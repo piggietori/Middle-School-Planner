@@ -1,0 +1,754 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>D20 Middle School Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap">
+<style>
+/* Layout: one calm column of big, tappable cards; tabs at the bottom on phones, at the top on wide screens. Subway bullets carry the only loud color. */
+:root{
+  --bg:#f3f5f9; --surface:#ffffff; --ink:#18213a; --muted:#59627a; --line:#dde2ec;
+  --accent:#1f4fa3; --accent-soft:#e3ebfa; --on-accent:#ffffff;
+  --leaf:#c4561b; --leaf-soft:#fbe9df; --key:#7a3db8; --key-soft:#efe5fa;
+  --good:#1d7a4a; --good-soft:#dff2e7; --warn:#9a6a00; --warn-soft:#fbf0d4; --bad:#b3261e; --bad-soft:#fbe3e1;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#10141f; --surface:#192033; --ink:#e9edf6; --muted:#a3abc0; --line:#2b3550;
+  --accent:#8fb2ff; --accent-soft:#22305180; --on-accent:#0d1530;
+  --leaf:#f0915a; --leaf-soft:#3a241a; --key:#c9a2f2; --key-soft:#2e2142;
+  --good:#6fd39c; --good-soft:#173528; --warn:#f2c35a; --warn-soft:#3a3015; --bad:#ff8a80; --bad-soft:#3d1c1a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#10141f; --surface:#192033; --ink:#e9edf6; --muted:#a3abc0; --line:#2b3550;
+  --accent:#8fb2ff; --accent-soft:#22305180; --on-accent:#0d1530;
+  --leaf:#f0915a; --leaf-soft:#3a241a; --key:#c9a2f2; --key-soft:#2e2142;
+  --good:#6fd39c; --good-soft:#173528; --warn:#f2c35a; --warn-soft:#3a3015; --bad:#ff8a80; --bad-soft:#3d1c1a; color-scheme:dark}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5;margin:0}
+a{color:var(--accent)}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:1.45rem;font-weight:800}
+h2{font-size:1.35rem;font-weight:800}
+h3{font-size:1.08rem;font-weight:600}
+button,select,input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1080px;margin:0 auto;padding-inline:16px;padding-block:0 120px}
+
+/* header + tabs */
+.top{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);z-index:20}
+.top-in{max-width:1080px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;margin-right:auto}
+.brand-mark{width:38px;height:38px;border-radius:50%;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:1rem}
+.brand small{display:block;color:var(--muted);font-size:.8rem;font-family:var(--body)}
+.tabs{display:flex;gap:4px}
+.tab{border:0;background:none;padding:10px 14px;border-radius:999px;cursor:pointer;font-weight:700;color:var(--muted);display:flex;align-items:center;gap:8px}
+.tab svg{width:22px;height:22px;flex:none}
+.tab[aria-current="page"]{background:var(--accent-soft);color:var(--accent)}
+@media (max-width:799px){
+  .tabs{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px));justify-content:space-around;z-index:30}
+  .tab{flex-direction:column;gap:2px;font-size:.78rem;padding:6px 8px;border-radius:12px;flex:1}
+}
+
+section.view{padding-top:22px;display:grid;gap:18px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+.muted{color:var(--muted)}
+.small{font-size:.88rem}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.grid2{display:grid;gap:18px;grid-template-columns:1fr}
+@media (min-width:900px){.grid2{grid-template-columns:minmax(0,5fr) minmax(0,7fr)}}
+.stack{display:grid;gap:12px}
+
+.btn{border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:9px 16px;cursor:pointer;font-weight:700;display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--ink);font-size:.95rem;min-height:44px}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn.on{background:var(--good-soft);border-color:var(--good);color:var(--good)}
+.btn.saved{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.linkbtn{border:0;background:none;color:var(--accent);font-weight:700;cursor:pointer;padding:6px 0;text-decoration:underline;text-underline-offset:3px}
+
+/* hero countdown */
+.hero{background:var(--accent);color:var(--on-accent);border-radius:var(--r);padding:22px;display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+.hero .big{font-family:var(--display);font-weight:800;font-size:3.4rem;line-height:1;font-variant-numeric:tabular-nums}
+.hero p{margin:.2rem 0 0;max-width:46ch}
+.hero h2{color:var(--on-accent)}
+
+/* timeline steps */
+.steps{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.step{display:flex;gap:12px;align-items:flex-start;padding:10px 4px;border-bottom:1px solid var(--line)}
+.step:last-child{border-bottom:0}
+.check{width:30px;height:30px;border-radius:50%;border:2px solid var(--line);background:none;flex:none;cursor:pointer;display:grid;place-items:center;color:transparent}
+.check[aria-pressed="true"]{background:var(--good);border-color:var(--good);color:var(--surface)}
+.step.done .step-t{text-decoration:line-through;color:var(--muted)}
+.step-t{font-weight:700}
+
+/* events */
+.ev{display:flex;gap:14px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--line)}
+.ev:last-child{border-bottom:0}
+.cal{width:58px;flex:none;border-radius:10px;border:1.5px solid var(--line);text-align:center;overflow:hidden;background:var(--surface)}
+.cal b{display:block;background:var(--leaf);color:var(--surface);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;padding:2px 0}
+.cal span{display:block;font-family:var(--display);font-weight:800;font-size:1.5rem;line-height:1.3;font-variant-numeric:tabular-nums}
+.cal.key b{background:var(--key)}
+.ev.past{opacity:.55}
+.ev-body{min-width:0;flex:1;display:grid;gap:6px}
+.ev-title{font-weight:700}
+.pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:.8rem;font-weight:700;background:var(--accent-soft);color:var(--accent)}
+.pill.key{background:var(--key-soft);color:var(--key)}
+.pill.leaf{background:var(--leaf-soft);color:var(--leaf)}
+.pill.good{background:var(--good-soft);color:var(--good)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.month{font-family:var(--display);font-weight:800;font-size:1.05rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:6px}
+
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:700;font-size:.92rem;min-height:42px}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+
+/* criteria */
+.q{display:grid;gap:8px;padding:12px 0;border-bottom:1px solid var(--line)}
+.q:last-child{border-bottom:0}
+.q label,.q .lab{font-weight:700}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);border:1.5px solid var(--line);border-radius:12px;overflow:hidden}
+.seg button{border:0;background:var(--surface);padding:9px 4px;cursor:pointer;font-weight:700;font-size:.85rem;color:var(--muted);min-height:42px}
+.seg button+button{border-left:1.5px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent)}
+select{width:100%;padding:11px 12px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);min-height:46px}
+.toggle{display:flex;gap:12px;align-items:center;cursor:pointer;font-weight:700}
+.toggle input{width:24px;height:24px;accent-color:var(--accent);flex:none}
+
+/* school cards */
+.sc{display:grid;gap:10px;padding:16px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+.sc-head{display:flex;gap:12px;align-items:flex-start}
+.sc-head > div{min-width:0;flex:1}
+.score{width:60px;height:60px;flex:none;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:1.35rem;border:4px solid var(--good);color:var(--good);font-variant-numeric:tabular-nums}
+.score.mid{border-color:var(--warn);color:var(--warn)}
+.score.low{border-color:var(--bad);color:var(--bad)}
+.match{display:grid;gap:5px;--m:var(--good)}
+.match.warn{--m:var(--warn)}
+.match.bad{--m:var(--bad)}
+.match-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.match-lab{font-weight:700;color:var(--m)}
+.match-num{color:var(--muted);font-size:.88rem;font-variant-numeric:tabular-nums}
+.meter{height:10px;border-radius:999px;background:var(--line);overflow:hidden}
+.meter i{display:block;height:100%;border-radius:999px;background:var(--m)}
+.rank{font-family:var(--display);font-weight:800;color:var(--muted);font-size:.9rem}
+ul.why{margin:0;padding-left:1.1rem;display:grid;gap:2px}
+ul.why li::marker{color:var(--good)}
+ul.why.caution li::marker{color:var(--leaf)}
+.meta{display:flex;gap:6px 14px;flex-wrap:wrap;color:var(--muted);font-size:.92rem;align-items:center}
+
+/* subway bullets */
+.bul{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;font-weight:700;font-size:.78rem;font-family:"Helvetica Neue",Arial,sans-serif;line-height:1;vertical-align:-5px;margin-right:2px}
+.bul.y{background:#fccc0a;color:#111}
+.bul.o{background:#ff6319;color:#fff}
+.bus{display:inline-block;border:1.5px solid var(--line);border-radius:6px;padding:0 6px;font-size:.8rem;font-weight:700;margin:2px 4px 2px 0;font-variant-numeric:tabular-nums}
+
+/* detail sheet */
+.sheet{position:fixed;inset:0;background:color-mix(in srgb,var(--ink) 45%,transparent);z-index:50;display:flex;justify-content:center;align-items:flex-end}
+.sheet-in{background:var(--bg);width:100%;max-width:760px;max-height:92%;overflow:auto;border-radius:20px 20px 0 0;padding:0 16px calc(28px + env(safe-area-inset-bottom,0px))}
+@media (min-width:800px){.sheet{align-items:center}.sheet-in{border-radius:20px;max-height:88%}}
+.sheet-bar{position:sticky;top:0;background:var(--bg);padding:14px 0 10px;display:flex;gap:10px;align-items:center;z-index:2}
+.stat{display:grid;gap:4px}
+.stat-row{display:flex;justify-content:space-between;gap:10px;font-size:.95rem}
+.bar{height:10px;border-radius:999px;background:var(--line);position:relative;overflow:visible}
+.bar i{position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:var(--accent)}
+.bar i.bad{background:var(--leaf)}
+.bar u{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--ink);opacity:.6}
+.stats{display:grid;gap:14px;grid-template-columns:1fr}
+@media (min-width:600px){.stats{grid-template-columns:1fr 1fr}}
+.notice{background:var(--leaf-soft);color:var(--ink);border-radius:var(--r);padding:14px 16px;display:flex;gap:12px;align-items:flex-start}
+.notice b{color:var(--leaf)}
+.empty{border:2px dashed var(--line);border-radius:var(--r);padding:22px;text-align:center;color:var(--muted)}
+.order{display:flex;flex-direction:column;gap:4px}
+.order button{width:40px;height:34px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);cursor:pointer;font-weight:700}
+.order button:disabled{opacity:.35;cursor:default}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-weight:700;z-index:60}
+@media (min-width:800px){.toast{bottom:28px}}
+.check:disabled{cursor:default}
+.btn:disabled{opacity:.35;cursor:default}
+.calgrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.dow{font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:center;font-weight:700;padding-bottom:2px}
+.day{min-height:62px;min-width:0;border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:4px;display:flex;flex-direction:column;align-items:stretch;gap:3px;font-size:.85rem;text-align:left;color:var(--ink)}
+.day.blank{border:0;background:none}
+.day.gone{opacity:.5}
+.day.has{cursor:pointer;border-color:var(--leaf)}
+.day.has:hover{background:var(--leaf-soft)}
+.day[aria-pressed="true"]{outline:3px solid var(--ink);outline-offset:-1px;opacity:1;background:var(--bg)}
+.day .n{font-weight:700;font-variant-numeric:tabular-nums;align-self:flex-start;padding:0 5px;border-radius:999px}
+.day.today .n{background:var(--accent);color:var(--on-accent)}
+.lbl{font-size:.7rem;line-height:1.25;border-radius:4px;padding:1px 4px;background:var(--leaf-soft);color:var(--leaf);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lbl.key{background:var(--key-soft);color:var(--key)}
+.lbl.go{background:var(--good-soft);color:var(--good)}
+.lbl.more{background:none;color:var(--muted);padding:0 2px}
+.dots{display:flex;gap:3px;flex-wrap:wrap;padding-left:4px}
+.dots i,.legend i{width:9px;height:9px;border-radius:50%;background:var(--leaf);display:inline-block}
+.dots i.key,.legend i.key{background:var(--key)}
+.today-chip{background:var(--accent);color:var(--on-accent);border-radius:999px;padding:0 6px;font-size:.75rem}
+.sel-chip{width:16px;height:16px;border:3px solid var(--ink);border-radius:4px;display:inline-block}
+.dots i.go,.legend i.go{background:var(--good)}
+.legend{display:flex;gap:16px;flex-wrap:wrap}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+@media (max-width:640px){.lbl{display:none}.day{min-height:52px}}
+@media (min-width:641px){.dots{display:none}}
+details summary{cursor:pointer;font-weight:700;color:var(--accent);min-height:36px;display:flex;align-items:center}
+@media (prefers-reduced-motion:no-preference){.sheet-in{animation:up .22s ease-out}@keyframes up{from{transform:translateY(24px);opacity:.6}}}
+</style>
+
+<header class="top">
+  <div class="top-in">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">20</div>
+      <div><h1>Middle School Planner</h1><small>Brooklyn District 20 · Fall 2027 admission</small></div>
+    </div>
+    <nav class="tabs" aria-label="Main">
+      <button class="tab" data-tab="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home</button>
+      <button class="tab" data-tab="dates"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Dates</button>
+      <button class="tab" data-tab="find"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>Find schools</button>
+      <button class="tab" data-tab="list"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>My list</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap" id="app"></main>
+<div id="sheet"></div>
+<div id="toast" class="toast" hidden></div>
+
+<script>
+/* ---------------- DATA ---------------- */
+// Facts from InsideSchools school profiles (NYC School Survey + state test results) and the
+// District 20 Open House flyer for 2026. Distances are straight-line estimates.
+const CITY = {math:52, ela:51, safe:80, bully:59, teach:85};
+const PROG = {
+  honors:"Honors / gifted", arts:"Arts (theater, dance, art)", music:"Music & band",
+  stem:"Science & tech (STEM)", language:"Dual language", sped:"Special-ed support", small:"Small school"
+};
+const S = [
+ {dbn:"20K030",name:"P.S./I.S. 30 Mary White Ovington",short:"PS/IS 30",addr:"7002 4th Ave, 11209",hood:"Bay Ridge",lat:40.6340,lng:-74.0236,grades:"K–8",size:849,
+  math:null,ela:50,safe:68,bully:78,teach:57,
+  subway:[{l:["R"],st:"Bay Ridge Av"}],bus:["B4","B9","B37","B63","B64","B70"],
+  tags:["language","honors"],admit:["zoned","screened","language"],
+  admitText:"Zoned program (priority for families in the zone). Screened Superintendent's Program. Arabic Dual Language program.",
+  good:["Arabic dual language program","Low suspension rate (1%)"],
+  concerns:["78% of students say bullying happens often (citywide 57%)","Only 57% of teachers would recommend the school","68% of students feel safe (citywide 81%)"],
+  web:"https://www.psis30marywhiteovington.org/",flyer:"https://drive.google.com/file/d/10liz5qod2dh5Zs9-bLQIPPEfex2tYeEZ/view"},
+ {dbn:"20K062",name:"J.H.S. 62 Ditmas",short:"JHS 62",addr:"700 Cortelyou Rd, 11218",hood:"Kensington",lat:40.6396,lng:-73.9745,grades:"6–8",size:872,
+  math:54,ela:56,safe:85,bully:null,teach:null,
+  subway:[{l:["B","Q"],st:"Cortelyou Rd"},{l:["F"],st:"Ditmas Av"}],bus:["B8","B35","B67","B68","B69","B103"],
+  tags:["arts","honors","sped"],admit:["zoned","screened"],
+  admitText:"Zoned program (priority for families in the zone). Screened Superintendent's Program and Algebra Honors. ASD ACES program for students with autism.",
+  good:["Performing & visual arts academy, plus a law & community service academy","85% of students feel safe"],
+  concerns:["Only 18% of 8th graders earn high school credit (citywide 36%)","School is working to raise achievement for newly arrived immigrant students"],
+  web:"http://www.ditmas.org/",flyer:"https://drive.google.com/file/d/1DTLFToJnsiwF3uUQrL44nRRVJGrfHYKl/view"},
+ {dbn:"20K104",name:"P.S./I.S. 104 The Fort Hamilton School",short:"PS/IS 104",addr:"9115 5th Ave, 11209",hood:"Fort Hamilton",lat:40.6168,lng:-74.0302,grades:"K–8",size:1023,
+  math:56,ela:63,safe:82,bully:null,teach:77,
+  subway:[{l:["R"],st:"95 St"}],bus:["B1","B8","B16","B37","B63","B70"],
+  tags:["honors","sped"],admit:["zoned","screened"],
+  admitText:"Zoned program (Civic Leadership, priority for families in the zone). Screened Superintendent's Program.",
+  good:["Gifted & talented classes in each grade","Warm, welcoming school for students of all abilities"],
+  concerns:["Overcrowded: some classes reach 32 students","Split across two buildings several blocks apart"],
+  web:"https://www.psis104.com/",flyer:"https://drive.google.com/file/d/1n-kY44TP3qJoBBfE-Sr8T_HqoThN4dIP/view"},
+ {dbn:"20K180",name:"The SEEALL Academy (K180)",short:"SEEALL K180",addr:"5601 16th Ave, 11204",hood:"Borough Park",lat:40.6300,lng:-73.9930,grades:"Pre-K–8",size:853,
+  math:81,ela:69,safe:82,bully:null,teach:85,
+  subway:[{l:["D","N"],st:"New Utrecht Av / 62 St"}],bus:["B8","B9","B11","B16"],
+  tags:["honors","sped"],admit:["zoned","screened"],
+  admitText:"Zoned program (priority for families in the zone). Screened Algebra Honors and Superintendent's Program.",
+  good:["Strong middle school math: 81% passing","85% of teachers would recommend the school"],
+  concerns:["Teachers rate the principal below the city average (64% vs 84%)"],
+  web:"https://seeallacademy.com/",flyer:"https://drive.google.com/file/d/1FsDMUuxWTYuzclP-mOUGVyXYY-H1BcGN/view"},
+ {dbn:"20K187",name:"I.S. 187 The Christa McAuliffe School",short:"IS 187",addr:"1171 65th St, 11219",hood:"Dyker Heights",lat:40.6255,lng:-74.0030,grades:"6–8",size:954,
+  math:96,ela:93,safe:91,bully:null,teach:97,
+  subway:[{l:["D"],st:"62 St"},{l:["N"],st:"Fort Hamilton Pkwy"}],bus:["B9","B16","B64"],
+  tags:["honors","arts","music","stem","sped"],admit:["screened"],
+  admitText:"Screened only (grades and attendance). Three academies: Arts & Humanities, Business & Law, Scientific Research.",
+  good:["Top test scores: 96% math, 93% reading","Aviation flight simulators and a hydroponics lab","91% of students feel safe"],
+  concerns:["No full-size gym","Screened admission only, very competitive"],
+  web:"https://www.is187nyc.com/",flyer:"https://drive.google.com/file/d/1uOBQXU5YhXZo1aWQ4PejCYp1f_94OpGE/view"},
+ {dbn:"20K192",name:"P.S./I.S. 192 Magnet School for Math and Science Inquiry",short:"PS/IS 192",addr:"4715 18th Ave, 11204",hood:"Borough Park",lat:40.6339,lng:-73.9810,grades:"Pre-K–8",size:597,
+  math:54,ela:69,safe:73,bully:73,teach:85,
+  subway:[{l:["F"],st:"18 Av"}],bus:["B8","B11"],
+  tags:["stem","honors","small"],admit:["zoned","screened"],
+  admitText:"Zoned program (priority for families in the zone). Screened Algebra Honors program.",
+  good:["Math and science magnet school","Middle school reading: 69% passing"],
+  concerns:["73% of students say bullying happens often (citywide 57%)","Fewer students feel safe than citywide"],
+  web:"https://www.ps-is192.org/",flyer:"https://drive.google.com/file/d/1Pn5YenbFd8YZtT79s2BPfsIRhsOq5VPO/view"},
+ {dbn:"20K201",name:"J.H.S. 201 The Madeleine Brennan School",short:"JHS 201",addr:"8010 12th Ave, 11228",hood:"Dyker Heights",lat:40.6175,lng:-74.0124,grades:"6–8",size:1526,
+  math:85,ela:80,safe:81,bully:null,teach:97,
+  subway:[],bus:["B1","B4","B16","B64","B70"],
+  tags:["honors","language","music","arts"],admit:["zoned","screened","language"],
+  admitText:"Zoned program (priority for families in the zone). Screened Superintendent's Program and Algebra Honors. Italian Dual Language program.",
+  good:["High scores: 85% math, 80% reading","Marching band, drama, studio art and chorus","Stable leadership; 95% attendance"],
+  concerns:["Very large school (1,526 students); may feel too big for some","No subway nearby"],
+  web:"https://www.is201k.org/",flyer:"https://drive.google.com/file/d/1b3niIcowPamdEYMUf0PPW6_ju3YEI335/view"},
+ {dbn:"20K220",name:"J.H.S. 220 John J. Pershing",short:"JHS 220",addr:"4812 9th Ave, 11220",hood:"Sunset Park",lat:40.6420,lng:-73.9973,grades:"6–8",size:1263,
+  math:80,ela:59,safe:71,bully:63,teach:99,
+  subway:[{l:["D"],st:"Fort Hamilton Pkwy"}],bus:["B11","B16","B35","B70"],
+  tags:["honors","language","stem"],admit:["zoned","screened","language","open"],
+  admitText:"Zoned program (priority for families in the zone). Screened Algebra Honors and Superintendent's Program. Spanish Dual Language. Open-admission Federal Magnet program.",
+  good:["99% of teachers would recommend the school","Math: 80% passing","Partnership with Maimonides Medical Center"],
+  concerns:["Reading scores lag behind math","Students report concerns about bullying and behavior"],
+  web:"https://www.is220.org/",flyer:"https://drive.google.com/file/d/1PNLFhn1PXnOpSzPKmeyABsHEjmFIpHK8/view"},
+ {dbn:"20K223",name:"J.H.S. 223 The Montauk",short:"JHS 223",addr:"4200 16th Ave, 11204",hood:"Borough Park",lat:40.6380,lng:-73.9853,grades:"6–8",size:623,
+  math:63,ela:54,safe:64,bully:69,teach:93,
+  subway:[{l:["F"],st:"Ditmas Av"}],bus:["B8","B11","B16","B35","B67","B69"],
+  tags:["honors"],admit:["zoned","screened","open"],
+  admitText:"Zoned program (priority for families in the zone). Screened Algebra Honors and Superintendent's Program. Open-admission Federal Magnet program.",
+  good:["AVID college-readiness program","93% of teachers would recommend the school"],
+  concerns:["Limited arts (no dance or theater)","69% of students say bullying happens often","Shares its building with another school"],
+  web:"https://sites.google.com/is223montauk.org/site",flyer:"https://drive.google.com/file/d/1TzYUrV8x6wPZVeGnKynSOZoWBYcjtaON/view"},
+ {dbn:"20K227",name:"J.H.S. 227 Edward B. Shallow",short:"JHS 227",addr:"6500 16th Ave, 11204",hood:"Bensonhurst",lat:40.6236,lng:-73.9990,grades:"6–8",size:1325,
+  math:60,ela:55,safe:73,bully:null,teach:94,
+  subway:[{l:["D","N"],st:"New Utrecht Av / 62 St"}],bus:["B4","B8","B9","B64"],
+  tags:["honors","music","stem","arts"],admit:["zoned","screened"],
+  admitText:"Zoned program (priority for families in the zone). Screened Algebra Honors and Superintendent's Program.",
+  good:["Band, orchestra and chorus","Flight simulators, graphic arts and coding classes"],
+  concerns:["Students say teacher feedback is uneven","About half of students want more challenge"],
+  web:"https://jhs227k.org/",flyer:"https://drive.google.com/file/d/14kuJfJL1V2Gk-f3xYROBiP2Gh_bd-kzr/view"},
+ {dbn:"20K229",name:"P.S./I.S. 229 Dyker",short:"PS/IS 229",addr:"1400 Benson Ave, 11228",hood:"Dyker Heights",lat:40.6085,lng:-74.0107,grades:"Pre-K–8",size:1118,
+  math:68,ela:74,safe:85,bully:null,teach:92,
+  subway:[],bus:["B1","B8","B64"],
+  tags:["honors","arts","music"],admit:["zoned","screened"],
+  admitText:"Zoned program (priority for families in the zone). Screened Superintendent's Program with an honors Regents track.",
+  good:["Strong visual arts, orchestra, band and drama","85% of students feel safe"],
+  concerns:["Half of middle schoolers say there isn't enough class variety","No subway nearby"],
+  web:"http://www.229k.org/",flyer:"https://drive.google.com/file/d/1qrMGNjScKpX50dLlo7CCltT72CsyBDdZ/view"},
+ {dbn:"20K259",name:"J.H.S. 259 William McKinley",short:"JHS 259",addr:"7305 Fort Hamilton Pkwy, 11228",hood:"Dyker Heights",lat:40.6292,lng:-74.0134,grades:"6–8",size:1798,
+  math:82,ela:72,safe:73,bully:65,teach:100,
+  subway:[],bus:["B4","B16","B63","B64","B70"],
+  tags:["honors","language","stem"],admit:["zoned","screened","language"],
+  admitText:"Zoned program (priority for families in the zone). Screened Superintendent's Program, Algebra Honors, and Mandarin Dual Language.",
+  good:["100% of teachers would recommend the school","Math: 82% passing","Virtual Enterprise business program and STEM classes"],
+  concerns:["One of the city's largest middle schools (about 1,800 students)","65% of students say bullying happens often","No subway nearby"],
+  web:"https://www.mckinley259.org/home",flyer:"https://drive.google.com/file/d/15cdojfvjceC7rj1yCsaOVwHIviwTJeSZ/view"},
+ {dbn:"20K407",name:"M.S. 407 School of Technology, Arts, and Research",short:"MS 407",addr:"650 86th St, 11228",hood:"Bay Ridge",lat:40.6216,lng:-74.0233,grades:"6–7 (growing)",size:116,
+  math:null,ela:null,safe:89,bully:null,teach:100,
+  subway:[{l:["R"],st:"86 St"}],bus:["B1","B8","B16","B63","B70"],
+  tags:["sped","stem","arts","honors","small"],admit:["zoned","screened"],
+  admitText:"Zoned program (priority for families in the zone). Screened Superintendent's Program and ASD ACES program.",
+  good:["ASD Nest program for students with autism","89% of students feel safe","Very small school"],
+  concerns:["New school: too new for full test results","New principal; fewer experienced teachers than average"],
+  web:"https://www.ms407star.org/",flyer:"https://drive.google.com/file/d/1i6GXHxFw_HVw_PoaSHa17J0c4Ob-bm-Q/view"},
+ {dbn:"20K609",name:"Urban Assembly School for Leadership and Empowerment",short:"UA Leadership",addr:"4200 16th Ave, 11204",hood:"Borough Park",lat:40.6380,lng:-73.9853,grades:"6–12",size:497,
+  math:57,ela:66,safe:72,bully:48,teach:78,
+  subway:[{l:["F"],st:"Ditmas Av"}],bus:["B8","B11","B16","B35","B67","B69"],
+  tags:["sped","small"],admit:["open"],
+  admitText:"Open admission: any student may apply. School for girls, transgender and non-binary students, grades 6–12.",
+  good:["All-girls school from 6th grade through high school","Strong writing and history; 93% graduation rate"],
+  concerns:["No science lab yet; chemistry and physics not always offered"],
+  web:"https://www.ualeadershipandempowerment.org/",flyer:null},
+ {dbn:"20K686",name:"Brooklyn School of Inquiry (K686)",short:"BSI",addr:"50 Avenue P, 11204",hood:"Bensonhurst",lat:40.6100,lng:-73.9770,grades:"K–8",size:501,
+  math:97,ela:96,safe:89,bully:11,teach:89,
+  subway:[{l:["N"],st:"Kings Hwy"}],bus:["B1","B4","B6","B82"],
+  tags:["honors","small"],admit:["screened"],
+  admitText:"Screened only (Superintendent's Program). Citywide gifted & talented school; requires very high grades and test scores.",
+  good:["Highest scores: 97% math, 96% reading","Only 11% of students say bullying happens often"],
+  concerns:["Demand far exceeds available seats","No lockers for middle school; small schoolyard"],
+  web:"https://bsi686.org/",flyer:"https://drive.google.com/file/d/1b6GtupYH9_0rdhnU_mpQUv5OpPc3nfwn/view"},
+ {dbn:"20K936",name:"M.S. 936 Arts Off 3rd",short:"MS 936",addr:"270 59th St, 11220",hood:"Sunset Park",lat:40.6420,lng:-74.0200,grades:"6–8",size:442,
+  math:62,ela:63,safe:86,bully:null,teach:92,
+  subway:[{l:["N","R"],st:"59 St"}],bus:["B9","B11","B37","B63"],
+  tags:["arts","music","small","stem"],admit:["audition"],
+  admitText:"Audition required. Choose a major: dance, drama, music, visual arts or STEAM. Register for an open house on the school website first.",
+  good:["Arts majors in music, theater, dance and visual arts","86% of students feel safe"],
+  concerns:["Small school: limited sports","Audition required"],
+  web:"https://www.ms936artsoff3rd.org/",flyer:"https://drive.google.com/file/d/10urCapcnJF7iffsRfahMBfrevHtHn3gl/view",
+  signup:"https://docs.google.com/forms/d/e/1FAIpQLSfbBccPKW_TYKyN9aUfAh-7dk5GJmHcD0bxQbagpAmi93IqwQ/viewform"}
+];
+const BY = Object.fromEntries(S.map(s=>[s.dbn,s]));
+const OH = [ // open houses (District 20 flyer, 2026)
+ ["20K030","2026-10-28","16:30","17:30"],["20K062","2026-10-27","16:30","18:00"],["20K104","2026-10-20","17:30","18:30"],
+ ["20K180","2026-10-29","17:00","18:30"],["20K187","2026-11-10","17:30","19:30"],["20K192","2026-10-19","16:00",null],
+ ["20K201","2026-11-09","17:00","19:00"],["20K220","2026-10-19","17:30",null],["20K223","2026-11-04","17:30","19:30"],
+ ["20K227","2026-10-22","17:30","19:30"],["20K229","2026-11-18","17:30","19:00"],["20K259","2026-11-02","18:00","20:00"],
+ ["20K407","2026-11-23","17:00","18:15","Session 1"],["20K407","2026-11-23","18:30","19:45","Session 2"],
+ ["20K609","2026-10-29","17:00","19:00"],["20K609","2026-11-07","10:00","12:00"],["20K609","2026-11-19","17:00","19:00"],
+ ["20K686","2026-10-29","17:30","18:30"],
+ ["20K936","2026-10-14","18:00",null,"Virtual"],["20K936","2026-10-28","16:00",null],["20K936","2026-11-18","16:00",null,"Virtual"]
+].map(([dbn,date,start,end,note],i)=>({id:"oh-"+dbn+"-"+date+"-"+start.replace(":",""),dbn,date,start,end,note:note||"",kind:"open"}));
+const KEY = [
+ {id:"k-open",date:"2026-10-14",title:"Middle school applications open",text:"Apply in your MySchools account.",kind:"key",link:"https://www.myschools.nyc/"},
+ {id:"k-d20",date:"2026-10-21",start:"17:00",end:"19:00",title:"District 20 middle school open house",text:"Meet District 20 staff and learn about all schools.",kind:"key",link:"https://sites.google.com/schools.nyc.gov/d20website",flyer:"https://drive.google.com/file/d/1BOZ1pMthfbC0CGHmrELcQ_uJm0AuVt43/view"},
+ {id:"k-close",date:"2026-12-11",title:"Application deadline",text:"Submit your ranked list in MySchools by today.",kind:"key",link:"https://www.myschools.nyc/"},
+ {id:"k-offer",date:"2027-04-07",title:"Offers released",text:"See your child's middle school offer in MySchools.",kind:"key",link:"https://www.myschools.nyc/"}
+];
+const EVENTS = [...OH,...KEY].sort((a,b)=>(a.date+(a.start||"")).localeCompare(b.date+(b.start||"")));
+const HOMES = [
+ ["sunset","Sunset Park (around 50th St & 6th Ave)",40.6435,-74.0090],
+ ["ridge-n","Bay Ridge, north (around 70th St & 4th Ave)",40.6345,-74.0235],
+ ["ridge-s","Bay Ridge, south (around 86th St & 4th Ave)",40.6225,-74.0285],
+ ["fort","Fort Hamilton (around 95th St & 4th Ave)",40.6160,-74.0305],
+ ["dyker","Dyker Heights (around 80th St & 13th Ave)",40.6170,-74.0110],
+ ["bens","Bensonhurst (around 18th Ave & 70th St)",40.6175,-73.9970],
+ ["boro","Borough Park (around 13th Ave & 48th St)",40.6355,-73.9925],
+ ["maple","Mapleton (around 20th Ave & 60th St)",40.6230,-73.9850],
+ ["kens","Kensington (around Church Ave & McDonald Ave)",40.6440,-73.9790],
+ ["gravesend","Gravesend (around McDonald Ave & Avenue P)",40.6100,-73.9765]
+];
+const STEPS = [
+ {id:"s1",t:"Tell us what matters to your family",d:"Pick your neighborhood and priorities on the Find schools page.",tab:"find"},
+ {id:"s2",t:"Save the schools you like",d:"Tap Save on any school. Aim for 4 to 8 schools.",tab:"find"},
+ {id:"s3",t:"Visit open houses",d:"Tap “I'm going” to plan a visit. After the visit, tap “Yes, I went.” This step checks itself off when every planned visit is done.",tab:"dates"},
+ {id:"s4",t:"Log in to MySchools",d:"Create or open your account at myschools.nyc. Your elementary school can give you a code.",link:"https://www.myschools.nyc/"},
+ {id:"s5",t:"Check auditions and screens",d:"Screened schools look at grades and attendance. MS 936 needs an audition.",tab:"list"},
+ {id:"s6",t:"Put your list in order and enter it in MySchools",d:"Put your true favorite first. Adding more schools does not hurt your chances at your top choice.",tab:"list"},
+ {id:"s7",t:"Submit by December 11, 2026",d:"The application closes at the end of the day."},
+ {id:"s8",t:"Get your offer on April 7, 2027",d:"Offers appear in MySchools."}
+];
+
+/* ---------------- STATE ---------------- */
+const DEFAULT = {home:"",maxMiles:1.5,needSubway:false,skipCompetitive:false,
+  w:{distance:2,scores:1,safety:2,bullying:1,teachers:1},programs:[],saved:[],going:[],attended:[],done:{}};
+let st = load();
+let tab = (location.hash||"").slice(1);
+if(!["home","dates","find","list"].includes(tab)) tab="home";
+let dateFilter="all", openDbn=null, dateView="cal", calMonth=null, selDay=null;
+function load(){try{const v=JSON.parse(localStorage.getItem("d20plan")||"null");if(v)return {...DEFAULT,...v,w:{...DEFAULT.w,...(v.w||{})}}}catch(e){}return structuredClone(DEFAULT)}
+let dbRef=null, saveTimer=null;
+function persist(){
+  try{localStorage.setItem("d20plan",JSON.stringify(st))}catch(e){}
+  if(dbRef){clearTimeout(saveTimer);saveTimer=setTimeout(()=>{dbRef.set(JSON.parse(JSON.stringify(st))).catch(()=>{})},700)}
+}
+(async()=>{ // keep the plan in the viewer's private store so it follows them across devices
+  try{
+    if(!window.claude?.use) return;
+    const [db,user]=await Promise.all([claude.use("db"),claude.use("user")]);
+    if(!db||!user) return;
+    const id=await user.id(); if(!id) return;
+    const ref=db.doc("data/users/"+id+"/plan");
+    const snap=await ref.get();
+    if(snap.exists){st={...DEFAULT,...snap.data(),w:{...DEFAULT.w,...(snap.data().w||{})}};try{localStorage.setItem("d20plan",JSON.stringify(st))}catch(e){};render()}
+    dbRef=ref;
+    if(!snap.exists) persist();
+  }catch(e){}
+})();
+
+/* ---------------- HELPERS ---------------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const today=()=>{const d=new Date();d.setHours(0,0,0,0);return d};
+const pd=s=>{const [y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d)};
+const daysUntil=s=>Math.round((pd(s)-today())/864e5);
+const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const DOW=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const fmtT=t=>{if(!t)return"";let [h,m]=t.split(":").map(Number);const ap=h>=12?"PM":"AM";h=h%12||12;return h+(m?":"+String(m).padStart(2,"0"):"")+" "+ap};
+const when=e=>{const d=pd(e.date);return DOW[d.getDay()]+", "+MON[d.getMonth()]+" "+d.getDate()+(e.start?" · "+fmtT(e.start)+(e.end?" – "+fmtT(e.end):""):"")};
+const rel=n=>n<0?"Passed":n===0?"Today":n===1?"Tomorrow":"In "+n+" days";
+function miles(a,b){const R=3958.8,t=x=>x*Math.PI/180;const dl=t(b.lat-a.lat),dg=t(b.lng-a.lng);
+  const h=Math.sin(dl/2)**2+Math.cos(t(a.lat))*Math.cos(t(b.lat))*Math.sin(dg/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
+const homePt=()=>{const h=HOMES.find(x=>x[0]===st.home);return h?{lat:h[2],lng:h[3],label:h[1]}:null};
+const evTitle=e=>e.kind==="key"?e.title:BY[e.dbn].name+" open house";
+function gcal(e){
+  const s=e.start||"09:00";let en=e.end;
+  if(!en){const [h,m]=s.split(":").map(Number);en=String(h+(e.start?1:0)).padStart(2,"0")+":"+String(m).padStart(2,"0")}
+  const d=e.date.replace(/-/g,"");const dates=e.start?d+"T"+s.replace(":","")+"00/"+d+"T"+en.replace(":","")+"00":d+"/"+(n=>n.getFullYear()+String(n.getMonth()+1).padStart(2,"0")+String(n.getDate()).padStart(2,"0"))(new Date(pd(e.date).getTime()+864e5));
+  const sc=e.dbn?BY[e.dbn]:null;
+  const p=new URLSearchParams({action:"TEMPLATE",text:evTitle(e)+(e.note?" ("+e.note+")":""),dates,ctz:"America/New_York",
+    details:(sc?"Middle school open house. School site: "+sc.web:e.text+" "+(e.link||"")),location:sc?(e.note==="Virtual"?"Online (see school website)":sc.addr+", Brooklyn, NY"):""});
+  return "https://calendar.google.com/calendar/render?"+p.toString();
+}
+function bullets(sub){return sub.map(x=>x.l.map(l=>`<span class="bul ${"BDF".includes(l)?"o":"y"}" aria-label="${l} train">${l}</span>`).join("")+" "+esc(x.st)).join(" &nbsp; ")}
+function toast(m){const t=$("#toast");t.textContent=m;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,2200)}
+const isSaved=d=>st.saved.includes(d);
+function toggleSave(d){st.saved=isSaved(d)?st.saved.filter(x=>x!==d):[...st.saved,d];if(st.saved.length)st.done.s2=true;persist();toast(isSaved(d)?"Saved to My list":"Removed from My list");render()}
+function toggleGoing(id){st.going=st.going.includes(id)?st.going.filter(x=>x!==id):[...st.going,id];persist();render()}
+function toggleWent(id){const on=!st.attended.includes(id);st.attended=on?[...st.attended,id]:st.attended.filter(x=>x!==id);
+  if(on&&!st.going.includes(id))st.going=[...st.going,id];persist();toast(on?"Marked as visited":"Visit unmarked");render()}
+// "Visit open houses" is done only once every open house you planned to attend is marked as visited.
+function visitProgress(){const planned=st.going.filter(id=>EVENTS.some(e=>e.id===id&&e.kind==="open"));
+  return {planned:planned.length,went:planned.filter(id=>st.attended.includes(id)).length}}
+function stepDone(s){if(s.id==="s3"){const p=visitProgress();return p.planned>0&&p.went===p.planned}return !!st.done[s.id]}
+
+/* ---------------- MATCHING ---------------- */
+const lin=(v,lo,hi)=>Math.max(0,Math.min(100,(v-lo)/(hi-lo)*100));
+function match(s){
+  const h=homePt(), c={}, why=[], warn=[];
+  const dist=h?miles(h,s):null;
+  if(h){const far=st.maxMiles*1.6;c.distance=dist<=.5?100:Math.max(0,100*(1-(dist-.5)/(far-.5)))}
+  const avg=[s.math,s.ela].filter(x=>x!=null);
+  c.scores=avg.length?lin(avg.reduce((a,b)=>a+b)/avg.length,40,97):40; // too new for results: count as below average, not unknown
+  c.safety=lin(s.safe,60,92);
+  if(s.bully!=null)c.bullying=lin(80-s.bully,0,70);
+  if(s.teach!=null)c.teachers=lin(s.teach,55,100);
+  let tw=0,sum=0;
+  for(const k in st.w){if(c[k]!=null&&st.w[k]>0){tw+=st.w[k];sum+=st.w[k]*c[k]}}
+  let hits=[];
+  if(st.programs.length){hits=st.programs.filter(p=>s.tags.includes(p)||(p==="small"&&s.size<650));tw+=2;sum+=2*(hits.length/st.programs.length*100)}
+  let score=tw?sum/tw:50;
+  if(h&&dist>st.maxMiles){score*=.75;warn.push("Farther than you want ("+dist.toFixed(1)+" mi)")}
+  if(st.needSubway&&!s.subway.length){score*=.8;warn.push("No subway nearby, bus only")}
+  if(dist!=null&&dist<=st.maxMiles)why.push(dist<.8?"Very close to home: about "+dist.toFixed(1)+" mi":"About "+dist.toFixed(1)+" mi from home");
+  if(avg.length&&c.scores>=60)why.push("Strong test results: "+(s.math!=null?s.math+"% math, ":"")+s.ela+"% reading passing");
+  if(s.safe>=84)why.push(s.safe+"% of students feel safe");
+  if(s.bully!=null&&s.bully<50)why.push("Low bullying reports ("+s.bully+"%)");
+  if(hits.length)why.push("Offers: "+hits.map(p=>PROG[p]).join(", "));
+  if(st.needSubway&&s.subway.length)why.push("Near the subway");
+  if(!avg.length)warn.push("Too new for full test results");
+  return {s,score:Math.round(score),dist,why:why.slice(0,3),warn};
+}
+function ranked(){return S.filter(s=>!(st.skipCompetitive&&!s.admit.some(a=>a==="zoned"||a==="open"||a==="language"))).map(match).sort((a,b)=>b.score-a.score)}
+function meter(n){const [lab,cls]=label(n);
+  return `<div class="match ${cls}" role="img" aria-label="${lab}: ${n} out of 100">
+    <div class="match-top"><span class="match-lab">${lab}</span><span class="match-num">${n} out of 100</span></div>
+    <div class="meter"><i style="width:${n}%"></i></div></div>`}
+const label=n=>n>=78?["Great match","good"]:n>=62?["Good match","good"]:n>=48?["Possible","warn"]:["Weak match","bad"];
+
+/* ---------------- VIEWS ---------------- */
+function render(){
+  document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-current",b.dataset.tab===tab?"page":"false"));
+  $("#app").innerHTML=({home:vHome,dates:vDates,find:vFind,list:vList})[tab]();
+  renderSheet();
+}
+function evRow(e,opts={}){
+  const n=daysUntil(e.date), d=pd(e.date), past=n<0, sc=e.dbn&&BY[e.dbn], going=st.going.includes(e.id), went=st.attended.includes(e.id);
+  const tag=went?`<span class="pill good">✓ Visited</span>`:past?`<span class="pill">Passed</span>`:n<=7?`<span class="pill leaf">${rel(n)}</span>`:`<span class="pill">${rel(n)}</span>`;
+  const wentBtn=e.kind==="open"&&n<=0?`<div class="row" style="gap:8px">${going&&!went?`<span class="small" style="font-weight:700">Did you go?</span>`:""}<button class="btn${went?" on":""}" data-went="${e.id}">${went?"✓ I went":"Yes, I went"}</button></div>`:"";
+  if(past&&(going||went))opts={...opts,keep:true};
+  return `<div class="ev${past&&!opts.keep?" past":""}">
+    <div class="cal${e.kind==="key"?" key":""}"><b>${MON[d.getMonth()]}</b><span>${d.getDate()}</span></div>
+    <div class="ev-body">
+      <div class="row" style="gap:8px">${tag}${e.kind==="key"?`<span class="pill key">Key date</span>`:""}${e.note?`<span class="pill warn">${esc(e.note)}</span>`:""}${sc&&isSaved(sc.dbn)?`<span class="pill good">On my list</span>`:""}</div>
+      <div class="ev-title">${sc?`<button class="linkbtn" style="padding:0;text-align:left;font-size:1rem" data-open="${sc.dbn}">${esc(sc.name)}</button>`:esc(e.title)}</div>
+      <div class="muted small">${when(e)}${sc?" · "+esc(sc.addr):""}${e.text?" · "+esc(e.text):""}</div>
+      ${wentBtn}
+      ${past||opts.compact?"":`<div class="row" style="gap:8px">
+        ${e.kind==="open"||e.start?`<button class="btn${going?" on":""}" data-going="${e.id}">${going?"✓ I'm going":"I'm going"}</button>`:""}
+        <a class="btn" href="${gcal(e)}" target="_blank" rel="noopener">Add to my calendar</a>
+        ${sc&&sc.flyer?`<a class="btn" href="${sc.flyer}" target="_blank" rel="noopener">Flyer</a>`:""}
+        ${e.flyer?`<a class="btn" href="${e.flyer}" target="_blank" rel="noopener">Flyer</a>`:""}
+        ${sc&&sc.signup?`<a class="btn" href="${sc.signup}" target="_blank" rel="noopener">Register</a>`:""}
+        ${e.link&&!e.flyer?`<a class="btn" href="${e.link}" target="_blank" rel="noopener">Open MySchools</a>`:""}
+      </div>`}
+    </div></div>`;
+}
+function vHome(){
+  const close=KEY.find(k=>k.id==="k-close"), n=daysUntil(close.date);
+  const up=EVENTS.filter(e=>{const d=daysUntil(e.date);return d>=0&&d<=14});
+  const mine=up.filter(e=>st.going.includes(e.id)||(e.dbn&&isSaved(e.dbn))||e.kind==="key");
+  const show=(mine.length?mine:up).slice(0,5);
+  const doneN=STEPS.filter(stepDone).length, vp=visitProgress();
+  const ask=EVENTS.filter(e=>st.going.includes(e.id)&&!st.attended.includes(e.id)&&daysUntil(e.date)<0);
+  const alerts=[];
+  const goingSoon=EVENTS.filter(e=>st.going.includes(e.id)&&daysUntil(e.date)>=0&&daysUntil(e.date)<=2);
+  goingSoon.forEach(e=>alerts.push(`<b>Reminder:</b> ${esc(evTitle(e))} is ${rel(daysUntil(e.date)).toLowerCase()} at ${fmtT(e.start)}.`));
+  ask.forEach(e=>alerts.push(`<b>Did you go?</b> ${esc(evTitle(e))} was on ${when(e).split(" · ")[0]}. <button class="linkbtn" data-went="${e.id}">Yes, I went</button> &nbsp; <button class="linkbtn" data-going="${e.id}">No, I missed it</button>`));
+  if(n>=0&&n<=21)alerts.push(`<b>Deadline soon:</b> only ${n} days left to submit your application in MySchools.`);
+  if(!st.home)alerts.push(`<b>Start here:</b> pick your neighborhood on <button class="linkbtn" data-tab-go="find">Find schools</button> so we can show distances.`);
+  const missed=st.saved.filter(d=>{const ev=OH.filter(e=>e.dbn===d);return ev.length&&ev.every(e=>daysUntil(e.date)<0)&&!ev.some(e=>st.going.includes(e.id))});
+  if(missed.length)alerts.push(`<b>Missed an open house?</b> ${missed.map(d=>esc(BY[d].short)).join(", ")} already held theirs. Check the school website for tours.`);
+  return `<section class="view">
+    <div class="hero">
+      <div class="big">${Math.max(n,0)}</div>
+      <div><h2>${n>0?"days left to apply":n===0?"Applications close today":"Applications are closed"}</h2>
+      <p>Middle school applications close <b>Friday, December 11, 2026</b>. Offers arrive April 7, 2027.</p></div>
+    </div>
+    ${alerts.map(a=>`<div class="notice" role="status"><span aria-hidden="true">🔔</span><div>${a}</div></div>`).join("")}
+    <div class="grid2">
+      <div class="card stack">
+        <div class="row"><h2 style="margin-right:auto">Your steps</h2><span class="pill good">${doneN} of ${STEPS.length} done</span></div>
+        <ol class="steps">${STEPS.map(s=>{const dn=stepDone(s),auto=s.id==="s3";return `<li class="step${dn?" done":""}">
+          <button class="check" aria-pressed="${dn}" ${auto?`disabled title="Checks itself off when you mark your visits"`:`data-step="${s.id}"`} aria-label="${auto?"Done automatically when every planned visit is marked":"Mark "+esc(s.t)+" as done"}">✓</button>
+          <div style="min-width:0"><div class="step-t">${esc(s.t)}</div><div class="muted small">${esc(s.d)}</div>
+          ${auto?`<div class="small" style="font-weight:700;margin-top:2px">${vp.planned?vp.went+" of "+vp.planned+" planned visits done":"No visits planned yet"}</div>`:""}
+          ${s.tab?`<button class="linkbtn small" data-tab-go="${s.tab}">Go there</button>`:""}${s.link?`<a class="small" href="${s.link}" target="_blank" rel="noopener" style="font-weight:700">Open MySchools</a>`:""}</div></li>`}).join("")}</ol>
+      </div>
+      <div class="card">
+        <div class="row"><h2 style="margin-right:auto">Coming up</h2><button class="linkbtn" data-tab-go="dates">See all dates</button></div>
+        <p class="muted small" style="margin:.3rem 0 0">${mine.length?"Your schools and key dates in the next two weeks.":"All open houses in the next two weeks. Save schools to see only yours."}</p>
+        ${show.length?show.map(e=>evRow(e)).join(""):`<div class="empty" style="margin-top:12px">No events in the next two weeks.</div>`}
+      </div>
+    </div>
+  </section>`;
+}
+function vDates(){
+  let list=EVENTS;
+  if(dateFilter==="mine")list=EVENTS.filter(e=>e.kind==="key"||(e.dbn&&isSaved(e.dbn)));
+  if(dateFilter==="going")list=EVENTS.filter(e=>st.going.includes(e.id));
+  const upcoming=list.filter(e=>daysUntil(e.date)>=0), past=list.filter(e=>daysUntil(e.date)<0);
+  let html="",last="";
+  for(const e of upcoming){const d=pd(e.date),m=MON[d.getMonth()]+" "+d.getFullYear();if(m!==last){html+=`<div class="month">${["January","February","March","April","May","June","July","August","September","October","November","December"][d.getMonth()]} ${d.getFullYear()}</div>`;last=m}html+=evRow(e)}
+  return `<section class="view">
+    <div><h2>Open houses & key dates</h2><p class="muted" style="margin:.3rem 0 0">Tap <b>Add to my calendar</b> to get a reminder on your phone. Tap <b>I'm going</b> to see reminders here.</p></div>
+    <div class="row" style="justify-content:space-between">
+      <div class="chips" role="group" aria-label="Show">
+        ${[["all","All dates"],["mine","My schools"],["going","I'm going"]].map(([k,l])=>`<button class="chip" aria-pressed="${dateFilter===k}" data-df="${k}">${l}</button>`).join("")}
+      </div>
+      <div class="seg" role="group" aria-label="View" style="min-width:220px">
+        ${[["cal","Calendar"],["list","List"]].map(([k,l])=>`<button aria-pressed="${dateView===k}" data-dv="${k}">${l}</button>`).join("")}
+      </div>
+    </div>
+    ${dateView==="cal"?vCal(list):`<div class="card">${upcoming.length?html:`<div class="empty">${dateFilter==="going"?"You haven't marked any open houses yet. Tap “I'm going” on a date.":"Save schools on Find schools to see their dates here."}</div>`}
+      ${past.length?`<details style="margin-top:10px"><summary>Show ${past.length} past date${past.length>1?"s":""}</summary>${past.map(e=>evRow(e)).join("")}</details>`:""}
+    </div>`}
+    <p class="muted small">Dates from the District 20 Middle School Open House flyer. Schools sometimes change times, so check the flyer before you go.</p>
+  </section>`;
+}
+const MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
+const CAL_RANGE=[[2026,9],[2026,10],[2026,11],[2027,0],[2027,1],[2027,2],[2027,3]]; // Oct 2026 – Apr 2027
+const iso=(y,m,d)=>y+"-"+String(m+1).padStart(2,"0")+"-"+String(d).padStart(2,"0");
+function vCal(list){
+  if(calMonth==null){const t=today();calMonth=Math.max(0,CAL_RANGE.findIndex(([y,m])=>y===t.getFullYear()&&m===t.getMonth()))}
+  const [y,m]=CAL_RANGE[calMonth], first=new Date(y,m,1).getDay(), days=new Date(y,m+1,0).getDate(), tIso=(t=>iso(t.getFullYear(),t.getMonth(),t.getDate()))(today());
+  const inMonth=list.filter(e=>e.date.startsWith(iso(y,m,1).slice(0,7)));
+  if(!selDay||!selDay.startsWith(iso(y,m,1).slice(0,7))){const nx=inMonth.find(e=>e.date>=tIso)||inMonth[0];selDay=nx?nx.date:null}
+  let cells=Array.from({length:first},()=>`<div class="day blank" aria-hidden="true"></div>`).join("");
+  for(let d=1;d<=days;d++){
+    const ds=iso(y,m,d), ev=inMonth.filter(e=>e.date===ds);
+    const cls=e=>e.kind==="key"?"key":st.going.includes(e.id)?"go":"";
+    const name=e=>e.kind==="key"?e.title:BY[e.dbn].short;
+    const inner=`<span class="n">${d}</span>
+      <span class="dots">${ev.map(e=>`<i class="${cls(e)}"></i>`).join("")}</span>
+      ${ev.slice(0,2).map(e=>`<span class="lbl ${cls(e)}">${esc(name(e))}</span>`).join("")}${ev.length>2?`<span class="lbl more">+${ev.length-2} more</span>`:""}`;
+    cells+=ev.length?`<button class="day has${ds===tIso?" today":""}${ds<tIso?" gone":""}" aria-pressed="${selDay===ds}" data-day="${ds}" aria-label="${MONTHS[m]} ${d}: ${ev.length} event${ev.length>1?"s":""}">${inner}</button>`
+      :`<div class="day${ds===tIso?" today":""}${ds<tIso?" gone":""}">${inner}</div>`;
+  }
+  const sel=selDay?list.filter(e=>e.date===selDay):[];
+  return `<div class="card stack">
+    <div class="row" style="justify-content:space-between">
+      <button class="btn" data-cm="-1" ${calMonth===0?"disabled":""} aria-label="Previous month">‹</button>
+      <h3 style="font-size:1.2rem">${MONTHS[m]} ${y}</h3>
+      <button class="btn" data-cm="1" ${calMonth===CAL_RANGE.length-1?"disabled":""} aria-label="Next month">›</button>
+    </div>
+    <div class="calgrid">${["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(x=>`<div class="dow">${x}</div>`).join("")}${cells}</div>
+    <div class="legend small muted"><span><i></i>Open house</span><span><i class="go"></i>I'm going</span><span><i class="key"></i>Key date (deadline or district event)</span><span><b class="today-chip">${today().getDate()}</b>Today</span><span><b class="sel-chip"></b>Selected day</span></div>
+  </div>
+  <div class="card">${sel.length?`<h3>${(d=>DOW[d.getDay()]+", "+MONTHS[d.getMonth()]+" "+d.getDate())(pd(selDay))}</h3>${sel.map(e=>evRow(e)).join("")}`
+    :`<div class="empty">${inMonth.length?"Tap a highlighted day to see its events.":"No events this month"+(dateFilter!=="all"?" for this filter.":".")}</div>`}</div>`;
+}
+function seg(key,label,help){
+  return `<div class="q"><span class="lab" id="lab-${key}">${label}</span>${help?`<span class="muted small">${help}</span>`:""}
+  <div class="seg" role="group" aria-labelledby="lab-${key}">${["Not important","Important","Very important"].map((t,i)=>`<button aria-pressed="${st.w[key]===i}" data-w="${key}:${i}">${t}</button>`).join("")}</div></div>`;
+}
+function schoolCard(m,i){
+  const s=m.s;
+  return `<article class="sc">
+    <div><div class="rank">#${i+1} for your family</div>
+      <h3 style="margin-top:2px">${esc(s.name)}</h3>
+      <div class="meta"><span>${esc(s.hood)}</span>${m.dist!=null?`<span>${m.dist.toFixed(1)} mi</span>`:""}<span>Grades ${s.grades}</span><span>${s.size.toLocaleString()} students</span></div></div>
+    ${meter(m.score)}
+    ${m.why.length?`<ul class="why">${m.why.map(w=>`<li>${esc(w)}</li>`).join("")}</ul>`:""}
+    ${m.warn.length?`<ul class="why caution">${m.warn.map(w=>`<li>${esc(w)}</li>`).join("")}</ul>`:""}
+    <div class="meta">${s.subway.length?bullets(s.subway):"Bus only: "+s.bus.slice(0,4).join(", ")}</div>
+    <div class="row"><button class="btn${isSaved(s.dbn)?" saved":" primary"}" data-save="${s.dbn}">${isSaved(s.dbn)?"★ Saved":"☆ Save"}</button><button class="btn" data-open="${s.dbn}">See details</button></div>
+  </article>`;
+}
+function vFind(){
+  const r=ranked();
+  const progs=Object.entries(PROG).map(([k,l])=>`<button class="chip" aria-pressed="${st.programs.includes(k)}" data-prog="${k}">${l}</button>`).join("");
+  return `<section class="view">
+    <div><h2>Find the right schools</h2><p class="muted" style="margin:.3rem 0 0">Answer a few questions. The list on the right updates as you go.</p></div>
+    <div class="grid2">
+      <div class="card" style="align-self:start">
+        <div class="q"><label for="home">Where do you live?</label>
+          <select id="home"><option value="">Choose your neighborhood</option>${HOMES.map(h=>`<option value="${h[0]}"${st.home===h[0]?" selected":""}>${h[1]}</option>`).join("")}</select>
+          <span class="muted small">Pick the closest one. Distances are straight-line estimates.</span></div>
+        <div class="q"><label for="maxm">How far can your child travel?</label>
+          <select id="maxm">${[[.75,"Up to ¾ mile (walking)"],[1,"Up to 1 mile"],[1.5,"Up to 1½ miles"],[2,"Up to 2 miles"],[3,"Up to 3 miles (bus or train)"]].map(([v,l])=>`<option value="${v}"${st.maxMiles==v?" selected":""}>${l}</option>`).join("")}</select></div>
+        <div class="q"><label class="toggle"><input type="checkbox" id="subway"${st.needSubway?" checked":""}>Must be near a subway</label>
+          <label class="toggle"><input type="checkbox" id="skipc"${st.skipCompetitive?" checked":""}>Hide schools that admit only by audition or grades</label></div>
+        ${seg("distance","Close to home")}
+        ${seg("scores","Test scores","State math and reading results")}
+        ${seg("safety","Feels safe","Students who say they feel safe")}
+        ${seg("bullying","Less bullying","Students reporting bullying")}
+        ${seg("teachers","Happy teachers","Teachers who would recommend the school")}
+        <div class="q"><span class="lab">Programs your child wants</span><div class="chips">${progs}</div></div>
+      </div>
+      <div class="stack" style="min-width:0">
+        <div class="row"><h2 style="margin-right:auto">Best matches</h2><span class="muted small">${r.length} schools</span></div>
+        <details class="card small" style="padding:10px 16px"><summary>How is the match worked out?</summary>
+          <p style="margin:.4rem 0">Each school gets a match from 0 to 100 based on your answers on this page. Things you mark <b>Very important</b> count twice as much as <b>Important</b>. Things marked <b>Not important</b> don't count.</p>
+          <p style="margin:.4rem 0">Programs you pick add points when a school offers them. A school loses points if it is farther than you want to travel, or has no subway when you need one.</p>
+          <p style="margin:.4rem 0"><b>Great match</b> is 78 or higher, <b>Good match</b> 62 or higher, <b>Possible</b> 48 or higher. It is a guide to help you choose which schools to visit, not an official rating.</p></details>
+        ${st.home?"":`<div class="notice"><span aria-hidden="true">📍</span><div>Choose your neighborhood to include distance in the ranking.</div></div>`}
+        ${r.map(schoolCard).join("")}
+      </div>
+    </div>
+  </section>`;
+}
+function vList(){
+  const saved=st.saved.map(d=>BY[d]).filter(Boolean);
+  return `<section class="view">
+    <div><h2>My list</h2><p class="muted" style="margin:.3rem 0 0">Put your favorite first. This is the order to enter in MySchools. Use the arrows to move schools up or down.</p></div>
+    ${saved.length?`<div class="stack">${saved.map((s,i)=>{const m=match(s),ev=OH.filter(e=>e.dbn===s.dbn&&daysUntil(e.date)>=0);
+      return `<article class="sc"><div class="sc-head">
+        <div class="order"><button data-mv="${i}:-1" ${i===0?"disabled":""} aria-label="Move up">▲</button><button data-mv="${i}:1" ${i===saved.length-1?"disabled":""} aria-label="Move down">▼</button></div>
+        <div><div class="rank">Choice ${i+1} · ${esc(s.dbn)}</div><h3 style="margin-top:2px">${esc(s.name)}</h3>
+        <div class="meta"><span>${label(m.score)[0]} (${m.score} out of 100)</span>${m.dist!=null?`<span>${m.dist.toFixed(1)} mi</span>`:""}<span>${s.admit.includes("audition")?"Audition":s.admit.length===1&&s.admit[0]==="screened"?"Screened only":s.admit.includes("open")&&s.admit.length===1?"Open to all":"Zoned + other programs"}</span></div></div></div>
+        <div class="muted small">${ev.length?"Next open house: <b>"+when(ev[0])+"</b>":"No upcoming open house listed. Check the school website for tours."}</div>
+        <div class="row"><button class="btn" data-open="${s.dbn}">See details</button>${ev.length?`<a class="btn" href="${gcal(ev[0])}" target="_blank" rel="noopener">Add open house to calendar</a>`:""}<button class="btn" data-save="${s.dbn}">Remove</button></div>
+      </article>`}).join("")}</div>
+      <div class="card small"><b>How the ranking works:</b> NYC matches each student to the highest school on their list that has room for them. Listing more schools never lowers your chance at your first choice. Check MySchools for how many choices you can add.</div>`
+    :`<div class="empty"><p style="margin:0 0 12px">Your list is empty.</p><button class="btn primary" data-tab-go="find">Find schools</button></div>`}
+  </section>`;
+}
+function stat(label,v,city,bad){
+  if(v==null)return `<div class="stat"><div class="stat-row"><span>${label}</span><span class="muted">No data</span></div><div class="bar"></div></div>`;
+  return `<div class="stat"><div class="stat-row"><span>${label}</span><b>${v}%</b></div>
+    <div class="bar" role="img" aria-label="${v}% versus citywide ${city}%"><i class="${bad?"bad":""}" style="width:${v}%"></i><u style="left:${city}%"></u></div>
+    <span class="muted small">Citywide: ${city}%${bad?" (lower is better)":""}</span></div>`;
+}
+function renderSheet(){
+  const box=$("#sheet");
+  if(!openDbn){box.innerHTML="";return}
+  const s=BY[openDbn],m=match(s),ev=OH.filter(e=>e.dbn===s.dbn);
+  box.innerHTML=`<div class="sheet" data-close="1"><div class="sheet-in" role="dialog" aria-modal="true" aria-label="${esc(s.name)}">
+    <div class="sheet-bar"><button class="btn" data-close="1">← Back</button><span style="margin-left:auto"></span><button class="btn${isSaved(s.dbn)?" saved":" primary"}" data-save="${s.dbn}">${isSaved(s.dbn)?"★ Saved":"☆ Save"}</button></div>
+    <div class="stack">
+      <div><div class="rank">${s.dbn}</div><h2 style="margin-top:4px">${esc(s.name)}</h2>
+      <div class="meta" style="margin-top:6px"><span>${esc(s.addr)}</span>${m.dist!=null?`<span>${m.dist.toFixed(1)} mi from home</span>`:""}<span>Grades ${s.grades}</span><span>${s.size.toLocaleString()} students</span></div></div>
+      <div class="card">${meter(m.score)}<p class="muted small" style="margin:.5rem 0 0">How well this school fits the answers you gave on Find schools.</p></div>
+      <div class="card stack"><h3>Getting there</h3>
+        <div>${s.subway.length?bullets(s.subway):`<span class="muted">No subway nearby.</span>`}</div>
+        <div><span class="muted small">Buses: </span>${s.bus.map(b=>`<span class="bus">${b}</span>`).join("")}</div></div>
+      <div class="card stack"><h3>How to get in</h3><p style="margin:0">${esc(s.admitText)}</p>
+        ${s.admit.includes("zoned")?`<p class="muted small" style="margin:0">Zoned programs give first priority to students who live in the school's zone. <a href="https://www.schools.nyc.gov/find-a-school" target="_blank" rel="noopener">Find your zoned school</a>.</p>`:""}</div>
+      <div class="card stack"><h3>By the numbers</h3><div class="stats">
+        ${stat("Math: students passing",s.math,CITY.math)}${stat("Reading: students passing",s.ela,CITY.ela)}
+        ${stat("Students who feel safe",s.safe,CITY.safe)}${stat("Students who say bullying happens often",s.bully,CITY.bully,true)}
+        ${stat("Teachers who recommend the school",s.teach,CITY.teach)}</div>
+        <span class="muted small">Middle school grades. The dark line marks the citywide average.</span></div>
+      <div class="grid2" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
+        <div class="card"><h3>Highlights</h3><ul class="why" style="margin-top:8px">${s.good.map(g=>`<li>${esc(g)}</li>`).join("")}</ul>
+          <div class="chips" style="margin-top:12px">${s.tags.map(t=>`<span class="pill">${PROG[t]}</span>`).join("")}</div></div>
+        <div class="card"><h3>Reported concerns</h3><ul class="why caution" style="margin-top:8px">${s.concerns.map(g=>`<li>${esc(g)}</li>`).join("")}</ul></div>
+      </div>
+      <div class="card"><h3>Open houses</h3>${ev.map(e=>evRow(e)).join("")}</div>
+      <div class="row"><a class="btn" href="${s.web}" target="_blank" rel="noopener">School website</a><a class="btn" href="https://insideschools.org/school/${s.dbn}" target="_blank" rel="noopener">Full review on InsideSchools</a>${s.flyer?`<a class="btn" href="${s.flyer}" target="_blank" rel="noopener">Open house flyer</a>`:""}</div>
+      <p class="muted small" style="margin:0">Source: InsideSchools school profile (NYC School Survey and state test results). Check with the school for the latest.</p>
+    </div></div></div>`;
+}
+
+/* ---------------- EVENTS ---------------- */
+function go(t){tab=t;openDbn=null;try{history.replaceState(null,"","#"+t)}catch(e){}render();window.scrollTo(0,0)}
+document.addEventListener("click",e=>{
+  const t=e.target.closest("[data-tab],[data-tab-go],[data-open],[data-close],[data-save],[data-going],[data-step],[data-df],[data-w],[data-prog],[data-mv],[data-went],[data-dv],[data-cm],[data-day]");
+  if(!t)return;
+  const d=t.dataset;
+  if(d.close&&e.target!==t&&!e.target.closest("button[data-close]"))return; // clicks inside the sheet
+  if(d.tab)return go(d.tab);
+  if(d.tabGo)return go(d.tabGo);
+  if(d.open){openDbn=d.open;renderSheet();return}
+  if(d.close){openDbn=null;renderSheet();return}
+  if(d.save)return toggleSave(d.save);
+  if(d.going)return toggleGoing(d.going);
+  if(d.went)return toggleWent(d.went);
+  if(d.dv){dateView=d.dv;return render()}
+  if(d.cm){calMonth=Math.max(0,Math.min(CAL_RANGE.length-1,calMonth+(+d.cm)));selDay=null;return render()}
+  if(d.day){selDay=d.day;return render()}
+  if(d.step){st.done[d.step]=!st.done[d.step];persist();return render()}
+  if(d.df){dateFilter=d.df;return render()}
+  if(d.w){const [k,v]=d.w.split(":");st.w[k]=+v;st.done.s1=true;persist();return render()}
+  if(d.prog){const p=d.prog;st.programs=st.programs.includes(p)?st.programs.filter(x=>x!==p):[...st.programs,p];persist();return render()}
+  if(d.mv){const [i,dir]=d.mv.split(":").map(Number),a=st.saved,j=i+dir;[a[i],a[j]]=[a[j],a[i]];persist();return render()}
+});
+document.addEventListener("change",e=>{
+  const id=e.target.id;
+  if(id==="home"){st.home=e.target.value;st.done.s1=!!st.home||st.done.s1}
+  else if(id==="maxm")st.maxMiles=+e.target.value;
+  else if(id==="subway")st.needSubway=e.target.checked;
+  else if(id==="skipc")st.skipCompetitive=e.target.checked;
+  else return;
+  persist();render();
+});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&openDbn){openDbn=null;renderSheet()}});
+render();
+</script>

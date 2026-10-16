@@ -526,7 +526,8 @@ const label=n=>n>=78?["Great match","good"]:n>=62?["Good match","good"]:n>=48?["
 /* ---------------- VIEWS ---------------- */
 function render(){
   document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-current",b.dataset.tab===tab?"page":"false"));
-  $("#app").innerHTML=({home:vHome,dates:vDates,find:vFind,list:vList})[tab]();
+  try{$("#app").innerHTML=({home:vHome,dates:vDates,find:vFind,list:vList})[tab]()}
+  catch(e){console.error(e);$("#app").innerHTML=`<section class="view"><div class="notice" role="alert"><div><b>This page couldn't load.</b> Your saved choices are safe. Try another tab, or reload the page.</div></div></section>`}
   renderSheet();
 }
 function evRow(e,opts={}){
@@ -592,7 +593,7 @@ function stepSub(s){
   switch(s.id){
     case "s1":{const h=HOMES.find(x=>x[0]===st.home);return h?"Home: "+h[1].split(" (")[0]:"Not started"}
     case "s2":return n?n+" school"+(n>1?"s":"")+" saved":"No schools saved yet";
-    case "s3":{const next=EVENTS.find(e=>st.going.includes(e.id)&&!st.attended.includes(e.id)&&daysUntil(e.date)>=0);
+    case "s3":{const next=OH.find(e=>st.going.includes(e.id)&&!st.attended.includes(e.id)&&daysUntil(e.date)>=0);
       return (vp.planned?vp.went+" of "+vp.planned+" planned visits done":"No visits planned yet")+(next?" · Next: "+BY[next.dbn].short+", "+when(next).split(" · ")[0].replace(/^(\w{3})\w*/,"$1"):"")}
     case "s5":{const c=st.saved.filter(d=>BY[d].admit.includes("audition")||BY[d].admit.every(a=>a==="screened")).length;
       return n?(c?c+" of your schools need"+(c>1?"":"s")+" an audition or screen":"None of your schools are audition or screened only"):""}

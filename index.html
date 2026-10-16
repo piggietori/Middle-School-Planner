@@ -95,6 +95,9 @@ section.view{padding-top:22px;display:grid;gap:18px}
 .st-sub{margin-top:1px}
 .st-more{display:grid;gap:10px;margin-top:8px}
 .st-more p{margin:0}
+.st-item.skipped .st-dot{background:var(--surface);border:2px dashed var(--muted);color:var(--muted)}
+.st-item.skipped:not(:last-child)::before{border-left:2px solid var(--good)}
+.req{display:grid;gap:6px;padding:10px 12px;border-radius:10px;background:var(--surface);border:1px solid var(--line)}
 
 /* school map */
 :root{--tile-filter:none}
@@ -420,7 +423,7 @@ const STEPS = [
  {id:"s2",t:"Save the schools you like",d:"Tap Save on any school. Aim for 4 to 8 schools.",tab:"find"},
  {id:"s3",t:"Visit open houses",d:"Tap “I'm going” to plan a visit. After the visit, tap “Yes, I went.” This step checks itself off when every planned visit is done.",tab:"dates"},
  {id:"s4",t:"Log in to MySchools",d:"Create or open your account at myschools.nyc. Your elementary school can give you a code.",link:"https://www.myschools.nyc/"},
- {id:"s5",t:"Check auditions and screens",d:"Screened schools look at grades and attendance. MS 936 needs an audition.",tab:"list"},
+ {id:"s5",t:"Check auditions and screens",d:"Some schools take students only by audition, or only by screen (grades and attendance). Find out what each one needs before you apply.",tab:"list"},
  {id:"s6",t:"Put your list in order and enter it in MySchools",d:"Put your true favorite first. Adding more schools does not hurt your chances at your top choice.",tab:"list"},
  {id:"s7",t:"Submit by December 11, 2026",d:"The application closes at the end of the day."},
  {id:"s8",t:"Get your offer on April 7, 2027",d:"Offers appear in MySchools."}
@@ -487,7 +490,12 @@ function toggleWent(id){const on=!st.attended.includes(id);st.attended=on?[...st
 // "Visit open houses" is done only once every open house you planned to attend is marked as visited.
 function visitProgress(){const planned=st.going.filter(id=>EVENTS.some(e=>e.id===id&&e.kind==="open"));
   return {planned:planned.length,went:planned.filter(id=>st.attended.includes(id)).length}}
-function stepDone(s){if(s.id==="s3"){const p=visitProgress();return p.planned>0&&p.went===p.planned}return !!st.done[s.id]}
+// Saved schools that admit only by audition or only by screen (grades and attendance).
+const testSchools=()=>st.saved.map(d=>BY[d]).filter(s=>s&&(s.admit.includes("audition")||s.admit.every(a=>a==="screened")));
+const s5Skipped=()=>st.saved.length>0&&testSchools().length===0;
+function stepDone(s){if(s.id==="s3"){const p=visitProgress();return p.planned>0&&p.went===p.planned}
+  if(s.id==="s5"&&s5Skipped())return true;
+  return !!st.done[s.id]}
 
 /* ---------------- MATCHING ---------------- */
 const lin=(v,lo,hi)=>Math.max(0,Math.min(100,(v-lo)/(hi-lo)*100));
@@ -595,8 +603,10 @@ function stepSub(s){
     case "s2":return n?n+" school"+(n>1?"s":"")+" saved":"No schools saved yet";
     case "s3":{const next=OH.find(e=>st.going.includes(e.id)&&!st.attended.includes(e.id)&&daysUntil(e.date)>=0);
       return (vp.planned?vp.went+" of "+vp.planned+" planned visits done":"No visits planned yet")+(next?" · Next: "+BY[next.dbn].short+", "+when(next).split(" · ")[0].replace(/^(\w{3})\w*/,"$1"):"")}
-    case "s5":{const c=st.saved.filter(d=>BY[d].admit.includes("audition")||BY[d].admit.every(a=>a==="screened")).length;
-      return n?(c?c+" of your schools need"+(c>1?"":"s")+" an audition or screen":"None of your schools are audition or screened only"):""}
+    case "s5":{if(!n)return "Save schools first. We'll check if any need an audition or screen.";
+      const t=testSchools();
+      return t.length?"Needed for: "+t.map(s=>s.short+" ("+(s.admit.includes("audition")?"audition":"screened")+")").join(", ")
+        :"Skipped: none of your saved schools need an audition or screen"}
     case "s6":return n?"Your list has "+n+" school"+(n>1?"s":""):"";
     case "s7":{const k=daysUntil("2026-12-11");return "Dec 11, 2026"+(k>=0?" · "+(k===0?"today":k+" day"+(k>1?"s":"")+" left"):" · closed")}
     case "s8":{const k=daysUntil("2027-04-07");return "Apr 7, 2027"+(k>=0?" · in "+k+" days":"")}
@@ -606,16 +616,20 @@ function stepSub(s){
 function stepper(){
   const cur=STEPS.findIndex(s=>!stepDone(s)), openId=openStep??(cur>=0?STEPS[cur].id:null);
   return `<ol class="stepper">${STEPS.map((s,i)=>{
-    const dn=stepDone(s), state=dn?"done":i===cur?"current":"todo", open=openId===s.id, sub=stepSub(s), auto=s.id==="s3";
-    return `<li class="st-item ${state}">
-      <span class="st-dot" aria-hidden="true">${dn?"✓":i+1}</span>
+    const skip=s.id==="s5"&&s5Skipped(), dn=stepDone(s), state=dn?"done":i===cur?"current":"todo", open=openId===s.id, sub=stepSub(s), auto=s.id==="s3"||skip;
+    const tests=s.id==="s5"&&!skip?testSchools():[];
+    return `<li class="st-item ${state}${skip?" skipped":""}">
+      <span class="st-dot" aria-hidden="true">${skip?"–":dn?"✓":i+1}</span>
       <div class="st-body">
         <button class="st-head" data-ostep="${s.id}" aria-expanded="${open}">
           <span class="st-t"><span class="sr">Step ${i+1}: </span>${esc(s.t)}</span>
-          ${state==="current"?`<span class="pill">You are here</span>`:dn?`<span class="pill good">Done</span>`:""}
+          ${state==="current"?`<span class="pill">You are here</span>`:skip?`<span class="pill">Skipped</span>`:dn?`<span class="pill good">Done</span>`:""}
         </button>
         ${sub?`<div class="st-sub small muted">${esc(sub)}</div>`:""}
-        ${open?`<div class="st-more"><p class="small">${esc(s.d)}</p>
+        ${open?`<div class="st-more"><p class="small">${esc(skip?"None of the schools on your list need an audition or a screen, so you can skip this step. It comes back if you save one that does.":s.d)}</p>
+          ${tests.map(t=>`<div class="req"><b>${esc(t.name)}</b> <span class="pill ${t.admit.includes("audition")?"leaf":"warn"}">${t.admit.includes("audition")?"Audition":"Screened"}</span>
+            <p class="small">${esc(t.admitText)}</p>
+            <div class="row" style="gap:8px"><a class="btn" href="${t.web}" target="_blank" rel="noopener">School website</a>${t.signup?`<a class="btn" href="${t.signup}" target="_blank" rel="noopener">Register</a>`:""}<button class="btn" data-open="${t.dbn}">See details</button></div></div>`).join("")}
           <div class="row" style="gap:8px">
             ${s.tab?`<button class="btn${state==="current"?" primary":""}" data-tab-go="${s.tab}">${TAB_ACTION[s.tab]}</button>`:""}
             ${s.link?`<a class="btn${state==="current"?" primary":""}" href="${s.link}" target="_blank" rel="noopener">Open MySchools</a>`:""}

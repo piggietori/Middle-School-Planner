@@ -97,6 +97,7 @@ section.view{padding-top:22px;display:grid;gap:18px}
 .st-more p{margin:0}
 .st-item.skipped .st-dot{background:var(--surface);border:2px dashed var(--muted);color:var(--muted)}
 .st-item.skipped:not(:last-child)::before{border-left:2px solid var(--good)}
+.code{font-family:ui-monospace,Consolas,monospace;font-size:1.05rem;font-weight:700;background:var(--accent-soft);color:var(--accent);padding:4px 10px;border-radius:8px;letter-spacing:.04em;user-select:all}
 .req{display:grid;gap:6px;padding:10px 12px;border-radius:10px;background:var(--surface);border:1px solid var(--line)}
 
 /* school map */
@@ -389,6 +390,27 @@ const S = [
   signup:"https://docs.google.com/forms/d/e/1FAIpQLSfbBccPKW_TYKyN9aUfAh-7dk5GJmHcD0bxQbagpAmi93IqwQ/viewform"}
 ];
 const BY = Object.fromEntries(S.map(s=>[s.dbn,s]));
+// Programs inside each school (names from InsideSchools; MySchools may word them slightly differently).
+// Program codes are filled in only where confirmed from MySchools.
+const PROGRAMS = {
+ "20K030":[["Zoned Program"],["Superintendent's Program"],["Arabic Dual Language"]],
+ "20K062":[["Zoned Program"],["Superintendent's Program"],["Algebra Honors"],["ASD ACES Program"]],
+ "20K104":[["Zoned Program (Civic Leadership and Responsibility)"],["Superintendent's Program"]],
+ "20K180":[["Zoned Program"],["Algebra Honors"],["Superintendent's Program"]],
+ "20K187":[["Arts & Humanities Academy"],["Business & Law Academy"],["Scientific Research Academy"]],
+ "20K192":[["Zoned Program"],["Algebra Honors"]],
+ "20K201":[["Zoned Program","K201Z"],["Superintendent's Program"],["Algebra Honors"],["Italian Dual Language"]],
+ "20K220":[["Zoned Program"],["Algebra Honors"],["Superintendent's Program"],["Spanish Dual Language"],["Federal Magnet Program"]],
+ "20K223":[["Zoned Program"],["Algebra Honors"],["Superintendent's Program"],["Federal Magnet Program"]],
+ "20K227":[["Zoned Program"],["Algebra Honors"],["Superintendent's Program"]],
+ "20K229":[["Zoned Program"],["Superintendent's Program"]],
+ "20K259":[["Zoned Program"],["Superintendent's Program"],["Algebra Honors"],["Mandarin Dual Language"]],
+ "20K407":[["Zoned Program","K407A"],["Superintendent's Program"],["ASD ACES Program"]],
+ "20K609":[["Urban Assembly School for Leadership and Empowerment"]],
+ "20K686":[["Superintendent's Program"]],
+ "20K936":[["Dance"],["Drama"],["Music"],["Visual Arts"],["STEAM"]]
+};
+const progOf=d=>{const list=PROGRAMS[d]||[[BY[d].name]];return list.find(p=>p[0]===st.prog[d])||list[0]};
 const OH = [ // open houses (District 20 flyer, 2026)
  ["20K030","2026-10-28","16:30","17:30"],["20K062","2026-10-27","16:30","18:00"],["20K104","2026-10-20","17:30","18:30"],
  ["20K180","2026-10-29","17:00","18:30"],["20K187","2026-11-10","17:30","19:30"],["20K192","2026-10-19","16:00",null],
@@ -424,14 +446,14 @@ const STEPS = [
  {id:"s3",t:"Visit open houses",d:"Tap “I'm going” to plan a visit. After the visit, tap “Yes, I went.” This step checks itself off when every planned visit is done.",tab:"dates"},
  {id:"s4",t:"Log in to MySchools",d:"Create or open your account at myschools.nyc. Your elementary school can give you a code.",link:"https://www.myschools.nyc/"},
  {id:"s5",t:"Check auditions and screens",d:"Some schools take students only by audition, or only by screen (grades and attendance). Find out what each one needs before you apply.",tab:"list"},
- {id:"s6",t:"Put your list in order and enter it in MySchools",d:"Put your true favorite first. Adding more schools does not hurt your chances at your top choice.",tab:"list"},
+ {id:"s6",t:"Put your list in order and enter it in MySchools",d:"Put your true favorite first. Adding more schools does not hurt your chances at your top choice. My list has a Ready for MySchools guide that shows exactly what to search and add.",tab:"list"},
  {id:"s7",t:"Submit by December 11, 2026",d:"The application closes at the end of the day."},
  {id:"s8",t:"Get your offer on April 7, 2027",d:"Offers appear in MySchools."}
 ];
 
 /* ---------------- STATE ---------------- */
 const DEFAULT = {home:"",maxMiles:1.5,needSubway:false,skipCompetitive:false,
-  w:{distance:2,scores:1,safety:2,bullying:1,teachers:1},programs:[],saved:[],going:[],attended:[],done:{}};
+  w:{distance:2,scores:1,safety:2,bullying:1,teachers:1},programs:[],saved:[],going:[],attended:[],done:{},prog:{},entered:{}};
 let st = load();
 let tab = (location.hash||"").slice(1);
 if(!["home","dates","find","list"].includes(tab)) tab="home";
@@ -495,6 +517,7 @@ const testSchools=()=>st.saved.map(d=>BY[d]).filter(s=>s&&(s.admit.includes("aud
 const s5Skipped=()=>st.saved.length>0&&testSchools().length===0;
 function stepDone(s){if(s.id==="s3"){const p=visitProgress();return p.planned>0&&p.went===p.planned}
   if(s.id==="s5"&&s5Skipped())return true;
+  if(s.id==="s6"&&st.saved.length&&st.saved.every(d=>st.entered[d]))return true;
   return !!st.done[s.id]}
 
 /* ---------------- MATCHING ---------------- */
@@ -607,7 +630,7 @@ function stepSub(s){
       const t=testSchools();
       return t.length?"Needed for: "+t.map(s=>s.short+" ("+(s.admit.includes("audition")?"audition":"screened")+")").join(", ")
         :"Skipped: none of your saved schools need an audition or screen"}
-    case "s6":return n?"Your list has "+n+" school"+(n>1?"s":""):"";
+    case "s6":{const e=st.saved.filter(d=>st.entered[d]).length;return n?e+" of "+n+" added in MySchools":""}
     case "s7":{const k=daysUntil("2026-12-11");return "Dec 11, 2026"+(k>=0?" · "+(k===0?"today":k+" day"+(k>1?"s":"")+" left"):" · closed")}
     case "s8":{const k=daysUntil("2027-04-07");return "Apr 7, 2027"+(k>=0?" · in "+k+" days":"")}
   }
@@ -742,6 +765,33 @@ function vFind(){
     </div>
   </section>`;
 }
+const searchTerm=d=>progOf(d)[1]||d; // the program code when we know it, otherwise the school code
+function msText(){return st.saved.map((d,i)=>{const p=progOf(d);return `${i+1}. ${BY[d].name} (${d}) - ${p[0]}${p[1]?" ("+p[1]+")":""}`}).join("\n")}
+function msGuide(saved){
+  const e=saved.filter(s=>st.entered[s.dbn]).length, all=e===saved.length;
+  return `<div class="card stack" id="myschools">
+    <div class="row"><h2 style="margin-right:auto">Ready for MySchools</h2><span class="pill ${all?"good":""}">${e} of ${saved.length} added</span></div>
+    <p style="margin:0">Open MySchools and go to <b>Build your child's application</b>. For each choice below, type the code into <b>Search for a program to add</b>, add the program shown, then tick <b>Added</b> here.</p>
+    <div class="row"><a class="btn primary" href="https://www.myschools.nyc/" target="_blank" rel="noopener">Open MySchools</a><button class="btn" data-copyall="1">Copy the whole list</button></div>
+    <ol class="stepper">${saved.map((s,i)=>{const p=progOf(s.dbn),t=searchTerm(s.dbn),done=!!st.entered[s.dbn];
+      return `<li class="st-item ${done?"done":"todo"}"><span class="st-dot" aria-hidden="true">${done?"✓":i+1}</span>
+        <div class="st-body stack" style="gap:6px">
+          <div class="st-t" style="color:var(--ink)"><span class="sr">Choice ${i+1}: </span>${esc(s.name)}</div>
+          <div class="row" style="gap:8px"><span class="small">Search for</span><code class="code">${esc(t)}</code><button class="btn" data-copy="${esc(t)}">Copy</button></div>
+          <div class="small">Then add <b>${esc(p[0])}</b>${p[1]?"":` <span class="muted">(look for this program name under ${esc(s.short)})</span>`}.</div>
+          <label class="toggle small"><input type="checkbox" id="ent-${s.dbn}" data-entered="${s.dbn}"${done?" checked":""}>Added in MySchools</label>
+        </div></li>`}).join("")}
+      <li class="st-item ${all?"current":"todo"}"><span class="st-dot" aria-hidden="true">→</span>
+        <div class="st-body"><div class="st-t" style="color:var(--ink)">Check the order, then click Next and Submit</div>
+        <div class="small muted">The numbers in MySchools should match the numbers here. If they don't, use the arrows in MySchools to move programs. Submit by December 11, 2026.</div></div></li>
+    </ol>
+    <p class="small muted" style="margin:0">Program codes are shown when we know them. For the others, search the school code and pick the program by name. You can also add more than one program from the same school in MySchools.</p>
+  </div>`;
+}
+function copyText(t,msg){
+  const fail=()=>toast("Couldn't copy. Press and hold the text to copy it.");
+  try{navigator.clipboard.writeText(t).then(()=>toast(msg),fail)}catch(e){fail()}
+}
 function vList(){
   const saved=st.saved.map(d=>BY[d]).filter(Boolean);
   return `<section class="view">
@@ -751,9 +801,12 @@ function vList(){
         <div class="order"><button data-mv="${i}:-1" ${i===0?"disabled":""} aria-label="Move up">▲</button><button data-mv="${i}:1" ${i===saved.length-1?"disabled":""} aria-label="Move down">▼</button></div>
         <div><div class="rank">Choice ${i+1} · ${esc(s.dbn)}</div><h3 style="margin-top:2px">${esc(s.name)}</h3>
         <div class="meta"><span>${label(m.score)[0]} (${m.score} out of 100)</span>${m.dist!=null?`<span>${m.dist.toFixed(1)} mi</span>`:""}<span>${s.admit.includes("audition")?"Audition":s.admit.length===1&&s.admit[0]==="screened"?"Screened only":s.admit.includes("open")&&s.admit.length===1?"Open to all":"Zoned + other programs"}</span></div></div></div>
+        <div class="q" style="padding:0;border:0"><label for="prog-${s.dbn}">Program to apply to</label>
+          <select id="prog-${s.dbn}" data-progfor="${s.dbn}">${(PROGRAMS[s.dbn]||[[s.name]]).map(p=>`<option${progOf(s.dbn)[0]===p[0]?" selected":""}>${esc(p[0])}</option>`).join("")}</select></div>
         <div class="muted small">${ev.length?"Next open house: <b>"+when(ev[0])+"</b>":"No upcoming open house listed. Check the school website for tours."}</div>
         <div class="row"><button class="btn" data-open="${s.dbn}">See details</button>${ev.length?`<a class="btn" href="${gcal(ev[0])}" target="_blank" rel="noopener">Add open house to calendar</a>`:""}<button class="btn" data-save="${s.dbn}">Remove</button></div>
       </article>`}).join("")}</div>
+      ${msGuide(saved)}
       <div class="card small"><b>How the ranking works:</b> NYC matches each student to the highest school on their list that has room for them. Listing more schools never lowers your chance at your first choice. Check MySchools for how many choices you can add.</div>`
     :`<div class="empty"><p style="margin:0 0 12px">Your list is empty.</p><button class="btn primary" data-tab-go="find">Find schools</button></div>`}
   </section>`;
@@ -873,7 +926,7 @@ function renderSheet(){
 /* ---------------- EVENTS ---------------- */
 function go(t){tab=t;openDbn=null;try{history.replaceState(null,"","#"+t)}catch(e){}render();window.scrollTo(0,0)}
 document.addEventListener("click",e=>{
-  const t=e.target.closest("[data-tab],[data-tab-go],[data-open],[data-close],[data-save],[data-going],[data-step],[data-df],[data-w],[data-prog],[data-mv],[data-went],[data-dv],[data-cm],[data-day],[data-ostep]");
+  const t=e.target.closest("[data-tab],[data-tab-go],[data-open],[data-close],[data-save],[data-going],[data-step],[data-df],[data-w],[data-prog],[data-mv],[data-went],[data-dv],[data-cm],[data-day],[data-ostep],[data-copy],[data-copyall]");
   if(!t)return;
   const d=t.dataset;
   if(d.close&&e.target!==t&&!e.target.closest("button[data-close]"))return; // clicks inside the sheet
@@ -884,6 +937,8 @@ document.addEventListener("click",e=>{
   if(d.save)return toggleSave(d.save);
   if(d.going)return toggleGoing(d.going);
   if(d.went)return toggleWent(d.went);
+  if(d.copy)return copyText(d.copy,"Copied "+d.copy+". Paste it into the MySchools search box.");
+  if(d.copyall)return copyText(msText(),"Copied your list");
   if(d.dv){dateView=d.dv;return render()}
   if(d.cm){calMonth=Math.max(0,Math.min(CAL_RANGE.length-1,calMonth+(+d.cm)));selDay=null;return render()}
   if(d.day){selDay=d.day;return render()}
@@ -900,6 +955,8 @@ document.addEventListener("change",e=>{
   else if(id==="maxm")st.maxMiles=+e.target.value;
   else if(id==="subway")st.needSubway=e.target.checked;
   else if(id==="skipc")st.skipCompetitive=e.target.checked;
+  else if(e.target.dataset.progfor){const d=e.target.dataset.progfor;st.prog[d]=e.target.value;st.entered[d]=false}
+  else if(e.target.dataset.entered)st.entered[e.target.dataset.entered]=e.target.checked;
   else return;
   persist();render();
 });

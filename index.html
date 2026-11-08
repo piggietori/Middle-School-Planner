@@ -96,6 +96,40 @@ section.view{padding-top:22px;display:grid;gap:18px}
 .st-item.skipped .st-dot{background:var(--surface);border:2px dashed var(--muted);color:var(--muted)}
 .st-item.skipped:not(:last-child)::before{border-left:2px solid var(--good)}
 .code{font-family:ui-monospace,Consolas,monospace;font-size:1.05rem;font-weight:700;background:var(--accent-soft);color:var(--accent);padding:4px 10px;border-radius:8px;letter-spacing:.04em;user-select:all}
+/* our notes */
+.notes-card{scroll-margin-top:72px}
+.stars{display:flex;align-items:center;gap:2px;flex-wrap:wrap}
+.star{width:44px;height:44px;border:0;background:none;padding:0;font-size:2rem;line-height:1;cursor:pointer;color:var(--line)}
+.star.on{color:var(--warn)}
+.notelist{display:grid;gap:8px}
+.notelist .lab{font-weight:700}
+.notelist.pros .lab{color:var(--good)}
+.notelist.cons .lab{color:var(--leaf)}
+.notelist ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.notelist li{display:flex;gap:8px;align-items:center;padding:6px 6px 6px 12px;border-radius:10px;background:var(--good-soft)}
+.notelist.cons li{background:var(--leaf-soft)}
+.notelist li span{flex:1;min-width:0;overflow-wrap:anywhere}
+.notelist .x{flex:none;width:36px;height:36px;border:0;border-radius:8px;background:none;color:var(--muted);font-size:1.3rem;cursor:pointer}
+.notelist .x:hover{background:var(--surface);color:var(--ink)}
+.addrow{display:flex;gap:8px}
+.addrow input{flex:1;min-width:0;padding:10px 12px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);min-height:46px}
+.ournote .s{color:var(--warn);letter-spacing:1px}
+/* compare notes */
+.cmp-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);-webkit-overflow-scrolling:touch}
+.cmp{border-collapse:separate;border-spacing:0;width:100%}
+.cmp th,.cmp td{padding:12px 14px;vertical-align:top;text-align:left;border-bottom:1px solid var(--line)}
+.cmp tbody tr:last-child th,.cmp tbody tr:last-child td{border-bottom:0}
+.cmp thead th,.cmp td{min-width:200px;max-width:260px}
+.cmp thead th+th,.cmp td+td{border-left:1px solid var(--line)}
+.cmp th[scope="row"],.cmp .corner{position:sticky;left:0;z-index:1;background:var(--surface);min-width:112px;max-width:112px;font-size:.85rem;color:var(--muted);font-weight:700;border-right:1px solid var(--line)}
+.cmp thead th{background:var(--bg)}
+.cmp .corner{background:var(--bg)}
+.cmp-name{padding:4px 0 0;text-align:left;font-family:var(--display);font-size:1rem;line-height:1.25}
+.cmp-stars{color:var(--warn);font-size:1.25rem;letter-spacing:1px;line-height:1.2}
+.cmp-list{margin:0;padding-left:1.1rem;display:grid;gap:4px}
+.cmp-list.pros li::marker{color:var(--good)}
+.cmp-list.cons li::marker{color:var(--leaf)}
+@media (min-width:800px){.cmp-hint{display:none}}
 .req{display:grid;gap:6px;padding:10px 12px;border-radius:10px;background:var(--surface);border:1px solid var(--line)}
 
 /* events */
@@ -412,11 +446,11 @@ const STEPS = [
 
 /* ---------------- STATE ---------------- */
 const DEFAULT = {home:"",maxMiles:1.5,needSubway:false,skipCompetitive:false,
-  w:{distance:2,scores:1,safety:2,bullying:1,teachers:1},programs:[],saved:[],going:[],attended:[],done:{}};
+  w:{distance:2,scores:1,safety:2,bullying:1,teachers:1},programs:[],saved:[],going:[],attended:[],done:{},notes:{}};
 let st = load();
 let tab = (location.hash||"").slice(1);
 if(!["home","dates","find","list"].includes(tab)) tab="home";
-let dateFilter="all", openDbn=null, dateView="cal", calMonth=null, selDay=null, openStep=null;
+let dateFilter="all", openDbn=null, dateView="cal", calMonth=null, selDay=null, openStep=null, listView="order";
 function load(){try{const v=JSON.parse(localStorage.getItem("d20plan")||"null");if(v)return {...DEFAULT,...v,w:{...DEFAULT.w,...(v.w||{})}}}catch(e){}return structuredClone(DEFAULT)}
 let dbRef=null, saveTimer=null;
 function persist(){
@@ -467,7 +501,47 @@ const isSaved=d=>st.saved.includes(d);
 function toggleSave(d){st.saved=isSaved(d)?st.saved.filter(x=>x!==d):[...st.saved,d];if(st.saved.length)st.done.s2=true;persist();toast(isSaved(d)?"Saved to My list":"Removed from My list");render()}
 function toggleGoing(id){st.going=st.going.includes(id)?st.going.filter(x=>x!==id):[...st.going,id];persist();render()}
 function toggleWent(id){const on=!st.attended.includes(id);st.attended=on?[...st.attended,id]:st.attended.filter(x=>x!==id);
-  if(on&&!st.going.includes(id))st.going=[...st.going,id];persist();toast(on?"Marked as visited":"Visit unmarked");render()}
+  if(on&&!st.going.includes(id))st.going=[...st.going,id];persist();
+  const ev=OH.find(e=>e.id===id);
+  if(on&&ev){toast("Marked as visited. Add your notes while they're fresh.");render();openNotes(ev.dbn)} // jump straight to notes after a visit
+  else{toast(on?"Marked as visited":"Visit unmarked");render()}}
+
+/* ---------------- OUR NOTES ---------------- */
+// Each family's own rating and pros/cons per school, kept with the rest of their plan.
+const RATING_WORDS=["","Not for us","Has concerns","It's okay","Really like it","Love it"];
+const noteOf=d=>st.notes[d]||{rating:0,pros:[],cons:[]};
+const hasNotes=d=>!!st.notes[d];
+function setNote(d,fn){const n=JSON.parse(JSON.stringify(noteOf(d)));fn(n);n.updated=new Date().toISOString();
+  if(!n.rating&&!n.pros.length&&!n.cons.length)delete st.notes[d];else st.notes[d]=n;persist()}
+const starText=r=>"★".repeat(r)+"☆".repeat(5-r);
+function noteSummary(d){if(!hasNotes(d))return "";const n=noteOf(d),bits=[];
+  if(n.rating)bits.push(`<span class="s" aria-label="${n.rating} out of 5 stars">${starText(n.rating)}</span> ${RATING_WORDS[n.rating]}`);
+  if(n.pros.length)bits.push(n.pros.length+" like"+(n.pros.length>1?"s":""));
+  if(n.cons.length)bits.push(n.cons.length+" to improve");
+  return `<div class="ournote small"><b>Our notes:</b> ${bits.join(" · ")}</div>`}
+function noteList(d,kind,title,ph,items){
+  return `<div class="notelist ${kind}"><div class="lab">${title}</div>
+    ${items.length?`<ul>${items.map((t,i)=>`<li><span>${esc(t)}</span><button class="x" data-delnote="${d}:${kind}:${i}" aria-label="Remove ${esc(t)}">×</button></li>`).join("")}</ul>`:""}
+    <div class="addrow"><input id="${kind}-input" type="text" maxlength="200" placeholder="${ph}" aria-label="Add to ${title}" data-noteinput="${d}:${kind}" enterkeyhint="done"><button class="btn" data-addnote="${d}:${kind}">Add</button></div></div>`}
+function notesCard(d){const n=noteOf(d), up=n.updated?new Date(n.updated):null;
+  return `<h3>Our notes</h3>
+    <p class="muted small" style="margin:0">Write down what you noticed at the open house. Only you can see these.</p>
+    <div class="stack" style="gap:6px"><div class="lab" id="rate-lab">Our rating</div>
+      <div class="stars" role="radiogroup" aria-labelledby="rate-lab">${[1,2,3,4,5].map(i=>`<button class="star${i<=n.rating?" on":""}" role="radio" aria-checked="${n.rating===i}" aria-label="${i} star${i>1?"s":""}: ${RATING_WORDS[i]}" data-star="${d}:${i}">★</button>`).join("")}
+      <span class="small ${n.rating?"":"muted"}" style="font-weight:700">${n.rating?RATING_WORDS[n.rating]:"Tap a star to rate"}</span></div></div>
+    ${noteList(d,"pros","What we like","For example: friendly teachers, great science lab",n.pros)}
+    ${noteList(d,"cons","What could be better","For example: long commute, crowded hallways",n.cons)}
+    <div class="row" style="justify-content:space-between"><span class="muted small">Saved automatically${up?" · Last changed "+MON[up.getMonth()]+" "+up.getDate():""}</span>
+      <button class="linkbtn small" data-compare="1">Compare with other schools</button></div>`}
+function renderNotes(d){const box=document.getElementById("notesbox");if(!box)return;
+  const drafts={};["pros","cons"].forEach(k=>{const el=document.getElementById(k+"-input");if(el)drafts[k]=el.value}); // keep unsaved typing
+  box.innerHTML=notesCard(d);["pros","cons"].forEach(k=>{const el=document.getElementById(k+"-input");if(el&&drafts[k])el.value=drafts[k]})}
+function addNote(d,kind){const el=document.getElementById(kind+"-input");if(!el)return;const v=el.value.trim();
+  if(!v){el.focus();return}el.value="";setNote(d,n=>n[kind].push(v));renderNotes(d);document.getElementById(kind+"-input")?.focus()}
+function commitDrafts(){["pros","cons"].forEach(k=>{const el=document.getElementById(k+"-input");
+  if(el&&el.value.trim()){const d=el.dataset.noteinput.split(":")[0],v=el.value.trim();el.value="";setNote(d,n=>n[k].push(v))}})}
+function openNotes(d){openDbn=d;renderSheet();const b=document.getElementById("notesbox");if(b&&b.scrollIntoView)b.scrollIntoView({block:"start"})}
+function closeSheet(){commitDrafts();openDbn=null;render()}
 // "Visit open houses" is done only once every open house you planned to attend is marked as visited.
 function visitProgress(){const planned=st.going.filter(id=>EVENTS.some(e=>e.id===id&&e.kind==="open"));
   return {planned:planned.length,went:planned.filter(id=>st.attended.includes(id)).length}}
@@ -555,6 +629,9 @@ function vHome(){
   if(n>=0&&n<=21)alerts.push(`<b>Deadline soon:</b> only ${n} days left to submit your application in MySchools.`);
   if(!st.home)alerts.push(`<b>Start here:</b> pick your neighborhood on <button class="linkbtn" data-tab-go="find">Find schools</button> so we can show distances.`);
   const missed=st.saved.filter(d=>{const ev=OH.filter(e=>e.dbn===d);return ev.length&&ev.every(e=>daysUntil(e.date)<0)&&!ev.some(e=>st.going.includes(e.id))});
+  // Nudge: visited in the last two weeks but no notes yet
+  const fresh=[...new Set(OH.filter(e=>st.attended.includes(e.id)&&daysUntil(e.date)<=0&&daysUntil(e.date)>=-14&&!hasNotes(e.dbn)).map(e=>e.dbn))];
+  fresh.slice(0,3).forEach(d=>alerts.push(`<b>How was ${esc(BY[d].short)}?</b> Write down what you liked and what could be better while it's fresh. <button class="linkbtn" data-notes="${d}">Add our notes</button>`));
   if(missed.length)alerts.push(`<b>Missed an open house?</b> ${missed.map(d=>esc(BY[d].short)).join(", ")} already held theirs. Check the school website for tours.`);
   return `<section class="view">
     <div class="hero">
@@ -688,6 +765,7 @@ function schoolCard(m,i){
     ${m.why.length?`<ul class="why">${m.why.map(w=>`<li>${esc(w)}</li>`).join("")}</ul>`:""}
     ${m.warn.length?`<ul class="why caution">${m.warn.map(w=>`<li>${esc(w)}</li>`).join("")}</ul>`:""}
     <div class="meta">${s.subway.length?bullets(s.subway):"Bus only: "+s.bus.slice(0,4).join(", ")}</div>
+    ${noteSummary(s.dbn)}
     <div class="row"><button class="btn${isSaved(s.dbn)?" saved":" primary"}" data-save="${s.dbn}">${isSaved(s.dbn)?"★ Saved":"☆ Save"}</button><button class="btn" data-open="${s.dbn}">See details</button></div>
   </article>`;
 }
@@ -748,20 +826,56 @@ function copyText(t,msg){
 }
 function vList(){
   const saved=st.saved.map(d=>BY[d]).filter(Boolean);
+  const views=`<div class="seg" role="group" aria-label="View" style="max-width:340px;grid-template-columns:1fr 1fr">
+      ${[["order","My order"],["compare","Compare notes"]].map(([k,l])=>`<button aria-pressed="${listView===k}" data-lv="${k}">${l}</button>`).join("")}</div>`;
+  if(listView==="compare")return `<section class="view">
+    <div><h2>Compare our notes</h2><p class="muted" style="margin:.3rem 0 0">Your own ratings and notes for each school, side by side. Highest rated first.</p></div>
+    ${views}${vCompare()}</section>`;
   return `<section class="view">
     <div><h2>My list</h2><p class="muted" style="margin:.3rem 0 0">Put your favorite first. This is the order to enter in MySchools. Use the arrows to move schools up or down.</p></div>
+    ${views}
     ${saved.length?`<div class="stack">${saved.map((s,i)=>{const m=match(s),ev=OH.filter(e=>e.dbn===s.dbn&&daysUntil(e.date)>=0);
       return `<article class="sc"><div class="sc-head">
         <div class="order"><button data-mv="${i}:-1" ${i===0?"disabled":""} aria-label="Move up">▲</button><button data-mv="${i}:1" ${i===saved.length-1?"disabled":""} aria-label="Move down">▼</button></div>
         <div><div class="rank">Choice ${i+1} · ${esc(s.dbn)}</div><h3 style="margin-top:2px">${esc(s.name)}</h3>
         <div class="meta"><span>${label(m.score)[0]} (${m.score} out of 100)</span>${m.dist!=null?`<span>${m.dist.toFixed(1)} mi</span>`:""}<span>${s.admit.includes("audition")?"Audition":s.admit.length===1&&s.admit[0]==="screened"?"Screened only":s.admit.includes("open")&&s.admit.length===1?"Open to all":"Zoned + other programs"}</span></div></div></div>
+        ${noteSummary(s.dbn)}
         <div class="muted small">${ev.length?"Next open house: <b>"+when(ev[0])+"</b>":"No upcoming open house listed. Check the school website for tours."}</div>
-        <div class="row"><button class="btn" data-open="${s.dbn}">See details</button>${ev.length?`<a class="btn" href="${gcal(ev[0])}" target="_blank" rel="noopener">Add open house to calendar</a>`:""}<button class="btn" data-save="${s.dbn}">Remove</button></div>
+        <div class="row"><button class="btn" data-open="${s.dbn}">See details</button><button class="btn" data-notes="${s.dbn}">${hasNotes(s.dbn)?"Edit our notes":"Add our notes"}</button>${ev.length?`<a class="btn" href="${gcal(ev[0])}" target="_blank" rel="noopener">Add open house to calendar</a>`:""}<button class="btn" data-save="${s.dbn}">Remove</button></div>
       </article>`}).join("")}</div>
       ${msGuide(saved)}
       <div class="card small"><b>How the ranking works:</b> NYC matches each student to the highest school on their list that has room for them. Listing more schools never lowers your chance at your first choice. Check MySchools for how many choices you can add.</div>`
     :`<div class="empty"><p style="margin:0 0 12px">Your list is empty.</p><button class="btn primary" data-tab-go="find">Find schools</button></div>`}
   </section>`;
+}
+function vCompare(){
+  // Saved schools plus any other school you wrote notes for; best rated first, then your list order.
+  const ids=[...new Set([...st.saved,...Object.keys(st.notes)])].filter(d=>BY[d]);
+  if(!ids.length)return `<div class="empty"><p style="margin:0 0 12px">No schools to compare yet. Save schools, then add your notes after each open house.</p><button class="btn primary" data-tab-go="find">Find schools</button></div>`;
+  const pos=d=>{const i=st.saved.indexOf(d);return i<0?99:i};
+  ids.sort((a,b)=>noteOf(b).rating-noteOf(a).rating||pos(a)-pos(b));
+  const top=Math.max(...ids.map(d=>noteOf(d).rating));
+  const cell=(d,html)=>`<td>${html}</td>`;
+  const list=(items,kind)=>items.length?`<ul class="cmp-list ${kind}">${items.map(t=>`<li>${esc(t)}</li>`).join("")}</ul>`:`<span class="muted small">Nothing yet</span>`;
+  const visited=d=>{const ev=OH.filter(e=>e.dbn===d&&st.attended.includes(e.id));return ev.length?"Yes, "+MON[pd(ev[0].date).getMonth()]+" "+pd(ev[0].date).getDate():`<span class="muted">Not yet</span>`};
+  const admitLabel=s=>s.admit.includes("audition")?"Audition":s.admit.every(a=>a==="screened")?"Screened only":s.admit.length===1&&s.admit[0]==="open"?"Open to all":"Zoned + other programs";
+  const rows=[
+    ["Our rating",d=>{const n=noteOf(d);return n.rating?`<div class="cmp-stars" aria-label="${n.rating} out of 5 stars">${starText(n.rating)}</div><div class="small" style="font-weight:700">${RATING_WORDS[n.rating]}</div>`:`<span class="muted small">Not rated</span>`}],
+    ["What we like",d=>list(noteOf(d).pros,"pros")],
+    ["What could be better",d=>list(noteOf(d).cons,"cons")],
+    ["Visited",visited],
+    ["Match",d=>{const m=match(BY[d]);return `${label(m.score)[0]}<div class="muted small">${m.score} out of 100</div>`}],
+    ["Distance",d=>{const m=match(BY[d]);return m.dist!=null?m.dist.toFixed(1)+" mi":`<span class="muted small">Pick your neighborhood</span>`}],
+    ["How to get in",d=>admitLabel(BY[d])]
+  ];
+  return `${ids.length>2?`<p class="muted small cmp-hint" style="margin:0">Scroll sideways to see all ${ids.length} schools.</p>`:""}
+  <div class="cmp-wrap"><table class="cmp">
+    <thead><tr><td class="corner"></td>${ids.map(d=>{const p=pos(d);return `<th scope="col">
+      <div class="rank">${p<99?"Choice "+(p+1):"Not on my list"}${top&&noteOf(d).rating===top?` <span class="pill good">Top rated</span>`:""}</div>
+      <button class="linkbtn cmp-name" data-open="${d}">${esc(BY[d].name)}</button></th>`}).join("")}</tr></thead>
+    <tbody>${rows.map(([lab,f])=>`<tr><th scope="row">${lab}</th>${ids.map(d=>cell(d,f(d))).join("")}</tr>`).join("")}
+      <tr><th scope="row"><span class="sr">Edit</span></th>${ids.map(d=>`<td><button class="btn" data-notes="${d}">${hasNotes(d)?"Edit notes":"Add notes"}</button></td>`).join("")}</tr>
+    </tbody></table></div>`;
 }
 function stat(label,v,city,bad){
   if(v==null)return `<div class="stat"><div class="stat-row"><span>${label}</span><span class="muted">No data</span></div><div class="bar"></div></div>`;
@@ -773,6 +887,7 @@ function gmaps(s){const h=homePt(),dest=encodeURIComponent(s.addr+", Brooklyn, N
   return h?`https://www.google.com/maps/dir/?api=1&origin=${h.lat},${h.lng}&destination=${dest}&travelmode=transit`:`https://www.google.com/maps/search/?api=1&query=${dest}`}
 function renderSheet(){
   const box=$("#sheet");
+  commitDrafts(); // the sheet is about to be rebuilt; keep anything typed in the notes boxes
   if(!openDbn){box.innerHTML="";return}
   const s=BY[openDbn],m=match(s),ev=OH.filter(e=>e.dbn===s.dbn);
   box.innerHTML=`<div class="sheet" data-close="1"><div class="sheet-in" role="dialog" aria-modal="true" aria-label="${esc(s.name)}">
@@ -781,6 +896,7 @@ function renderSheet(){
       <div><div class="rank">${s.dbn}</div><h2 style="margin-top:4px">${esc(s.name)}</h2>
       <div class="meta" style="margin-top:6px"><span>${esc(s.addr)}</span>${m.dist!=null?`<span>${m.dist.toFixed(1)} mi from home</span>`:""}<span>Grades ${s.grades}</span><span>${s.size.toLocaleString()} students</span></div></div>
       <div class="card">${meter(m.score)}<p class="muted small" style="margin:.5rem 0 0">How well this school fits the answers you gave on Find schools.</p></div>
+      <div class="card stack notes-card" id="notesbox">${notesCard(s.dbn)}</div>
       <div class="card stack"><h3>Where it is</h3>
         <div class="row"><a class="btn primary" href="${gmaps(s)}" target="_blank" rel="noopener">${homePt()?"Directions in Google Maps":"Open in Google Maps"}</a></div>
         <div class="muted small" id="mapnote">${esc(s.addr)}, Brooklyn${m.dist!=null?" · "+m.dist.toFixed(1)+" mi from home in a straight line":" · Pick your neighborhood on Find schools to see the distance"}</div></div>
@@ -808,20 +924,26 @@ function renderSheet(){
 /* ---------------- EVENTS ---------------- */
 function go(t){tab=t;openDbn=null;try{history.replaceState(null,"","#"+t)}catch(e){}render();window.scrollTo(0,0)}
 document.addEventListener("click",e=>{
-  const t=e.target.closest("[data-tab],[data-tab-go],[data-open],[data-close],[data-save],[data-going],[data-step],[data-df],[data-w],[data-prog],[data-mv],[data-went],[data-dv],[data-cm],[data-day],[data-ostep],[data-copy],[data-copyall]");
+  const t=e.target.closest("[data-tab],[data-tab-go],[data-open],[data-close],[data-save],[data-going],[data-step],[data-df],[data-w],[data-prog],[data-mv],[data-went],[data-dv],[data-cm],[data-day],[data-ostep],[data-copy],[data-copyall],[data-star],[data-addnote],[data-delnote],[data-notes],[data-lv],[data-compare]");
   if(!t)return;
   const d=t.dataset;
   if(d.close&&e.target!==t&&!e.target.closest("button[data-close]"))return; // clicks inside the sheet
   if(d.tab)return go(d.tab);
   if(d.tabGo)return go(d.tabGo);
   if(d.open){openDbn=d.open;renderSheet();return}
-  if(d.close){openDbn=null;renderSheet();return}
+  if(d.close)return closeSheet();
+  if(d.notes)return openNotes(d.notes);
+  if(d.star){const [s,r]=d.star.split(":");setNote(s,n=>{n.rating=n.rating===+r?0:+r});return renderNotes(s)} // tap the same star again to clear
+  if(d.addnote){const [s,k]=d.addnote.split(":");return addNote(s,k)}
+  if(d.delnote){const [s,k,i]=d.delnote.split(":");setNote(s,n=>n[k].splice(+i,1));return renderNotes(s)}
   if(d.save)return toggleSave(d.save);
   if(d.going)return toggleGoing(d.going);
   if(d.went)return toggleWent(d.went);
   if(d.copy)return copyText(d.copy,"Copied "+d.copy+". Paste it into the MySchools search box.");
   if(d.copyall)return copyText(msText(),"Copied your list");
   if(d.dv){dateView=d.dv;return render()}
+  if(d.lv){listView=d.lv;return render()}
+  if(d.compare){commitDrafts();listView="compare";return go("list")}
   if(d.cm){calMonth=Math.max(0,Math.min(CAL_RANGE.length-1,calMonth+(+d.cm)));selDay=null;return render()}
   if(d.day){selDay=d.day;return render()}
   if(d.step){st.done[d.step]=!st.done[d.step];openStep=null;persist();return render()}
@@ -840,6 +962,10 @@ document.addEventListener("change",e=>{
   else return;
   persist();render();
 });
-document.addEventListener("keydown",e=>{if(e.key==="Escape"&&openDbn){openDbn=null;renderSheet()}});
+document.addEventListener("keydown",e=>{
+  const ni=e.target.dataset&&e.target.dataset.noteinput;
+  if(ni&&e.key==="Enter"){e.preventDefault();const [s,k]=ni.split(":");return addNote(s,k)}
+  if(e.key==="Escape"&&openDbn)closeSheet();
+});
 render();
 </script>

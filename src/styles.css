@@ -202,6 +202,8 @@ ul.why.caution li::marker{color:var(--leaf)}
 @media (min-width:600px){.stats{grid-template-columns:1fr 1fr}}
 .notice{background:var(--leaf-soft);color:var(--ink);border-radius:var(--r);padding:14px 16px;display:flex;gap:12px;align-items:flex-start}
 .notice b{color:var(--leaf)}
+.notice-list{flex:1;display:grid;gap:10px}
+.notice-list>div+div{border-top:1px solid color-mix(in srgb,var(--leaf) 25%,transparent);padding-top:10px}
 .empty{border:2px dashed var(--line);border-radius:var(--r);padding:22px;text-align:center;color:var(--muted)}
 .sc-head > .order{display:flex;flex-direction:column;gap:4px;flex:none}
 .order button{width:40px;height:34px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);cursor:pointer;font-weight:700}

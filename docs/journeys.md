@@ -48,7 +48,7 @@ Kept small on purpose. No names, notes text, or home location in event propertie
 
 **Goal:** see which schools fit, without creating an account.
 
-1. Opens the site → **Home**: countdown, steps (step 1 is "You are here"), "Start here" notice.
+1. Opens the site → **Home**: countdown, steps (step 1 is "You are here"), "Start here" tip (only while the plan is still empty; it goes away for good after the first choice). Reminders (deadline, upcoming visits, "Did you go?", notes nudges) share one box on Home.
 2. Goes to **Find schools** → picks neighborhood, travel distance, priorities, programs. The list re-ranks as they go.
 3. Opens a school → detail sheet → **Save**. Step 1 and step 2 check off.
 4. Goes to **Dates** → "I'm going" on an open house → "Add to my calendar".

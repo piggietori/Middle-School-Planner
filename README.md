@@ -16,7 +16,7 @@ No sign-up. Choices are saved in your own browser on your device.
 - School facts and survey data: [InsideSchools](https://insideschools.org) school profiles
 - Admissions timeline: [schools.nyc.gov/MS](https://www.schools.nyc.gov/MS)
 
-Every record in `data/` says where it came from and when (`source`, `as_of`), and the app shows when the data was last updated.
+Every record in `data/` says where it came from and when (`source`, `as_of`), and the app shows when the data was last updated. Details and refresh cadence: [docs/data-sources.md](docs/data-sources.md).
 
 This is an independent tool, not an official NYC Public Schools site. Confirm dates and details with each school.
 
@@ -51,15 +51,7 @@ npm run refresh:data # pull the latest test results into data/schools.json
 
 ### Updating data
 
-Every source changes about once a year, so each one is pulled once a year by a person. Where we can, a watch tells you when that's due:
-
-| Source | Gives us | Changes | How it's updated |
-|---|---|---|---|
-| NYC School Quality Reports (Open Data `dnpx-dfnc`) | test scores | once a year, in spring | Watched. When the issue opens: Actions → *Refresh data* → Run workflow, then review its pull request |
-| D20 open house flyer (D20 website) | open houses | out in Sep–Oct, changes through Dec | Watched. Edit `data/events.json` by hand |
-| schools.nyc.gov/MS | key dates | once a year | Watched. Edit `data/events.json` by hand |
-| InsideSchools and the NYC School Survey | school facts, highlights, survey numbers | once a year | August checklist. Edit `data/schools.json` by hand |
-| Our own files | neighborhoods, steps | when we decide | August checklist (steps) |
+Every source changes about once a year, so each one is pulled once a year by a person. Where we can, a watch tells you when that's due. **[docs/data-sources.md](docs/data-sources.md)** lists each source, what we take from it, its refresh cadence and how to update it.
 
 - **Watched** (`"watch"` on the source in `data/schools.json`): every Monday the *Watch sources* workflow checks those pages, and the dataset's last-updated date, and opens an issue for each source that changed, saying what to do. After updating our data, run `node scripts/watch-sources.js --accept <source>` and commit `data/watch.json` in the same pull request.
 - **August checklist**: on August 15 the *New admissions cycle* workflow opens an issue with everything to update for next year ([.github/new-cycle.md](.github/new-cycle.md)).

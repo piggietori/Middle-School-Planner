@@ -1,3 +1,4 @@
+import {acct} from "../account.js";
 import {BY, OH, KEY, EVENTS, HOMES, STEPS} from "../data.js";
 import {isSaved, hasNotes, visitProgress, testSchools, s5Skipped, stepDone} from "../plan.js";
 import {st} from "../state.js";
@@ -19,6 +20,7 @@ export function vHome(){
   ask.forEach(e=>alerts.push(`<b>Did you go?</b> ${esc(evTitle(e))} was on ${when(e).split(" · ")[0]}. <button class="linkbtn" data-went="${e.id}">Yes, I went</button> &nbsp; <button class="linkbtn" data-going="${e.id}">No, I missed it</button>`));
   if(n>=0&&n<=21)alerts.push(`<b>Deadline soon:</b> only ${n} days left to submit your application in MySchools.`);
   if(!st.home)alerts.push(`<b>Start here:</b> pick your neighborhood on <button class="linkbtn" data-tab-go="find">Find schools</button> so we can show distances.`);
+  if(acct.status==="out"&&st.saved.length)alerts.push(`<b>Keep your plan safe:</b> it's only on this device right now. <button class="linkbtn" data-acct="open">Sign in</button> to save it to your account and use it on your other devices.`);
   const missed=st.saved.filter(d=>{const ev=OH.filter(e=>e.dbn===d);return ev.length&&ev.every(e=>daysUntil(e.date)<0)&&!ev.some(e=>st.going.includes(e.id))});
   // Nudge: visited in the last two weeks but no notes yet
   const fresh=[...new Set(OH.filter(e=>st.attended.includes(e.id)&&daysUntil(e.date)<=0&&daysUntil(e.date)>=-14&&!hasNotes(e.dbn)).map(e=>e.dbn))];

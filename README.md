@@ -7,7 +7,7 @@ A simple planner for families applying to middle school in Brooklyn's District 2
 - **Find schools:** pick your neighborhood and what matters to you; schools are ranked with a match score and the reasons behind it
 - **My list:** put your saved schools in order before entering them in MySchools
 
-It is one HTML file with no sign-up. Choices are saved in your own browser on your device.
+No sign-up. Choices are saved in your own browser on your device.
 
 ## Sources
 
@@ -16,3 +16,30 @@ It is one HTML file with no sign-up. Choices are saved in your own browser on yo
 - Admissions timeline: [schools.nyc.gov/MS](https://www.schools.nyc.gov/MS)
 
 This is an independent tool, not an official NYC Public Schools site. Confirm dates and details with each school.
+
+## Versions
+
+- **MVP** (`v0.1.0`, tag `mvp`): the original single-file planner. [Release](https://github.com/piggietori/Middle-School-Planner/releases/tag/v0.1.0)
+- **v1** (in progress on the `v1` branch): data that stays up to date, accounts, and picking up where you left off. See [docs/journeys.md](docs/journeys.md).
+
+## Development
+
+Plain HTML, CSS and JavaScript modules. There is no build step: the files in the repo are the site.
+
+```
+npm install
+npm run dev        # http://localhost:5173
+npm run lint
+npm test           # unit tests (match score golden cases)
+npm run test:e2e   # browser walk-throughs of the user journeys
+```
+
+- `index.html`: page markup
+- `src/data.js`: schools, open houses, key dates, neighborhoods, steps
+- `src/state.js`: the family's plan and where it is saved
+- `src/match.js`: the match score (pure functions)
+- `src/plan.js`: changes to the plan and progress worked out from it
+- `src/views/`: one file per screen, plus the school sheet and notes
+- `src/main.js`: clicks and form changes
+
+CI runs lint and both test suites on every pull request. Pushes to `main` deploy to GitHub Pages (Settings → Pages → Source must be "GitHub Actions").

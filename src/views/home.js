@@ -1,5 +1,7 @@
+import {acct} from "../account.js";
 import {BY, OH, EVENTS, HOMES, STEPS, keyDate, longDate} from "../data.js";
 import {isSaved, hasNotes, visitProgress, testSchools, s5Skipped, stepDone} from "../plan.js";
+import {isEmpty} from "../plan-model.js";
 import {st} from "../state.js";
 import {ui} from "../ui.js";
 import {esc, daysUntil, fmtT, fmtDay, when, rel, evTitle} from "../util.js";
@@ -13,24 +15,27 @@ export function vHome(){
   const show=(mine.length?mine:up).slice(0,5);
   const doneN=STEPS.filter(stepDone).length;
   const ask=EVENTS.filter(e=>st.going.includes(e.id)&&!st.attended.includes(e.id)&&daysUntil(e.date)<0);
+  // One setup tip at most: Start here on the very first visit, then Keep your plan safe once something is saved
+  const tip=isEmpty(st)?`<b>Start here:</b> pick your neighborhood on <button class="linkbtn" data-tab-go="find">Find schools</button> so we can show distances.`
+    :acct.status==="out"&&st.saved.length?`<b>Keep your plan safe:</b> it's only on this device right now. <button class="linkbtn" data-acct="open">Sign in</button> to save it to your account and use it on your other devices.`:"";
+  // Reminders, grouped in one box
   const alerts=[];
-  const goingSoon=EVENTS.filter(e=>st.going.includes(e.id)&&daysUntil(e.date)>=0&&daysUntil(e.date)<=2);
-  goingSoon.forEach(e=>alerts.push(`<b>Reminder:</b> ${esc(evTitle(e))} is ${rel(daysUntil(e.date)).toLowerCase()} at ${fmtT(e.start)}.`));
-  ask.forEach(e=>alerts.push(`<b>Did you go?</b> ${esc(evTitle(e))} was on ${when(e).split(" · ")[0]}. <button class="linkbtn" data-went="${e.id}">Yes, I went</button> &nbsp; <button class="linkbtn" data-going="${e.id}">No, I missed it</button>`));
   if(n>=0&&n<=21)alerts.push(`<b>Deadline soon:</b> only ${n} days left to submit your application in MySchools.`);
-  if(!st.home)alerts.push(`<b>Start here:</b> pick your neighborhood on <button class="linkbtn" data-tab-go="find">Find schools</button> so we can show distances.`);
-  const missed=st.saved.filter(d=>{const ev=OH.filter(e=>e.dbn===d);return ev.length&&ev.every(e=>daysUntil(e.date)<0)&&!ev.some(e=>st.going.includes(e.id))});
+  const goingSoon=EVENTS.filter(e=>st.going.includes(e.id)&&daysUntil(e.date)>=0&&daysUntil(e.date)<=2);
+  goingSoon.forEach(e=>alerts.push(`<b>Coming up:</b> ${esc(evTitle(e))} is ${rel(daysUntil(e.date)).toLowerCase()} at ${fmtT(e.start)}.`));
+  ask.slice(0,3).forEach(e=>alerts.push(`<b>Did you go?</b> ${esc(evTitle(e))} was on ${when(e).split(" · ")[0]}. <button class="linkbtn" data-went="${e.id}">Yes, I went</button> &nbsp; <button class="linkbtn" data-going="${e.id}">No, I missed it</button>`));
+  if(ask.length>3)alerts.push(`And ${ask.length-3} more past visits to check on <button class="linkbtn" data-tab-go="dates">Dates</button>.`);
   // Nudge: visited in the last two weeks but no notes yet
   const fresh=[...new Set(OH.filter(e=>st.attended.includes(e.id)&&daysUntil(e.date)<=0&&daysUntil(e.date)>=-14&&!hasNotes(e.dbn)).map(e=>e.dbn))];
   fresh.slice(0,3).forEach(d=>alerts.push(`<b>How was ${esc(BY[d].short)}?</b> Write down what you liked and what could be better while it's fresh. <button class="linkbtn" data-notes="${d}">Add our notes</button>`));
-  if(missed.length)alerts.push(`<b>Missed an open house?</b> ${missed.map(d=>esc(BY[d].short)).join(", ")} already held theirs. Check the school website for tours.`);
   return `<section class="view">
     <div class="hero">
       <div class="big">${Math.max(n,0)}</div>
       <div><h2>${n>0?"days left to apply":n===0?"Applications close today":"Applications are closed"}</h2>
       <p>Middle school applications close <b>${longDate(close,true)}</b>. Offers arrive ${longDate(offer)}.</p></div>
     </div>
-    ${alerts.map(a=>`<div class="notice" role="status"><span aria-hidden="true">🔔</span><div>${a}</div></div>`).join("")}
+    ${tip?`<div class="notice" role="status"><span aria-hidden="true">👋</span><div>${tip}</div></div>`:""}
+    ${alerts.length?`<div class="notice" role="status"><span aria-hidden="true">🔔</span><div class="notice-list"><h2 class="sr">Reminders</h2>${alerts.map(a=>`<div>${a}</div>`).join("")}</div></div>`:""}
     <div class="grid2">
       <div class="card stack">
         <div class="row"><h2 style="margin-right:auto">Your steps</h2><span class="pill good">${doneN} of ${STEPS.length} done</span></div>

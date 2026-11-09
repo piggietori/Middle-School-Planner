@@ -202,6 +202,8 @@ ul.why.caution li::marker{color:var(--leaf)}
 @media (min-width:600px){.stats{grid-template-columns:1fr 1fr}}
 .notice{background:var(--leaf-soft);color:var(--ink);border-radius:var(--r);padding:14px 16px;display:flex;gap:12px;align-items:flex-start}
 .notice b{color:var(--leaf)}
+.notice-list{flex:1;display:grid;gap:10px}
+.notice-list>div+div{border-top:1px solid color-mix(in srgb,var(--leaf) 25%,transparent);padding-top:10px}
 .empty{border:2px dashed var(--line);border-radius:var(--r);padding:22px;text-align:center;color:var(--muted)}
 .sc-head > .order{display:flex;flex-direction:column;gap:4px;flex:none}
 .order button{width:40px;height:34px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);cursor:pointer;font-weight:700}
@@ -238,3 +240,19 @@ details summary{cursor:pointer;font-weight:700;color:var(--accent);min-height:36
 @media (prefers-reduced-motion:no-preference){.sheet-in{animation:up .22s ease-out}@keyframes up{from{transform:translateY(24px);opacity:.6}}}
 .data-foot{margin-top:32px;padding-top:12px;border-top:1px solid var(--line)}
 .data-foot a{color:inherit}
+/* Account: header button and sign-in sheet */
+.acct-btn{min-height:40px;padding:6px 14px}
+.acct-dot{width:26px;height:26px;border-radius:50%;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-size:.85rem;margin-left:-6px}
+.acct-sheet{max-width:520px}
+.acct-sheet h2{margin:0}
+.acct-sheet .lab{font-weight:700}
+.acct-sheet input{width:100%;padding:11px 12px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);min-height:46px}
+.acct-icon{width:20px;height:20px;display:none}
+/* Phones: the account button is an icon on the title row; its name is still read out by screen readers. */
+@media (max-width:799px){
+  .top-in{flex-wrap:nowrap}.brand{min-width:0}
+  .acct-btn{width:44px;height:44px;padding:0;justify-content:center;flex:none}
+  .acct-icon{display:block}
+  .acct-label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+  .acct-btn .acct-dot{margin:0}
+}

@@ -10,13 +10,13 @@ const {provenance, ...city} = schoolsFile.city_averages;
 export const CITY = city;
 export const PROG = schoolsFile.programs;
 export const SOURCES = schoolsFile.sources;
+export const CYCLE = schoolsFile.cycle;
 export const S = schoolsFile.schools;
 export const BY = Object.fromEntries(S.map(s=>[s.dbn,s]));
 export const OH = eventsFile.events.filter(e=>e.kind==="open").map(e=>({...e,note:e.note||""})); // open houses, in flyer order
 export const KEY = eventsFile.events.filter(e=>e.kind==="key");
 export const EVENTS = [...OH,...KEY].sort((a,b)=>(a.date+(a.start||"")).localeCompare(b.date+(b.start||"")));
 export const HOMES = neighborhoodsFile.neighborhoods;
-export const CYCLE = schoolsFile.cycle;
 export const keyDate = id=>KEY.find(e=>e.id===id).date;
 // "December 11, 2026", or "Friday, December 11, 2026" with the weekday
 export const longDate = (s,weekday)=>{const [y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d).toLocaleDateString("en-US",{weekday:weekday?"long":undefined,month:"long",day:"numeric",year:"numeric"})};

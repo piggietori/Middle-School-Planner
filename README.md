@@ -7,7 +7,7 @@ A simple planner for families applying to middle school in Brooklyn's District 2
 - **Find schools:** pick your neighborhood and what matters to you; schools are ranked with a match score and the reasons behind it
 - **My list:** put your saved schools in order before entering them in MySchools
 
-No sign-up. Choices are saved in your own browser on your device.
+Signing in is optional. Without it, choices are saved in your own browser on your device. Signed in (with an emailed link, no password), they're saved to your account and stay the same on all your devices.
 
 ## Sources
 
@@ -34,7 +34,7 @@ npm install
 npm run dev        # http://localhost:5173
 npm run lint
 npm run check:data # data checks (add -- --base origin/v1 to also catch removed IDs)
-npm test           # unit tests: match score golden cases and data checks
+npm test           # unit and database tests: match score, data checks, plan sync, row-level security
 npm run test:e2e   # browser walk-throughs of the user journeys
 npm run refresh:data # pull the latest test results into data/schools.json
 ```
@@ -42,12 +42,17 @@ npm run refresh:data # pull the latest test results into data/schools.json
 - `index.html`: page markup
 - `data/*.json`: schools, open houses and key dates, neighborhoods, steps; `data/schema/` describes each file
 - `src/data.js`: loads the data files for the views
-- `src/state.js`: the family's plan and where it is saved
+- `src/state.js`: the family's plan, kept in this browser
+- `src/plan-model.js`: the plan as database rows, what changed, and merging two plans (pure functions)
+- `src/account.js`: signing in, syncing the plan with the account, and the account sheet
+- `src/sync/backend.js`: the only code that talks to Supabase; `src/vendor/` holds the pinned Supabase library (`scripts/vendor-supabase.js`)
+- `src/config.js`: the Supabase project URL and publishable key
+- `supabase/`: the database migrations and setup steps (see [supabase/README.md](supabase/README.md))
 - `src/match.js`: the match score (pure functions)
 - `src/plan.js`: changes to the plan and progress worked out from it
 - `src/views/`: one file per screen, plus the school sheet and notes
 - `src/main.js` loads `src/app.js`, which handles clicks and form changes
-- `scripts/`: dev server, data checks, data refresh, source watch
+- `scripts/`: dev server, data checks, data refresh, source watch, live Supabase check
 
 ### Updating data
 

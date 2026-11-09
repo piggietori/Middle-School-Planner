@@ -1,6 +1,6 @@
 // Security evals for the database: run the real migrations in Postgres (PGlite) and try to reach
 // other households' data as different people. Supabase's auth schema and roles are stubbed the way
-// Supabase sets them up, including its default grants to anon and authenticated.
+// Supabase sets them up. authenticated gets only what the migrations grant (newer projects grant nothing by default).
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
@@ -18,8 +18,8 @@ const SUPABASE_STUB = `
     select nullif(coalesce(current_setting('request.jwt.claim.sub', true), (current_setting('request.jwt.claims', true)::jsonb ->> 'sub')), '')::uuid $$;
   grant usage on schema auth, public to anon, authenticated;
   grant execute on function auth.uid() to anon, authenticated;
-  alter default privileges in schema public grant all on tables to anon, authenticated;
-  alter default privileges in schema public grant all on functions to anon, authenticated;
+  alter default privileges in schema public grant all on tables to anon; -- worst case for anon; authenticated gets only what migrations grant
+  alter default privileges in schema public grant all on functions to anon;
   insert into auth.users values ('${A}', 'a@test.local'), ('${B}', 'b@test.local'), ('${C}', 'c@test.local');`;
 
 const db = new PGlite();

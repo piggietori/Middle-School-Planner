@@ -1,4 +1,4 @@
-import {BY, OH} from "../data.js";
+import {BY, OH, keyDate, longDate} from "../data.js";
 import {match, label} from "../match.js";
 import {RATING_WORDS, noteOf, hasNotes, starText} from "../plan.js";
 import {st} from "../state.js";
@@ -20,7 +20,7 @@ function msGuide(saved){
         </div></li>`).join("")}
       <li class="st-item todo"><span class="st-dot" aria-hidden="true">→</span>
         <div class="st-body"><div class="st-t" style="color:var(--ink)">Check the order, then click Next and Submit</div>
-        <div class="small muted">The numbers in MySchools should match the numbers here. If they don't, use the arrows in MySchools to move programs. Submit by December 11, 2026.</div></div></li>
+        <div class="small muted">The numbers in MySchools should match the numbers here. If they don't, use the arrows in MySchools to move programs. Submit by ${longDate(keyDate("k-close"))}.</div></div></li>
     </ol>
     <p class="small muted" style="margin:0">If the school code doesn't find it, search the school name. Many schools have more than one program, such as a zoned program and an honors program. You can add more than one from the same school.</p>
   </div>`;

@@ -1,15 +1,15 @@
 import {acct} from "../account.js";
-import {BY, OH, KEY, EVENTS, HOMES, STEPS} from "../data.js";
+import {BY, OH, EVENTS, HOMES, STEPS, keyDate, longDate} from "../data.js";
 import {isSaved, hasNotes, visitProgress, testSchools, s5Skipped, stepDone} from "../plan.js";
 import {isEmpty} from "../plan-model.js";
 import {st} from "../state.js";
 import {ui} from "../ui.js";
-import {esc, daysUntil, fmtT, when, rel, evTitle} from "../util.js";
+import {esc, daysUntil, fmtT, fmtDay, when, rel, evTitle} from "../util.js";
 import {evRow} from "./common.js";
 
 /* Home: countdown, reminders, steps, coming up. */
 export function vHome(){
-  const close=KEY.find(k=>k.id==="k-close"), n=daysUntil(close.date);
+  const close=keyDate("k-close"), offer=keyDate("k-offer"), n=daysUntil(close);
   const up=EVENTS.filter(e=>{const d=daysUntil(e.date);return d>=0&&d<=14});
   const mine=up.filter(e=>st.going.includes(e.id)||(e.dbn&&isSaved(e.dbn))||e.kind==="key");
   const show=(mine.length?mine:up).slice(0,5);
@@ -32,7 +32,7 @@ export function vHome(){
     <div class="hero">
       <div class="big">${Math.max(n,0)}</div>
       <div><h2>${n>0?"days left to apply":n===0?"Applications close today":"Applications are closed"}</h2>
-      <p>Middle school applications close <b>Friday, December 11, 2026</b>. Offers arrive April 7, 2027.</p></div>
+      <p>Middle school applications close <b>${longDate(close,true)}</b>. Offers arrive ${longDate(offer)}.</p></div>
     </div>
     ${tip?`<div class="notice" role="status"><span aria-hidden="true">👋</span><div>${tip}</div></div>`:""}
     ${alerts.length?`<div class="notice" role="status"><span aria-hidden="true">🔔</span><div class="notice-list"><h2 class="sr">Reminders</h2>${alerts.map(a=>`<div>${a}</div>`).join("")}</div></div>`:""}
@@ -63,8 +63,8 @@ function stepSub(s){
         :"Skipped: none of your saved schools need an audition or screen"}
     case "s6o":return n?"Your list has "+n+" school"+(n>1?"s":""):"Save schools first";
     case "s6":return n?n+" school"+(n>1?"s":"")+" to add, in your order":"";
-    case "s7":{const k=daysUntil("2026-12-11");return "Dec 11, 2026"+(k>=0?" · "+(k===0?"today":k+" day"+(k>1?"s":"")+" left"):" · closed")}
-    case "s8":{const k=daysUntil("2027-04-07");return "Apr 7, 2027"+(k>=0?" · in "+k+" days":"")}
+    case "s7":{const c=keyDate("k-close"),k=daysUntil(c);return fmtDay(c)+(k>=0?" · "+(k===0?"today":k+" day"+(k>1?"s":"")+" left"):" · closed")}
+    case "s8":{const o=keyDate("k-offer"),k=daysUntil(o);return fmtDay(o)+(k>=0?" · in "+k+" days":"")}
   }
   return "";
 }

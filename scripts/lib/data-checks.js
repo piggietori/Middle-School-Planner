@@ -52,6 +52,9 @@ export function checkData(data, {base = null, today = new Date().toISOString().s
     if (e.was && e.was.date === e.date && (e.was.start ?? e.start) === e.start && (e.was.end ?? e.end) === e.end) errors.push(`events.json ${e.id}: "was" is the same as the current date and time`);
   }
   for (const id of ef.retired_ids) if (ids.includes(id)) errors.push(`events.json: ${id} is retired but still listed`);
+  // The app reads the deadline and offer day from these; steps can name any key date as {k-...}.
+  for (const id of ["k-close", "k-offer"]) if (!events.some(e => e.id === id && e.kind === "key")) errors.push(`events.json: key date ${id} is missing (the countdown and steps use it)`);
+  for (const s of tf.steps) for (const [, id] of `${s.t} ${s.d}`.matchAll(/\{(k-[\w-]+)\}/g)) if (!events.some(e => e.id === id && e.kind === "key")) errors.push(`steps.json ${s.id}: {${id}} is not a key date in events.json`);
 
   // Plans store these IDs. Removing one silently breaks saved schools, visits, homes or steps.
   if (base) {

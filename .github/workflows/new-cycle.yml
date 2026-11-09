@@ -1,0 +1,18 @@
+# Every August, opens one issue with the checklist for next year's admissions cycle: the sources we
+# update by hand once a year (.github/new-cycle.md).
+name: New admissions cycle
+on:
+  schedule:
+    - cron: "0 13 15 8 *" # August 15, 9 AM New York time
+  workflow_dispatch:
+
+permissions: {contents: read, issues: write}
+
+jobs:
+  checklist:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Open the checklist
+        env: {GH_TOKEN: "${{ github.token }}"}
+        run: gh issue create --title "Get ready for the fall $(( $(date +%Y) + 1 )) admissions cycle" --body-file .github/new-cycle.md

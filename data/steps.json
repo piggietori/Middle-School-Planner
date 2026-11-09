@@ -42,9 +42,9 @@
     },
     {
       "id": "s7",
-      "t": "Submit by December 11, 2026",
+      "t": "Submit by {k-close}",
       "d": "The application closes at the end of the day."
     },
-    {"id": "s8", "t": "Get your offer on April 7, 2027", "d": "Offers appear in MySchools."}
+    {"id": "s8", "t": "Get your offer on {k-offer}", "d": "Offers appear in MySchools."}
   ]
 }

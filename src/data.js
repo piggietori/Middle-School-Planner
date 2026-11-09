@@ -16,7 +16,13 @@ export const OH = eventsFile.events.filter(e=>e.kind==="open").map(e=>({...e,not
 export const KEY = eventsFile.events.filter(e=>e.kind==="key");
 export const EVENTS = [...OH,...KEY].sort((a,b)=>(a.date+(a.start||"")).localeCompare(b.date+(b.start||"")));
 export const HOMES = neighborhoodsFile.neighborhoods;
-export const STEPS = stepsFile.steps;
+export const CYCLE = schoolsFile.cycle;
+export const keyDate = id=>KEY.find(e=>e.id===id).date;
+// "December 11, 2026", or "Friday, December 11, 2026" with the weekday
+export const longDate = (s,weekday)=>{const [y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d).toLocaleDateString("en-US",{weekday:weekday?"long":undefined,month:"long",day:"numeric",year:"numeric"})};
+// Step text can name a key date as {k-close}; it's filled in from events.json.
+export const STEPS = stepsFile.steps.map(s=>({...s,t:fillDates(s.t),d:fillDates(s.d)}));
+function fillDates(t){return t.replace(/\{(k-[\w-]+)\}/g,(_,id)=>longDate(keyDate(id)))}
 // The most recent date any record was checked against its source.
 export const DATA_AS_OF = [...S.flatMap(s=>Object.values(s.provenance)),...eventsFile.events,...Object.values(schoolsFile.city_averages.provenance)]
   .map(p=>p.as_of).sort().at(-1);

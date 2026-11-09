@@ -57,6 +57,15 @@ test("an event that ends before it starts, or falls outside the cycle, is an err
   has(e, /outside the 2027 admissions cycle/);
 });
 
+test("the deadline and offer day must be key dates, and steps can only name key dates that exist", () => {
+  const d = copy();
+  d.events.events = d.events.events.filter(e => e.id !== "k-offer");
+  d.steps.steps[0].t = "Apply by {k-nope}";
+  const e = errorsOf(d);
+  has(e, /key date k-offer is missing/);
+  has(e, /steps\.json s1: \{k-nope\} is not a key date/);
+});
+
 test("removing an ID that plans may reference is an error, unless the event is retired", () => {
   const d = copy();
   const [gone] = d.events.events.splice(0, 1);

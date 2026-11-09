@@ -4,8 +4,7 @@ See README → Updating data.
 
 **Admissions year**
 - [ ] Set `cycle` to the new fall entry year in `data/schools.json`, `data/events.json` and `data/steps.json`. Families get a fresh plan for the new cycle; last year's stays in their account.
-- [ ] Key dates from [schools.nyc.gov/MS](https://www.schools.nyc.gov/MS): applications open, D20 events, deadline, offers (`k-*` in `data/events.json`).
-- [ ] Dates still written into the code: `src/views/home.js` (countdown text, steps 7 and 8) and `src/views/list.js` (deadline).
+- [ ] Key dates from [schools.nyc.gov/MS](https://www.schools.nyc.gov/MS): applications open, D20 events, deadline, offers (`k-*` in `data/events.json`). The countdown, steps, My list and the calendar's months all read them from there; step text names them as `{k-close}`.
 
 **Open houses** (D20 flyer, usually out in September or October)
 - [ ] Add the new flyer to `sources` in `data/schools.json` under a new key (for example `d20-flyer-2027`) and point its `watch` at the D20 pages. Keep the old key: past events refer to it.

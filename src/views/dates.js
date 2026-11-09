@@ -30,7 +30,8 @@ export function vDates(){
   </section>`;
 }
 const MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
-export const CAL_RANGE=[[2026,9],[2026,10],[2026,11],[2027,0],[2027,1],[2027,2],[2027,3]]; // Oct 2026 – Apr 2027
+// Every month from the first date in events.json to the last ([year, month 0-11])
+export const CAL_RANGE=(([a,b])=>{const r=[];for(let d=new Date(pd(a).getFullYear(),pd(a).getMonth(),1);d<=pd(b);d.setMonth(d.getMonth()+1))r.push([d.getFullYear(),d.getMonth()]);return r})([EVENTS[0].date,EVENTS.at(-1).date]);
 const iso=(y,m,d)=>y+"-"+String(m+1).padStart(2,"0")+"-"+String(d).padStart(2,"0");
 function vCal(list){
   if(ui.calMonth==null){const t=today();ui.calMonth=Math.max(0,CAL_RANGE.findIndex(([y,m])=>y===t.getFullYear()&&m===t.getMonth()))}

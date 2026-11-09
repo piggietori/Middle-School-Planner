@@ -1,7 +1,9 @@
 // Journey J1 (docs/journeys.md): a first visit, signed out, on one device.
 import {test, expect} from "@playwright/test";
+import {useFixtureData} from "./fixture-data.js";
 
 test.beforeEach(async ({page}) => {
+  await useFixtureData(page);
   await page.clock.setFixedTime(new Date("2026-11-09T10:00:00"));
   page.on("pageerror", e => { throw e; });
 });

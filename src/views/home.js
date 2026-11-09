@@ -48,7 +48,7 @@ const TAB_ACTION={find:"Go to Find schools",dates:"See open house dates",list:"G
 function stepSub(s){
   const vp=visitProgress(), n=st.saved.length;
   switch(s.id){
-    case "s1":{const h=HOMES.find(x=>x[0]===st.home);return h?"Home: "+h[1].split(" (")[0]:"Not started"}
+    case "s1":{const h=HOMES.find(x=>x.id===st.home);return h?"Home: "+h.label.split(" (")[0]:"Not started"}
     case "s2":return n?n+" school"+(n>1?"s":"")+" saved":"No schools saved yet";
     case "s3":{const next=OH.find(e=>st.going.includes(e.id)&&!st.attended.includes(e.id)&&daysUntil(e.date)>=0);
       return (vp.planned?vp.went+" of "+vp.planned+" planned visits done":"No visits planned yet")+(next?" · Next: "+BY[next.dbn].short+", "+when(next).split(" · ")[0].replace(/^(\w{3})\w*/,"$1"):"")}

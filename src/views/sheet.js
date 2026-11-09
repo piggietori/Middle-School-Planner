@@ -3,11 +3,17 @@ import {homePt, match} from "../match.js";
 import {isSaved} from "../plan.js";
 import {st} from "../state.js";
 import {ui} from "../ui.js";
-import {$, esc, bullets} from "../util.js";
-import {meter, evRow} from "./common.js";
+import {$, esc, bullets, fmtDay} from "../util.js";
+import {meter, evRow, sourceName} from "./common.js";
 import {notesCard, commitDrafts} from "./notes.js";
 
 /* School detail sheet. */
+// Where each part of the profile came from; one line when every part shares a source.
+function sources(s){
+  const one=p=>`${esc(sourceName(p.source))}${p.period?" ("+esc(p.period)+" school year)":""}, updated ${fmtDay(p.as_of)}.`;
+  const parts=[["Test results",s.provenance.scores],["Survey",s.provenance.survey],["School details",s.provenance.profile]];
+  return new Set(parts.map(([,p])=>one(p))).size===1?"Source: "+one(parts[0][1]):parts.map(([k,p])=>k+": "+one(p)).join(" ");
+}
 function stat(label,v,city,bad){
   if(v==null)return `<div class="stat"><div class="stat-row"><span>${label}</span><span class="muted">No data</span></div><div class="bar"></div></div>`;
   return `<div class="stat"><div class="stat-row"><span>${label}</span><b>${v}%</b></div>
@@ -48,6 +54,6 @@ export function renderSheet(){
       </div>
       <div class="card"><h3>Open houses</h3>${ev.map(e=>evRow(e)).join("")}</div>
       <div class="row"><a class="btn" href="${s.web}" target="_blank" rel="noopener">School website</a><a class="btn" href="https://insideschools.org/school/${s.dbn}" target="_blank" rel="noopener">Full review on InsideSchools</a>${s.flyer?`<a class="btn" href="${s.flyer}" target="_blank" rel="noopener">Open house flyer</a>`:""}</div>
-      <p class="muted small" style="margin:0">Source: InsideSchools school profile (NYC School Survey and state test results). Check with the school for the latest.</p>
+      <p class="muted small" style="margin:0">${sources(s)} Check with the school for the latest.</p>
     </div></div></div>`;
 }

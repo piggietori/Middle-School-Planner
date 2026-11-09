@@ -32,7 +32,7 @@ export function vFind(){
     <div class="grid2">
       <div class="card" style="align-self:start">
         <div class="q"><label for="home">Where do you live?</label>
-          <select id="home"><option value="">Choose your neighborhood</option>${HOMES.map(h=>`<option value="${h[0]}"${st.home===h[0]?" selected":""}>${h[1]}</option>`).join("")}</select>
+          <select id="home"><option value="">Choose your neighborhood</option>${HOMES.map(h=>`<option value="${h.id}"${st.home===h.id?" selected":""}>${h.label}</option>`).join("")}</select>
           <span class="muted small">Pick the closest one. Distances are straight-line estimates.</span></div>
         <div class="q"><label for="maxm">How far can your child travel?</label>
           <select id="maxm">${[[.75,"Up to ¾ mile (walking)"],[1,"Up to 1 mile"],[1.5,"Up to 1½ miles"],[2,"Up to 2 miles"],[3,"Up to 3 miles (bus or train)"]].map(([v,l])=>`<option value="${v}"${st.maxMiles==v?" selected":""}>${l}</option>`).join("")}</select></div>

@@ -1,0 +1,39 @@
+# Pulls the latest test results from NYC Open Data and opens a pull request for a person to review.
+# Nothing reaches the live site until that pull request is merged.
+# One-time setup: Settings → Actions → General → "Allow GitHub Actions to create and approve pull requests".
+name: Refresh data
+on:
+  schedule:
+    - cron: "0 11 * * 1" # Mondays, 7 AM New York time
+  workflow_dispatch:
+
+permissions: {contents: write, pull-requests: write}
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-node@v4
+        with: {node-version: 24, cache: npm}
+      - run: npm ci
+      - name: Pull from NYC Open Data
+        run: node scripts/refresh-data.js --summary "$RUNNER_TEMP/summary.md"
+      - name: Data checks
+        run: |
+          set +e
+          out=$(GITHUB_ACTIONS= node scripts/validate-data.js --base HEAD); status=$?
+          printf '\n### Data checks\nWarnings are things to fix in this pull request before merging.\n```\n%s\n```\n' "$out" >> "$RUNNER_TEMP/summary.md"
+          cat "$RUNNER_TEMP/summary.md" >> "$GITHUB_STEP_SUMMARY"
+          exit $status
+      # Pull requests opened with the built-in token don't start other workflows, so run the checks here.
+      - run: npm test
+      - uses: peter-evans/create-pull-request@v7
+        with:
+          branch: data/refresh-test-results
+          commit-message: "Refresh test results from NYC School Quality Reports"
+          title: "Data refresh: test results from NYC Open Data"
+          body-path: ${{ runner.temp }}/summary.md
+          add-paths: data/schools.json
+          delete-branch: true

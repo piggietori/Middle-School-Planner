@@ -1,9 +1,12 @@
-// Golden cases for the match score. These lock in the MVP ranking: if a change moves a score,
-// the test fails and the new numbers have to be reviewed and copied in on purpose.
+// Golden cases for the match score. These lock in the MVP ranking: if a code change moves a score,
+// the test fails and the new numbers have to be reviewed and copied in on purpose. They run against a
+// frozen copy of the school data, so a data refresh never fails them.
 import test from "node:test";
 import assert from "node:assert/strict";
 import {match, ranked, label} from "../../src/match.js";
-import {BY} from "../../src/data.js";
+import fixture from "./fixtures/data-2026-10-16/schools.json" with {type: "json"};
+
+const SCHOOLS = fixture.schools, BY = Object.fromEntries(SCHOOLS.map(s => [s.dbn, s]));
 
 const base = {home:"",maxMiles:1.5,needSubway:false,skipCompetitive:false,w:{distance:2,scores:1,safety:2,bullying:1,teachers:1},programs:[]};
 
@@ -19,7 +22,7 @@ const golden = [
 ];
 
 for (const [name, plan, want] of golden)
-  test(`ranking: ${name}`, () => assert.deepEqual(ranked(plan).map(m => [m.s.dbn, m.score]), want));
+  test(`ranking: ${name}`, () => assert.deepEqual(ranked(plan, SCHOOLS).map(m => [m.s.dbn, m.score]), want));
 
 test("schools with no test results count as below average and say so", () => {
   const m = match(BY["20K407"], base);

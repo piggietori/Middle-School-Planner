@@ -1,3 +1,4 @@
+import {initAccount} from "./account.js";
 import {STEPS} from "./data.js";
 import {toggleSave, toggleGoing, toggleWent, setNote, stepDone} from "./plan.js";
 import {render, go} from "./render.js";
@@ -54,3 +55,4 @@ document.addEventListener("keydown",e=>{
   if(e.key==="Escape"&&ui.openDbn)closeSheet();
 });
 render();
+initAccount();

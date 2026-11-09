@@ -8,10 +8,11 @@
     "lint": "eslint .",
     "check:data": "node scripts/validate-data.js",
     "refresh:data": "node scripts/refresh-data.js",
-    "test": "node --test \"tests/unit/*.test.js\"",
+    "test": "node --test \"tests/unit/*.test.js\" \"tests/db/*.test.js\"",
     "test:e2e": "playwright test"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "0.5.10",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.65.0",
     "ajv": "^8.20.0",

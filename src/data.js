@@ -10,6 +10,7 @@ const {provenance, ...city} = schoolsFile.city_averages;
 export const CITY = city;
 export const PROG = schoolsFile.programs;
 export const SOURCES = schoolsFile.sources;
+export const CYCLE = schoolsFile.cycle;
 export const S = schoolsFile.schools;
 export const BY = Object.fromEntries(S.map(s=>[s.dbn,s]));
 export const OH = eventsFile.events.filter(e=>e.kind==="open").map(e=>({...e,note:e.note||""})); // open houses, in flyer order

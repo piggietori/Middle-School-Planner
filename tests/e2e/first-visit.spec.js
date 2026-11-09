@@ -21,6 +21,9 @@ test("first visit: pick a neighborhood, save a school, plan a visit, and keep it
   const name = await first.locator("h3").textContent();
   await first.getByRole("button", {name: "☆ Save"}).click();
   await expect(page.locator("#toast")).toHaveText("Saved to My list");
+  await page.locator('.tab[data-tab="home"]').click();
+  await expect(page.getByText("Start here:")).toHaveCount(0); // only on the very first visit
+  await expect(page.getByText("Keep your plan safe:")).toBeVisible();
 
   await page.locator('.tab[data-tab="dates"]').click();
   await page.click('[data-dv="list"]');
@@ -43,4 +46,20 @@ test("school sheet: rate and add a note", async ({page}) => {
   await page.press("#pros-input", "Enter");
   await page.click("#sheet button[data-close]");
   await expect(page.locator("#app .ournote").first()).toContainText("Really like it · 1 like");
+});
+
+test("reminders are grouped in one box, and there's no missed-open-house notice", async ({page}) => {
+  const plan = {home: "dyker", saved: ["20K187", "20K201", "20K223"],
+    going: ["oh-20K187-2026-11-10-1730", "oh-20K201-2026-11-09-1700", "oh-20K223-2026-11-04-1730"], attended: []};
+  await page.addInitScript(p => { if (!localStorage.getItem("d20plan")) localStorage.setItem("d20plan", p); }, JSON.stringify(plan));
+  await page.goto("/");
+  const box = page.locator(".notice", {has: page.locator(".notice-list")});
+  await expect(box).toHaveCount(1);
+  await expect(box.locator(".notice-list > div")).toHaveCount(3);
+  await expect(box).toContainText("tomorrow");
+  await expect(box).toContainText("today");
+  await expect(box).toContainText("Did you go?");
+  await expect(page.locator("#app .notice")).toHaveCount(2); // reminders + Keep your plan safe
+  await expect(page.getByText("Start here:")).toHaveCount(0);
+  await expect(page.getByText("Missed an open house")).toHaveCount(0);
 });

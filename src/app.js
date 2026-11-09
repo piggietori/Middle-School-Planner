@@ -7,6 +7,7 @@ import {ui} from "./ui.js";
 import {CAL_RANGE} from "./views/dates.js";
 import {msText, copyText} from "./views/list.js";
 import {renderNotes, addNote, commitDrafts, openNotes, closeSheet} from "./views/notes.js";
+import {restoreSession} from "./session.js";
 import {renderSheet} from "./views/sheet.js";
 
 /* ---------------- EVENTS ---------------- */
@@ -54,5 +55,6 @@ document.addEventListener("keydown",e=>{
   if(ni&&e.key==="Enter"){e.preventDefault();const [s,k]=ni.split(":");return addNote(s,k)}
   if(e.key==="Escape"&&ui.openDbn)closeSheet();
 });
+restoreSession();
 render();
 initAccount();

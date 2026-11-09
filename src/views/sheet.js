@@ -6,6 +6,7 @@ import {ui} from "../ui.js";
 import {$, esc, bullets, fmtDay} from "../util.js";
 import {meter, evRow, sourceName} from "./common.js";
 import {notesCard, commitDrafts} from "./notes.js";
+import {noteSession} from "../session.js";
 
 /* School detail sheet. */
 // Where each part of the profile came from; one line when every part shares a source.
@@ -25,6 +26,7 @@ function gmaps(s){const h=homePt(st),dest=encodeURIComponent(s.addr+", Brooklyn,
 export function renderSheet(){
   const box=$("#sheet");
   commitDrafts(); // the sheet is about to be rebuilt; keep anything typed in the notes boxes
+  noteSession();
   if(!ui.openDbn){box.innerHTML="";return}
   const s=BY[ui.openDbn],m=match(s,st),ev=OH.filter(e=>e.dbn===s.dbn);
   box.innerHTML=`<div class="sheet" data-close="1"><div class="sheet-in" role="dialog" aria-modal="true" aria-label="${esc(s.name)}">

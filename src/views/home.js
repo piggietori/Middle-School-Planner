@@ -7,7 +7,7 @@ import {ui} from "../ui.js";
 import {esc, daysUntil, fmtT, fmtDay, when, rel, evTitle} from "../util.js";
 import {evRow} from "./common.js";
 
-/* Home: countdown, reminders, steps, coming up. */
+/* Home: countdown, Next up, steps, coming up. */
 export function vHome(){
   const close=keyDate("k-close"), offer=keyDate("k-offer"), n=daysUntil(close);
   const up=EVENTS.filter(e=>{const d=daysUntil(e.date);return d>=0&&d<=14});
@@ -18,9 +18,9 @@ export function vHome(){
   // One setup tip at most: Start here on the very first visit, then Keep your plan safe once something is saved
   const tip=isEmpty(st)?`<b>Start here:</b> pick your neighborhood on <button class="linkbtn" data-tab-go="find">Find schools</button> so we can show distances.`
     :acct.status==="out"&&st.saved.length?`<b>Keep your plan safe:</b> it's only on this device right now. <button class="linkbtn" data-acct="open">Sign in</button> to save it to your account and use it on your other devices.`:"";
-  // Reminders, grouped in one box
-  const alerts=[];
-  if(n>=0&&n<=21)alerts.push(`<b>Deadline soon:</b> only ${n} days left to submit your application in MySchools.`);
+  // Next up (journey J3): what to do now, most urgent first. With nothing urgent, the next step.
+  const alerts=[], deadline=`<b>Deadline ${n===0?"today":"soon"}:</b> ${n===0?"submit your application in MySchools today.":`only ${n} day${n>1?"s":""} left to submit your application in MySchools.`}`;
+  if(n>=0&&n<=7)alerts.push(deadline);
   const goingSoon=EVENTS.filter(e=>st.going.includes(e.id)&&daysUntil(e.date)>=0&&daysUntil(e.date)<=2);
   goingSoon.forEach(e=>alerts.push(`<b>Coming up:</b> ${esc(evTitle(e))} is ${rel(daysUntil(e.date)).toLowerCase()} at ${fmtT(e.start)}.`));
   ask.slice(0,3).forEach(e=>alerts.push(`<b>Did you go?</b> ${esc(evTitle(e))} was on ${when(e).split(" · ")[0]}. <button class="linkbtn" data-went="${e.id}">Yes, I went</button> &nbsp; <button class="linkbtn" data-going="${e.id}">No, I missed it</button>`));
@@ -28,6 +28,8 @@ export function vHome(){
   // Nudge: visited in the last two weeks but no notes yet
   const fresh=[...new Set(OH.filter(e=>st.attended.includes(e.id)&&daysUntil(e.date)<=0&&daysUntil(e.date)>=-14&&!hasNotes(e.dbn)).map(e=>e.dbn))];
   fresh.slice(0,3).forEach(d=>alerts.push(`<b>How was ${esc(BY[d].short)}?</b> Write down what you liked and what could be better while it's fresh. <button class="linkbtn" data-notes="${d}">Add our notes</button>`));
+  if(n>7&&n<=21)alerts.push(deadline);
+  if(!alerts.length&&!isEmpty(st))alerts.push(nextStep(n,offer)); // a first visit has the Start here tip instead
   return `<section class="view">
     <div class="hero">
       <div class="big">${Math.max(n,0)}</div>
@@ -35,7 +37,7 @@ export function vHome(){
       <p>Middle school applications close <b>${longDate(close,true)}</b>. Offers arrive ${longDate(offer)}.</p></div>
     </div>
     ${tip?`<div class="notice" role="status"><span aria-hidden="true">👋</span><div>${tip}</div></div>`:""}
-    ${alerts.length?`<div class="notice" role="status"><span aria-hidden="true">🔔</span><div class="notice-list"><h2 class="sr">Reminders</h2>${alerts.map(a=>`<div>${a}</div>`).join("")}</div></div>`:""}
+    ${alerts.length?`<div class="notice" role="status"><span aria-hidden="true">🔔</span><div class="notice-list"><h2>Next up</h2>${alerts.map(a=>`<div>${a}</div>`).join("")}</div></div>`:""}
     <div class="grid2">
       <div class="card stack">
         <div class="row"><h2 style="margin-right:auto">Your steps</h2><span class="pill good">${doneN} of ${STEPS.length} done</span></div>
@@ -48,6 +50,14 @@ export function vHome(){
       </div>
     </div>
   </section>`;
+}
+function nextStep(n,offer){
+  if(n<0)return daysUntil(offer)>0?`<b>Applications are closed.</b> Offers arrive ${longDate(offer)}. Your list stays as you submitted it.`
+    :`<b>Offers are out.</b> See your child's offer in MySchools. <a class="linkbtn" href="https://www.myschools.nyc/" target="_blank" rel="noopener">Open MySchools</a>`;
+  const s=STEPS.find(x=>!stepDone(x));
+  if(!s)return `<b>All steps done.</b> Offers arrive ${longDate(offer)}.`;
+  const go=s.tab?`<button class="linkbtn" data-tab-go="${s.tab}">${TAB_ACTION[s.tab]}</button>`:s.link?`<a class="linkbtn" href="${s.link}" target="_blank" rel="noopener">Open MySchools</a>`:"";
+  return `<b>Next step:</b> ${esc(s.t)}. ${go}`;
 }
 const TAB_ACTION={find:"Go to Find schools",dates:"See open house dates",list:"Go to My list"};
 function stepSub(s){

@@ -26,6 +26,10 @@ export async function createBackend() {
       ]);
       return {plan: check(plan), ...Object.fromEntries(TABLES.map((t, i) => [t, check(rest[i])]))};
     },
+    async loadSession() {
+      return check(await sb.from("user_session").select("last_tab, last_dbn, last_view, updated_at").maybeSingle());
+    },
+    async saveSession(row) { check(await sb.from("user_session").upsert(row, {onConflict: "user_id"})); },
     async save(planId, d) {
       if (d.plan) check(await sb.from("plans").update(d.plan).eq("id", planId));
       for (const [t, rows] of Object.entries(d.upsert))

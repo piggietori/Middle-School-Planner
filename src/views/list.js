@@ -30,6 +30,7 @@ export function copyText(t,msg){
   try{navigator.clipboard.writeText(t).then(()=>toast(msg),fail)}catch(e){fail()}
 }
 export function vList(){
+  const closed=daysUntil(keyDate("k-close"))<0; // after the deadline the list is what was submitted (journey J6)
   const saved=st.saved.map(d=>BY[d]).filter(Boolean);
   const views=`<div class="seg" role="group" aria-label="View" style="max-width:340px;grid-template-columns:1fr 1fr">
       ${[["order","My order"],["compare","Compare notes"]].map(([k,l])=>`<button aria-pressed="${ui.listView===k}" data-lv="${k}">${l}</button>`).join("")}</div>`;
@@ -37,11 +38,11 @@ export function vList(){
     <div><h2>Compare our notes</h2><p class="muted" style="margin:.3rem 0 0">Your own ratings and notes for each school, side by side. Highest rated first.</p></div>
     ${views}${vCompare()}</section>`;
   return `<section class="view">
-    <div><h2>My list</h2><p class="muted" style="margin:.3rem 0 0">Put your favorite first. This is the order to enter in MySchools. Use the arrows to move schools up or down.</p></div>
+    <div><h2>My list</h2><p class="muted" style="margin:.3rem 0 0">${closed?`Applications closed on ${longDate(keyDate("k-close"))}. This is your list as you submitted it.`:"Put your favorite first. This is the order to enter in MySchools. Use the arrows to move schools up or down."}</p></div>
     ${views}
     ${saved.length?`<div class="stack">${saved.map((s,i)=>{const m=match(s,st),ev=OH.filter(e=>e.dbn===s.dbn&&daysUntil(e.date)>=0);
       return `<article class="sc"><div class="sc-head">
-        <div class="order"><button data-mv="${i}:-1" ${i===0?"disabled":""} aria-label="Move up">▲</button><button data-mv="${i}:1" ${i===saved.length-1?"disabled":""} aria-label="Move down">▼</button></div>
+        ${closed?"":`<div class="order"><button data-mv="${i}:-1" ${i===0?"disabled":""} aria-label="Move up">▲</button><button data-mv="${i}:1" ${i===saved.length-1?"disabled":""} aria-label="Move down">▼</button></div>`}
         <div><div class="rank">Choice ${i+1} · ${esc(s.dbn)}</div><h3 style="margin-top:2px">${esc(s.name)}</h3>
         <div class="meta"><span>${label(m.score)[0]} (${m.score} out of 100)</span>${m.dist!=null?`<span>${m.dist.toFixed(1)} mi</span>`:""}<span>${s.admit.includes("audition")?"Audition":s.admit.length===1&&s.admit[0]==="screened"?"Screened only":s.admit.includes("open")&&s.admit.length===1?"Open to all":"Zoned + other programs"}</span></div></div></div>
         ${noteSummary(s.dbn)}

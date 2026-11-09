@@ -12,8 +12,11 @@ No sign-up. Choices are saved in your own browser on your device.
 ## Sources
 
 - Open house dates and flyers: *District 20 Middle School Open House Dates 2026* (included in this repository)
-- School facts, test results and survey data: [InsideSchools](https://insideschools.org) school profiles
+- Test results: [NYC School Quality Reports](https://data.cityofnewyork.us/d/dnpx-dfnc) on NYC Open Data, refreshed automatically
+- School facts and survey data: [InsideSchools](https://insideschools.org) school profiles
 - Admissions timeline: [schools.nyc.gov/MS](https://www.schools.nyc.gov/MS)
+
+Every record in `data/` says where it came from and when (`source`, `as_of`), and the app shows when the data was last updated.
 
 This is an independent tool, not an official NYC Public Schools site. Confirm dates and details with each school.
 
@@ -30,16 +33,26 @@ Plain HTML, CSS and JavaScript modules. There is no build step: the files in the
 npm install
 npm run dev        # http://localhost:5173
 npm run lint
-npm test           # unit tests (match score golden cases)
+npm run check:data # data checks (add -- --base origin/v1 to also catch removed IDs)
+npm test           # unit tests: match score golden cases and data checks
 npm run test:e2e   # browser walk-throughs of the user journeys
+npm run refresh:data # pull the latest test results into data/schools.json
 ```
 
 - `index.html`: page markup
-- `src/data.js`: schools, open houses, key dates, neighborhoods, steps
+- `data/*.json`: schools, open houses and key dates, neighborhoods, steps; `data/schema/` describes each file
+- `src/data.js`: loads the data files for the views
 - `src/state.js`: the family's plan and where it is saved
 - `src/match.js`: the match score (pure functions)
 - `src/plan.js`: changes to the plan and progress worked out from it
 - `src/views/`: one file per screen, plus the school sheet and notes
-- `src/main.js`: clicks and form changes
+- `src/main.js` loads `src/app.js`, which handles clicks and form changes
+- `scripts/`: dev server, data checks, data refresh
 
-CI runs lint and both test suites on every pull request. Pushes to `main` deploy to GitHub Pages (Settings → Pages → Source must be "GitHub Actions").
+### Updating data
+
+- **Test results** update themselves: every Monday the *Refresh data* workflow pulls NYC Open Data and opens a pull request with a table of what changed. Fix any warnings it lists (usually highlight text that quotes an old number), then merge.
+- **Everything else** is edited by hand in `data/*.json`. Update `as_of` on what you checked.
+- **Never delete or rename an ID** (school DBN, event `id`, neighborhood `id`, step `id`): saved plans point at them. If an open house moves, change its date or time, keep its `id`, and add `"was": {"date": ..., "start": ...}` so families see it moved. If one is cancelled, remove it and add its ID to `retired_ids`.
+
+CI runs lint, the data checks and both test suites on every pull request. Pushes to `main` deploy to GitHub Pages (Settings → Pages → Source must be "GitHub Actions"). The refresh workflow needs Settings → Actions → General → "Allow GitHub Actions to create and approve pull requests".

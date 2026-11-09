@@ -1,8 +1,8 @@
-import {BY} from "../data.js";
+import {BY, SOURCES, DATA_AS_OF, S, EVENTS} from "../data.js";
 import {label} from "../match.js";
 import {isSaved, RATING_WORDS, noteOf, hasNotes, starText} from "../plan.js";
 import {st} from "../state.js";
-import {esc, pd, daysUntil, MON, when, rel, gcal} from "../util.js";
+import {esc, pd, daysUntil, MON, when, rel, gcal, fmtDay} from "../util.js";
 
 /* Pieces shared by several views. */
 export function meter(n){const [lab,cls]=label(n);
@@ -17,9 +17,10 @@ export function evRow(e,opts={}){
   return `<div class="ev${past&&!opts.keep?" past":""}">
     <div class="cal${e.kind==="key"?" key":""}"><b>${MON[d.getMonth()]}</b><span>${d.getDate()}</span></div>
     <div class="ev-body">
-      <div class="row" style="gap:8px">${tag}${e.kind==="key"?`<span class="pill key">Key date</span>`:""}${e.note?`<span class="pill warn">${esc(e.note)}</span>`:""}${sc&&isSaved(sc.dbn)?`<span class="pill good">On my list</span>`:""}</div>
+      <div class="row" style="gap:8px">${tag}${e.kind==="key"?`<span class="pill key">Key date</span>`:""}${e.note?`<span class="pill warn">${esc(e.note)}</span>`:""}${e.was?`<span class="pill warn">Changed</span>`:""}${sc&&isSaved(sc.dbn)?`<span class="pill good">On my list</span>`:""}</div>
       <div class="ev-title">${sc?`<button class="linkbtn" style="padding:0;text-align:left;font-size:1rem" data-open="${sc.dbn}">${esc(sc.name)}</button>`:esc(e.title)}</div>
-      <div class="muted small">${when(e)}${sc?" · "+esc(sc.addr):""}${e.text?" · "+esc(e.text):""}</div>
+      <div class="muted small">${when(e)}${sc?" · "+esc(sc.addr):""}${e.text?" · "+esc(e.text):""}</div>${e.was?`
+      <div class="small" style="color:var(--warn)">Moved. It was ${when({...e.was,start:e.was.start??e.start,end:e.was.end??e.end})}.</div>`:""}
       ${wentBtn}
       ${past||opts.compact?"":`<div class="row" style="gap:8px">
         ${e.kind==="open"||e.start?`<button class="btn${going?" on":""}" data-going="${e.id}">${going?"✓ I'm going":"I'm going"}</button>`:""}
@@ -36,3 +37,10 @@ export function noteSummary(d){if(!hasNotes(d))return "";const n=noteOf(d),bits=
   if(n.pros.length)bits.push(n.pros.length+" like"+(n.pros.length>1?"s":""));
   if(n.cons.length)bits.push(n.cons.length+" to improve");
   return `<div class="ournote small"><b>Our notes:</b> ${bits.join(" · ")}</div>`}
+// Short names for where data came from, for "updated on" lines.
+export const sourceName=id=>(SOURCES[id]?.name||id).split(" (")[0];
+// Footer on every tab: how fresh the data is and where it comes from.
+export function dataFooter(){
+  const used=[...new Set([...S.flatMap(s=>Object.values(s.provenance).map(p=>p.source)),...EVENTS.map(e=>e.source)])];
+  return `<footer class="muted small data-foot">Data last updated ${fmtDay(DATA_AS_OF)}. Sources: ${used.map(id=>`<a href="${SOURCES[id].url}" target="_blank" rel="noopener">${esc(sourceName(id))}</a>`).join(", ")}. This is an independent tool, not an official NYC Public Schools site.</footer>`;
+}

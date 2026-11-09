@@ -2,7 +2,7 @@ import {PROG, S, HOMES} from "./data.js";
 import {miles} from "./util.js";
 
 /* Match score: pure functions of a school and the family's plan. */
-export const homePt=plan=>{const h=HOMES.find(x=>x[0]===plan.home);return h?{lat:h[2],lng:h[3],label:h[1]}:null};
+export const homePt=plan=>{const h=HOMES.find(x=>x.id===plan.home);return h?{lat:h.lat,lng:h.lng,label:h.label}:null};
 const lin=(v,lo,hi)=>Math.max(0,Math.min(100,(v-lo)/(hi-lo)*100));
 export function match(s,plan){
   const h=homePt(plan), c={}, why=[], warn=[];
@@ -29,5 +29,5 @@ export function match(s,plan){
   if(!avg.length)warn.push("Too new for full test results");
   return {s,score:Math.round(score),dist,why:why.slice(0,3),warn};
 }
-export function ranked(plan){return S.filter(s=>!(plan.skipCompetitive&&!s.admit.some(a=>a==="zoned"||a==="open"||a==="language"))).map(s=>match(s,plan)).sort((a,b)=>b.score-a.score)}
+export function ranked(plan,schools=S){return schools.filter(s=>!(plan.skipCompetitive&&!s.admit.some(a=>a==="zoned"||a==="open"||a==="language"))).map(s=>match(s,plan)).sort((a,b)=>b.score-a.score)}
 export const label=n=>n>=78?["Great match","good"]:n>=62?["Good match","good"]:n>=48?["Possible","warn"]:["Weak match","bad"];

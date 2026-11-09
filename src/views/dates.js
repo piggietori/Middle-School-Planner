@@ -2,7 +2,7 @@ import {BY, EVENTS} from "../data.js";
 import {isSaved} from "../plan.js";
 import {st} from "../state.js";
 import {ui} from "../ui.js";
-import {esc, today, pd, daysUntil, MON, DOW} from "../util.js";
+import {esc, today, pd, daysUntil, MON, DOW, fmtDay} from "../util.js";
 import {evRow} from "./common.js";
 
 /* Dates: open houses and key dates, as a calendar or a list. */
@@ -26,7 +26,7 @@ export function vDates(){
     ${ui.dateView==="cal"?vCal(list):`<div class="card">${upcoming.length?html:`<div class="empty">${ui.dateFilter==="going"?"You haven't marked any open houses yet. Tap “I'm going” on a date.":"Save schools on Find schools to see their dates here."}</div>`}
       ${past.length?`<details style="margin-top:10px"><summary>Show ${past.length} past date${past.length>1?"s":""}</summary>${past.map(e=>evRow(e)).join("")}</details>`:""}
     </div>`}
-    <p class="muted small">Dates from the District 20 Middle School Open House flyer. Schools sometimes change times, so check the flyer before you go.</p>
+    <p class="muted small">Dates from the District 20 Middle School Open House flyer. Schools sometimes change times, so check the flyer before you go. Last updated ${fmtDay(EVENTS.map(e=>e.as_of).sort().at(-1))}.</p>
   </section>`;
 }
 const MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];

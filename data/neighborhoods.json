@@ -1,0 +1,36 @@
+{
+  "$schema": "./schema/neighborhoods.schema.json",
+  "schema_version": 1,
+  "neighborhoods": [
+    {"id": "sunset", "label": "Sunset Park (around 50th St & 6th Ave)", "lat": 40.6435, "lng": -74.009},
+    {
+      "id": "ridge-n",
+      "label": "Bay Ridge, north (around 70th St & 4th Ave)",
+      "lat": 40.6345,
+      "lng": -74.0235
+    },
+    {
+      "id": "ridge-s",
+      "label": "Bay Ridge, south (around 86th St & 4th Ave)",
+      "lat": 40.6225,
+      "lng": -74.0285
+    },
+    {"id": "fort", "label": "Fort Hamilton (around 95th St & 4th Ave)", "lat": 40.616, "lng": -74.0305},
+    {"id": "dyker", "label": "Dyker Heights (around 80th St & 13th Ave)", "lat": 40.617, "lng": -74.011},
+    {"id": "bens", "label": "Bensonhurst (around 18th Ave & 70th St)", "lat": 40.6175, "lng": -73.997},
+    {"id": "boro", "label": "Borough Park (around 13th Ave & 48th St)", "lat": 40.6355, "lng": -73.9925},
+    {"id": "maple", "label": "Mapleton (around 20th Ave & 60th St)", "lat": 40.623, "lng": -73.985},
+    {
+      "id": "kens",
+      "label": "Kensington (around Church Ave & McDonald Ave)",
+      "lat": 40.644,
+      "lng": -73.979
+    },
+    {
+      "id": "gravesend",
+      "label": "Gravesend (around McDonald Ave & Avenue P)",
+      "lat": 40.61,
+      "lng": -73.9765
+    }
+  ]
+}

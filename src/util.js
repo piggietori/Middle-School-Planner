@@ -10,6 +10,7 @@ export const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","N
 export const DOW=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 export const fmtT=t=>{if(!t)return"";let [h,m]=t.split(":").map(Number);const ap=h>=12?"PM":"AM";h=h%12||12;return h+(m?":"+String(m).padStart(2,"0"):"")+" "+ap};
 export const when=e=>{const d=pd(e.date);return DOW[d.getDay()]+", "+MON[d.getMonth()]+" "+d.getDate()+(e.start?" · "+fmtT(e.start)+(e.end?" – "+fmtT(e.end):""):"")};
+export const fmtDay=s=>{const d=pd(s);return MON[d.getMonth()]+" "+d.getDate()+", "+d.getFullYear()};
 export const rel=n=>n<0?"Passed":n===0?"Today":n===1?"Tomorrow":"In "+n+" days";
 export function miles(a,b){const R=3958.8,t=x=>x*Math.PI/180;const dl=t(b.lat-a.lat),dg=t(b.lng-a.lng);
   const h=Math.sin(dl/2)**2+Math.cos(t(a.lat))*Math.cos(t(b.lat))*Math.sin(dg/2)**2;return 2*R*Math.asin(Math.sqrt(h))}

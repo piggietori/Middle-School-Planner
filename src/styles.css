@@ -236,3 +236,5 @@ ul.why.caution li::marker{color:var(--leaf)}
 @media (min-width:641px){.dots{display:none}}
 details summary{cursor:pointer;font-weight:700;color:var(--accent);min-height:36px;display:flex;align-items:center}
 @media (prefers-reduced-motion:no-preference){.sheet-in{animation:up .22s ease-out}@keyframes up{from{transform:translateY(24px);opacity:.6}}}
+.data-foot{margin-top:32px;padding-top:12px;border-top:1px solid var(--line)}
+.data-foot a{color:inherit}

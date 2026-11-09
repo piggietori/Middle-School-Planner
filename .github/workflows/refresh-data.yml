@@ -1,10 +1,10 @@
 # Pulls the latest test results from NYC Open Data and opens a pull request for a person to review.
 # Nothing reaches the live site until that pull request is merged.
+# Run by hand (Actions → Refresh data → Run workflow): NYC publishes results once a year, and the
+# Watch sources workflow opens an issue when it does.
 # One-time setup: Settings → Actions → General → "Allow GitHub Actions to create and approve pull requests".
 name: Refresh data
 on:
-  schedule:
-    - cron: "0 11 * * 1" # Mondays, 7 AM New York time
   workflow_dispatch:
 
 permissions: {contents: write, pull-requests: write}

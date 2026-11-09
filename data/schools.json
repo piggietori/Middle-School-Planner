@@ -5,17 +5,34 @@
   "sources": {
     "insideschools": {
       "name": "InsideSchools school profiles (NYC School Survey and state test results)",
-      "url": "https://insideschools.org"
+      "url": "https://insideschools.org",
+      "cadence": "yearly",
+      "update": "Each August, from the new-cycle checklist: school facts, highlights and concerns, and survey numbers."
     },
     "nyc-sqr": {
       "name": "NYC School Quality Reports (NYC Open Data dnpx-dfnc)",
-      "url": "https://data.cityofnewyork.us/d/dnpx-dfnc"
+      "url": "https://data.cityofnewyork.us/d/dnpx-dfnc",
+      "cadence": "yearly+watch",
+      "update": "Actions → Refresh data → Run workflow. Review its pull request and fix any text it flags.",
+      "watch": ["https://data.cityofnewyork.us/d/dnpx-dfnc"]
     },
     "d20-flyer-2026": {
       "name": "District 20 Middle School Open House Dates 2026 (flyer)",
-      "url": "https://sites.google.com/schools.nyc.gov/d20website"
+      "url": "https://sites.google.com/schools.nyc.gov/d20website",
+      "cadence": "yearly+watch",
+      "update": "Open the open house flyer and compare it with data/events.json. A moved open house keeps its id and gets \"was\"; a cancelled one goes in retired_ids. Update as_of on what you checked.",
+      "watch": [
+        "https://sites.google.com/schools.nyc.gov/d20website",
+        "https://sites.google.com/schools.nyc.gov/d20website/district-20-schools/school-flyers"
+      ]
     },
-    "nyc-ms-admissions": {"name": "NYC Public Schools middle school admissions", "url": "https://www.schools.nyc.gov/MS"}
+    "nyc-ms-admissions": {
+      "name": "NYC Public Schools middle school admissions",
+      "url": "https://www.schools.nyc.gov/MS",
+      "cadence": "yearly+watch",
+      "update": "Compare the key dates (applications open, deadline, offers) with the \"key\" events in data/events.json. Update as_of on what you checked.",
+      "watch": ["https://www.schools.nyc.gov/enrollment/enroll-grade-by-grade/middle-school"]
+    }
   },
   "programs": {
     "honors": "Honors / gifted",

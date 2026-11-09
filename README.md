@@ -12,7 +12,7 @@ No sign-up. Choices are saved in your own browser on your device.
 ## Sources
 
 - Open house dates and flyers: *District 20 Middle School Open House Dates 2026* (included in this repository)
-- Test results: [NYC School Quality Reports](https://data.cityofnewyork.us/d/dnpx-dfnc) on NYC Open Data, refreshed automatically
+- Test results: [NYC School Quality Reports](https://data.cityofnewyork.us/d/dnpx-dfnc) on NYC Open Data, pulled by a workflow when the city publishes new results
 - School facts and survey data: [InsideSchools](https://insideschools.org) school profiles
 - Admissions timeline: [schools.nyc.gov/MS](https://www.schools.nyc.gov/MS)
 
@@ -47,12 +47,24 @@ npm run refresh:data # pull the latest test results into data/schools.json
 - `src/plan.js`: changes to the plan and progress worked out from it
 - `src/views/`: one file per screen, plus the school sheet and notes
 - `src/main.js` loads `src/app.js`, which handles clicks and form changes
-- `scripts/`: dev server, data checks, data refresh
+- `scripts/`: dev server, data checks, data refresh, source watch
 
 ### Updating data
 
-- **Test results** update themselves: every Monday the *Refresh data* workflow pulls NYC Open Data and opens a pull request with a table of what changed. Fix any warnings it lists (usually highlight text that quotes an old number), then merge.
-- **Everything else** is edited by hand in `data/*.json`. Update `as_of` on what you checked.
+Every source changes about once a year, so each one is pulled once a year by a person. Where we can, a watch tells you when that's due:
+
+| Source | Gives us | Changes | How it's updated |
+|---|---|---|---|
+| NYC School Quality Reports (Open Data `dnpx-dfnc`) | test scores | once a year, in spring | Watched. When the issue opens: Actions → *Refresh data* → Run workflow, then review its pull request |
+| D20 open house flyer (D20 website) | open houses | out in Sep–Oct, changes through Dec | Watched. Edit `data/events.json` by hand |
+| schools.nyc.gov/MS | key dates | once a year | Watched. Edit `data/events.json` by hand |
+| InsideSchools and the NYC School Survey | school facts, highlights, survey numbers | once a year | August checklist. Edit `data/schools.json` by hand |
+| Our own files | neighborhoods, steps | when we decide | August checklist (steps) |
+
+- **Watched** (`"watch"` on the source in `data/schools.json`): every Monday the *Watch sources* workflow checks those pages, and the dataset's last-updated date, and opens an issue for each source that changed, saying what to do. After updating our data, run `node scripts/watch-sources.js --accept <source>` and commit `data/watch.json` in the same pull request.
+- **August checklist**: on August 15 the *New admissions cycle* workflow opens an issue with everything to update for next year ([.github/new-cycle.md](.github/new-cycle.md)).
+- The *Refresh data* workflow pulls test results and opens a pull request with a table of what changed. Fix any warnings it lists (usually highlight text that quotes an old number), then merge.
+- Update `as_of` on everything you check by hand.
 - **Never delete or rename an ID** (school DBN, event `id`, neighborhood `id`, step `id`): saved plans point at them. If an open house moves, change its date or time, keep its `id`, and add `"was": {"date": ..., "start": ...}` so families see it moved. If one is cancelled, remove it and add its ID to `retired_ids`.
 
 CI runs lint, the data checks and both test suites on every pull request. Pushes to `main` deploy to GitHub Pages (Settings → Pages → Source must be "GitHub Actions"). The refresh workflow needs Settings → Actions → General → "Allow GitHub Actions to create and approve pull requests".

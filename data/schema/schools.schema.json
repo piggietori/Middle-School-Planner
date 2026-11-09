@@ -12,7 +12,13 @@
       "type": "object",
       "additionalProperties": {
         "type": "object", "required": ["name", "url"],
-        "properties": {"name": {"type": "string"}, "url": {"$ref": "common.schema.json#/$defs/url"}},
+        "properties": {
+          "name": {"type": "string"},
+          "url": {"$ref": "common.schema.json#/$defs/url"},
+          "cadence": {"enum": ["yearly", "yearly+watch"], "description": "yearly: updated by hand from the new-cycle checklist. +watch: the Watch sources workflow also opens an issue when it changes."},
+          "update": {"type": "string", "description": "What a person does to update our data from this source."},
+          "watch": {"type": "array", "minItems": 1, "items": {"$ref": "common.schema.json#/$defs/url"}, "description": "Pages (or an NYC Open Data dataset) checked weekly for changes."}
+        },
         "additionalProperties": false
       }
     },

@@ -1,0 +1,33 @@
+# Checks the sources listed with "watch" in data/schools.json (the D20 open house pages, the city's middle
+# school admissions page, and the test results dataset) and opens an issue for each one that changed,
+# so a person can update data/*.json. It never changes data or the site.
+name: Watch sources
+on:
+  schedule:
+    - cron: "0 11 * * 1" # Mondays, 7 AM New York time
+  workflow_dispatch:
+
+permissions: {contents: read, issues: write}
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 24}
+      - name: Check sources
+        run: node scripts/watch-sources.js --issues "$RUNNER_TEMP/issues.json"
+      # Runs even if a page couldn't be checked, so the others still get their issue.
+      - name: Open an issue for each changed source
+        if: success() || failure()
+        env: {GH_TOKEN: "${{ github.token }}"}
+        run: |
+          [ -s "$RUNNER_TEMP/issues.json" ] || exit 0
+          jq -c '.[]' "$RUNNER_TEMP/issues.json" | while read -r issue; do
+            title=$(jq -r .title <<<"$issue")
+            if gh issue list --state open --limit 100 --json title --jq '.[].title' | grep -Fxq "$title"; then
+              echo "Already open: $title"; continue
+            fi
+            jq -r .body <<<"$issue" | gh issue create --title "$title" --body-file -
+          done

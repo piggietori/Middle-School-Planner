@@ -97,9 +97,11 @@ test("a second member of the same household shares the plan", async () => {
 
 test("signed-out visitors can't read anything or open a plan", async () => {
   await as(null);
-  for (const t of ["households", "household_members", "plans", "saved_schools", "visits", "step_progress", "school_notes", "user_session"])
+  for (const t of ["households", "household_members", "plans", "saved_schools", "visits", "step_progress", "school_notes", "user_session", "events", "client_errors"])
     await denied(db.query(`select * from public.${t}`));
   await denied(db.query("select public.open_plan('2027')"));
+  await denied(db.query("insert into public.events (name) values ('app_open')"));
+  await denied(db.query("select public.delete_my_account()"));
 });
 
 test("each person reads and writes only their own session", async () => {
@@ -120,4 +122,41 @@ test("bad values are rejected by the database", async () => {
   await denied(db.query("insert into public.saved_schools (plan_id, dbn, rank) values ($1, 'DROP', 1)", [planA]), "23514");
   await denied(db.query("insert into public.school_notes (plan_id, dbn, rating) values ($1, '20K201', 9)", [planA]), "23514");
   await denied(db.query("select public.open_plan('next year')"), "22023");
+});
+
+test("people can add their own events and errors, but not as someone else, and nobody can read them back", async () => {
+  await as(A);
+  await db.query("insert into public.events (user_id, name, props) values ($1, 'school_saved', '{\"dbn\": \"20K187\"}')", [A]);
+  await db.query("insert into public.client_errors (user_id, message, context) values ($1, 'boom', 'render')", [A]);
+  await denied(db.query("insert into public.events (user_id, name) values ($1, 'app_open')", [B]));
+  await denied(db.query("insert into public.events (user_id, name) values (null, 'app_open')"));
+  await denied(db.query("select * from public.events"));
+  await denied(db.query("select * from public.client_errors"));
+  await denied(db.query("update public.events set name = 'app_open'"));
+  await denied(db.query("insert into public.events (user_id, name) values ($1, 'anything')", [A]), "23514");
+});
+
+test("deleting an account removes the person, and their household only if nobody else is in it", async () => {
+  const D = "00000000-0000-4000-8000-00000000000d";
+  await db.exec("reset role");
+  await db.query("insert into auth.users values ($1, 'd@test.local')", [D]);
+  await as(D);
+  const planD = (await rows("select public.open_plan('2027') as id"))[0].id;
+  await db.query("insert into public.saved_schools (plan_id, dbn, rank) values ($1, '20K187', 1)", [planD]);
+  await db.query("insert into public.user_session (last_tab) values ('list')");
+  await db.query("insert into public.events (user_id, name) values ($1, 'app_open')", [D]);
+  await db.query("select public.delete_my_account()");
+
+  // C shares A's household (added above): C goes, the household and its plan stay for A.
+  await as(C);
+  await db.query("select public.delete_my_account()");
+
+  await db.exec("reset role");
+  assert.equal((await rows("select count(*)::int as n from auth.users where id in ($1, $2)", [C, D]))[0].n, 0);
+  assert.deepEqual(await rows("select id from public.plans where id = $1", [planD]), []);
+  assert.deepEqual(await rows("select * from public.saved_schools where plan_id = $1", [planD]), []);
+  assert.deepEqual(await rows("select * from public.user_session where user_id = $1", [D]), []);
+  assert.deepEqual(await rows("select user_id from public.events where name = 'app_open'"), [{user_id: null}]);
+  assert.deepEqual(await rows("select id from public.plans where id = $1", [planA]), [{id: planA}]);
+  assert.deepEqual(await rows("select user_id from public.household_members where user_id in ($1, $2)", [A, C]), [{user_id: A}]);
 });

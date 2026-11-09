@@ -22,6 +22,34 @@ Signed-out visitors never talk to it. School data is not here; it lives in `data
    - Redirect URLs: add `https://piggietori.github.io/Middle-School-Planner/**` and `http://localhost:5173/**`
 4. **Sign-in emails.** Authentication → Sign In / Providers → Email stays on. Supabase's built-in email sender is limited to a few emails an hour, which is fine for one household. Before opening to the public, set up custom SMTP (Authentication → Emails → SMTP Settings).
 
+5. **Backups.** The free plan has no backups of its own (the Pro plan adds daily backups kept 7 days). The
+   *Backup* workflow (`.github/workflows/backup.yml`) makes a weekly encrypted one instead. To turn it on, add two
+   repository secrets yourself (GitHub → Settings → Secrets and variables → Actions → New repository secret):
+   - `SUPABASE_DB_URL`: Dashboard → **Connect** → **Session pooler** connection string, with your database password
+     in place of `[YOUR-PASSWORD]`. (Use the pooler: GitHub's runners can't reach the direct connection.)
+   - `BACKUP_PASSPHRASE`: a long passphrase. Keep it in a password manager: without it a backup can't be opened,
+     and with it anyone could read one.
+
+   Then Actions → *Backup* → Run workflow, and check the run shows "Backup …, encrypted." Families can also download
+   their own copy any time from the account sheet (Download my data).
+
+## Usage and errors
+
+Signed-in people's devices add rows to `events` (a few kinds, IDs only: see docs/journeys.md) and `client_errors`.
+Signed-out visitors send nothing. Nobody can read these through the API; look in the SQL Editor:
+
+```sql
+select name, count(*) from events where at > now() - interval '7 days' group by name order by 2 desc;
+select at, message, context from client_errors order by at desc limit 20;
+```
+
+## Restoring a backup
+
+1. Download the artifact from the *Backup* run, then `gpg -d backup-<date>.tar.gz.gpg | tar -xz` (asks for the passphrase).
+   You get `users.csv` (who has an account) and `public-data.sql` (households, plans and everything in them).
+2. In a new project, apply the migrations. Recreate the people with the same IDs (`users.csv`) following Supabase's
+   guide to migrating auth users, then run `public-data.sql` in the SQL Editor.
+
 ## Adding a change to the database
 
 1. Add `migrations/<yyyymmddhhmmss>_<what>.sql`. Give every new table row-level security and policies in the same file.

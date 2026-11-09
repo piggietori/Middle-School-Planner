@@ -1,15 +1,17 @@
-/* Signing in, and keeping the plan in sync with the account (journeys J2 and J3 in docs/journeys.md).
+/* Signing in, keeping the plan in sync with the account, and leaving (journeys J2, J3 and J7 in docs/journeys.md).
    Signed out, nothing here loads or runs: the plan stays on this device, exactly as before. */
 import {SESSION_KEY} from "./config.js";
 import {CYCLE} from "./data.js";
-import {toRows, fromRows, diffRows, isNoop, isEmpty, mergePlans} from "./plan-model.js";
+import {reportError, setLogging, takeLogs, track} from "./log.js";
+import {CHILD_KEYS, toRows, fromRows, diffRows, isNoop, isEmpty, mergePlans} from "./plan-model.js";
 import {render} from "./render.js";
-import {applyRemoteSession} from "./session.js";
+import {applyRemoteSession, forgetSession} from "./session.js";
 import {st, replacePlan} from "./state.js";
+import {ui} from "./ui.js";
 import {$, esc, toast} from "./util.js";
 
-export const acct = {status:"out", email:"", userId:"", sent:"", lastEmail:"", saving:"saved", open:false, error:""};
-let backend=null, planId=null, synced=null, timer=null, busy=null, warned=false, sessionTimer=null, sessionNext=null;
+export const acct = {status:"out", email:"", userId:"", sent:"", lastEmail:"", saving:"saved", open:false, error:"", ask:"", deleting:false};
+let backend=null, planId=null, synced=null, timer=null, busy=null, warned=false, sessionTimer=null, sessionNext=null, logTimer=null, opened=false;
 
 const store = {
   get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},
@@ -25,7 +27,7 @@ async function getBackend(){
 
 export async function initAccount(){
   addEventListener("online",()=>acct.status==="error"?retry():flush());
-  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")refresh();else saveSession()});
+  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")refresh();else{saveSession();sendLogs()}});
   const hash=new URLSearchParams(location.hash.slice(1));
   if(hash.has("error_description")){ // an expired or already-used sign-in link
     history.replaceState(null,"",location.pathname+location.search);
@@ -33,11 +35,11 @@ export async function initAccount(){
     acct.open=true;
   }
   const returning=hash.has("access_token");
-  if(!returning&&!store.get(SESSION_KEY)&&!window.__plannerTestBackend)return renderAccount();
+  if(!returning&&!store.get(SESSION_KEY)&&!window.__plannerTestBackend){setLogging(false);return renderAccount()}
   try{
     const s=await (await getBackend()).session();
-    if(s)await signedIn(s);else renderAccount();
-  }catch(e){console.error(e);renderAccount()}
+    if(s)await signedIn(s);else{setLogging(false);renderAccount()}
+  }catch(e){console.error(e);setLogging(false);renderAccount()}
 }
 
 function onAuth(event,session){
@@ -62,17 +64,21 @@ async function signedIn(session){
     store.set(OWNER,session.user.id);
     await resumeSession();
     acct.status="in";
+    setLogging(true,queueLogs);
+    if(!opened){opened=true;track("app_open",{tab:ui.tab})}
+    if(firstHere)track("sign_in",{method:"email",claimed_local:combine&&!isEmpty(local)});
     render();renderAccount();
     await flush();
     if(firstHere)toast(isEmpty(local)?"Signed in. Your plan is loaded.":isEmpty(remote)?"Signed in. Your plan is saved to your account.":"Signed in. We added this device's plan to your account.");
   }catch(e){
-    console.error(e);acct.status="error";renderAccount();
+    reportError(e,"sign-in");acct.status="error";renderAccount();
     toast("Couldn't reach your account. Your plan is still saved on this device.");
   }
 }
 const retry=()=>lastSession&&signedIn(lastSession);
 
 function signedOut(){
+  setLogging(false);
   acct.status="out";acct.email="";acct.userId="";planId=null;synced=null;
   store.set(UNSYNCED,"");store.set(OWNER,"");
   renderAccount();render();
@@ -96,6 +102,7 @@ async function flush(){
     if(isNoop(diffRows(synced,toRows(st)))){store.set(UNSYNCED,"");setSaving("saved")}
   },e=>{
     console.error(e);setSaving("failed");
+    track("sync_failed",{error_code:String(e?.code||e?.status||"network").slice(0,40)});
     if(!warned){warned=true;toast("Couldn't save to your account. We'll keep trying. Your plan is safe on this device.")}
   });
   await busy;busy=null;
@@ -143,11 +150,57 @@ export async function sendLink(email){
   renderAccount();
 }
 
-export async function signOut(){
-  clearTimeout(timer);await flush();
+// Usage events and errors (log.js), sent in small batches while signed in.
+function queueLogs(){clearTimeout(logTimer);logTimer=setTimeout(sendLogs,2000)}
+async function sendLogs(){
+  clearTimeout(logTimer);
+  if(acct.status!=="in")return;
+  const {events,errors}=takeLogs();
+  if(!events.length&&!errors.length)return;
+  try{await backend.log(events.map(e=>({user_id:acct.userId,name:e.name,props:e.props})),errors.map(e=>({user_id:acct.userId,...e})))}
+  catch(e){console.error(e)} // dropped, not retried: these are only for us
+}
+
+// Sign out (J7): the account keeps the plan; the family chooses whether this device does too.
+export async function signOut(keep){
+  clearTimeout(timer);await flush();await saveSession();await sendLogs();
   try{await backend.signOut()}catch(e){console.error(e)}
-  signedOut();acct.open=false;renderAccount();
-  toast("Signed out. Your plan is still on this device.");
+  if(!keep)forgetDevice();
+  signedOut();acct.open=false;acct.ask="";renderAccount();
+  toast(keep?"Signed out. Your plan is still on this device.":"Signed out. Your plan was removed from this device.");
+}
+function forgetDevice(){replacePlan(null);forgetSession();store.set(UNSYNCED,"")}
+
+// Download my data (J7): everything the account holds about this person's plan, as JSON.
+export async function exportData(){
+  try{
+    const [rows,place]=await Promise.all([backend.load(planId),backend.loadSession()]);
+    const strip=({plan_id,household_id,...r})=>r; // internal IDs mean nothing outside the app
+    const data={exported_at:new Date().toISOString(),account:{email:acct.email},cycle:CYCLE,plan:strip(rows.plan),
+      ...Object.fromEntries(Object.keys(CHILD_KEYS).map(t=>[t,rows[t].map(strip)])),last_place:place||null};
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}));
+    a.download="middle-school-plan-"+data.exported_at.slice(0,10)+".json";
+    document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+    toast("Downloaded your data");
+  }catch(e){reportError(e,"export");toast("Couldn't download your data. Check your connection and try again.")}
+}
+
+// Delete my account (J7). The server does it in one transaction, so either all of it happens or none of it.
+export async function deleteAccount(removeLocal){
+  acct.deleting=true;acct.error="";renderAccount();
+  clearTimeout(timer);clearTimeout(sessionTimer);
+  try{await backend.deleteAccount()}
+  catch(e){
+    reportError(e,"delete-account");acct.deleting=false;
+    acct.error="Couldn't delete your account, so nothing was deleted. Check your connection and try again.";
+    return renderAccount();
+  }
+  setLogging(false);
+  try{await backend.signOut()}catch(e){console.error(e)}
+  if(removeLocal)forgetDevice();
+  signedOut();acct.open=false;acct.ask="";acct.deleting=false;renderAccount();
+  toast(removeLocal?"Your account is deleted, and your plan was removed from this device.":"Your account is deleted. Your plan is still on this device.");
 }
 
 /* ---------------- ACCOUNT UI ---------------- */
@@ -155,10 +208,23 @@ const SAVING={saving:"Saving…",saved:"✓ All changes saved to your account",f
 function setSaving(s){acct.saving=s;if(acct.open)renderAccount()}
 
 function sheetBody(){
+  if(acct.status==="in"&&acct.ask==="signout")return `<h2>Sign out on this device</h2>
+    <p style="margin:0">Keep a copy of your plan on this device? Choose <b>Remove</b> on a shared or borrowed computer. Your account keeps your plan either way.</p>
+    <div class="row"><button class="btn primary" data-acct="signout-keep">Keep a copy and sign out</button><button class="btn" data-acct="signout-remove">Remove it and sign out</button></div>
+    <div><button class="linkbtn" data-acct="cancel">Cancel</button></div>`;
+  if(acct.status==="in"&&acct.ask==="delete")return `<h2>Delete your account</h2>
+    <p style="margin:0">This permanently deletes your account and the plan saved in it: your schools, visits, steps and notes. It can't be undone. If someone else shares your plan, it stays for them.</p>
+    <p class="small muted" style="margin:0">Want a copy first? <button class="linkbtn" data-acct="export">Download my data</button></p>
+    ${acct.error?`<div class="notice" role="alert"><div>${esc(acct.error)}</div></div>`:""}
+    <label for="acct-delete" class="lab">Type DELETE to confirm</label>
+    <input id="acct-delete" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="10">
+    <label class="row small" style="gap:8px;flex-wrap:nowrap"><input type="checkbox" id="acct-delete-local" checked> Also remove my plan from this device</label>
+    <div class="row"><button class="btn danger" data-acct="delete-now" disabled>${acct.deleting?"Deleting…":"Delete my account"}</button><button class="linkbtn" data-acct="cancel">Cancel</button></div>`;
   if(acct.status==="in")return `<h2>Your account</h2>
     <p style="margin:0">Signed in as <b>${esc(acct.email)}</b>. Your plan is saved to your account and stays the same on every device where you sign in.</p>
     <p class="small" role="status" style="margin:0;color:var(--${acct.saving==="failed"?"bad":acct.saving==="saved"?"good":"muted"})">${SAVING[acct.saving]}</p>
-    <div class="row"><button class="btn" data-acct="signout">Sign out on this device</button></div>`;
+    <div class="row"><button class="btn" data-acct="export">Download my data</button><button class="btn" data-acct="signout">Sign out on this device</button></div>
+    <div><button class="linkbtn" data-acct="delete">Delete my account…</button></div>`;
   if(acct.status==="loading")return `<h2>Signing in…</h2><p class="muted" style="margin:0">Loading your plan.</p>`;
   if(acct.sent)return `<h2>Check your email</h2>
     <p style="margin:0">We sent a sign-in link to <b>${esc(acct.sent)}</b>. Open it on this device or any other to sign in. It works once and expires in an hour.</p>
@@ -182,11 +248,19 @@ export function renderAccount(){
     :`<button class="btn acct-btn" data-acct="open"${acct.status==="loading"?' aria-busy="true"':""}><svg class="acct-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg><span class="acct-label">${acct.status==="loading"?"Signing in…":"Sign in"}</span></button>`;
   const s=$("#acctsheet");
   if(!s)return;
-  const typed=document.getElementById("acct-email")?.value; // keep what's being typed across re-renders
+  // keep what's being typed across re-renders
+  const typed=document.getElementById("acct-email")?.value, del=document.getElementById("acct-delete")?.value, local=document.getElementById("acct-delete-local")?.checked;
   s.innerHTML=acct.open?`<div class="sheet" data-acct="close"><div class="sheet-in acct-sheet" role="dialog" aria-modal="true" aria-label="Account">
     <div class="sheet-bar"><button class="btn" data-acct="close">← Back</button></div><div class="stack">${sheetBody()}</div></div></div>`:"";
   const input=document.getElementById("acct-email");
   if(input&&typed!=null)input.value=typed;
+  const d=document.getElementById("acct-delete");
+  if(d&&del!=null){d.value=del;document.getElementById("acct-delete-local").checked=local}
+  canDelete();
+}
+function canDelete(){
+  const b=document.querySelector('[data-acct="delete-now"]');
+  if(b)b.disabled=acct.deleting||document.getElementById("acct-delete").value.trim().toUpperCase()!=="DELETE";
 }
 
 document.addEventListener("click",e=>{
@@ -195,10 +269,14 @@ document.addEventListener("click",e=>{
   const a=t.dataset.acct;
   if(a==="close"&&e.target!==t&&!e.target.closest("button[data-acct]"))return; // clicks inside the sheet
   if(a==="open"){acct.open=true;renderAccount();document.getElementById("acct-email")?.focus()}
-  if(a==="close"){acct.open=false;renderAccount()}
+  if(a==="close"){acct.open=false;acct.ask="";acct.error="";renderAccount()}
   if(a==="again"){acct.sent="";renderAccount();document.getElementById("acct-email")?.focus()}
   if(a==="retry")retry();
-  if(a==="signout")signOut();
+  if(a==="signout"||a==="delete"){acct.ask=a;acct.error="";renderAccount();document.getElementById("acct-delete")?.focus()}
+  if(a==="cancel"){acct.ask="";acct.error="";renderAccount()}
+  if(a==="signout-keep"||a==="signout-remove")signOut(a==="signout-keep");
+  if(a==="export")exportData();
+  if(a==="delete-now"&&!t.disabled)deleteAccount(document.getElementById("acct-delete-local").checked);
 });
 document.addEventListener("submit",e=>{
   if(!e.target.dataset.acctForm)return;
@@ -206,4 +284,5 @@ document.addEventListener("submit",e=>{
   const email=document.getElementById("acct-email").value.trim();
   if(email)sendLink(email);
 });
-document.addEventListener("keydown",e=>{if(e.key==="Escape"&&acct.open){acct.open=false;renderAccount()}});
+document.addEventListener("input",e=>{if(e.target.id==="acct-delete")canDelete()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&acct.open){acct.open=false;acct.ask="";acct.error="";renderAccount()}});

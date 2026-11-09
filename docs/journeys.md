@@ -83,16 +83,18 @@ Kept small on purpose. No names, notes text, or home location in event propertie
 
 1. Opens the site (signed in on this device, or signs in again).
 2. App loads the plan from the cache right away, then refreshes from the account.
-3. Restores the last tab and last school sheet from `user_session`.
-4. **Home** shows a **Next up** card, the most important first:
-   - Open house I'm going to today or tomorrow
-   - Visits that passed: "Did you go?"
-   - Visited recently, no notes yet: "How was IS 187?"
-   - Saved schools with no open house left, not planned
-   - List not in order yet / not entered in MySchools
-   - Days until the deadline
+3. Opens where they left off: the tab, that tab's view (calendar or list, order or compare) and the school sheet if one was open.
+   - Same device: from this device (`localStorage` `d20session`). A link to a different tab (`#dates`) wins.
+   - Another device: after signing in, from `user_session`, if it's newer than this device's and they haven't moved yet.
+4. **Home** shows a **Next up** card, the most urgent first:
+   - Deadline in 7 days or fewer
+   - Open house I'm going to in the next 2 days
+   - Visits that passed: "Did you go?" (up to 3, then "and N more on Dates")
+   - Visited in the last 2 weeks, no notes yet: "How was IS 187?"
+   - Deadline in 8 to 21 days
+   - Nothing urgent: the next step on the checklist, with a button to do it. After the deadline: when offers arrive.
 
-**Stored:** `user_session` updates on tab change and sheet open (debounced); `app_open` event.
+**Stored:** `d20session` on this device on every tab, view or sheet change; `user_session` (signed in) a moment later, or when the page is hidden. `app_open` event in M5.
 **Failure cases:**
 - Server plan is newer than the cache → replace the screen quietly, keep any unsaved typing in the notes boxes (the MVP already does this with `commitDrafts`).
 - Saved school or event no longer in source data → keep it, show "No longer listed" instead of hiding it.
@@ -127,8 +129,8 @@ Kept small on purpose. No names, notes text, or home location in event propertie
 
 1. 21 days before Dec 11 → "Deadline soon" notice (MVP already does this).
 2. Marks "Log in to MySchools and add your programs" done → Ready for MySchools guide stays available.
-3. After Dec 11 → app switches to **submitted** mode: list is read-only, Home shows "Offers arrive April 7".
-4. Apr 7, 2027 → step 8 becomes current: "See your offer in MySchools".
+3. After Dec 11 → **submitted** mode: My list is read-only ("This is your list as you submitted it", no arrows), and Next up says when offers arrive.
+4. Apr 7, 2027 → Next up: "Offers are out. See your child's offer in MySchools."
 5. Next cycle (fall 2028) → a new `cycle`; last year's plan is archived, not mixed in.
 
 **Failure cases:** device clock is wrong → dates come from the device today; acceptable, but the server time is used for any reminder sent by email later.
@@ -149,10 +151,10 @@ Kept small on purpose. No names, notes text, or home location in event propertie
 |---|---|
 | J1 First visit | M1 (port), M2 (data load errors) |
 | J2 Sign in, claim local plan | M3 |
-| J3 Come back, Next up | M4 |
+| J3 Come back, Next up | M4 (done) |
 | J4 Second parent | Schema in M3, feature after v1 |
 | J5 Source data changes | M2 |
-| J6 Deadline and after | M4 (submitted mode), already partly in MVP |
+| J6 Deadline and after | M4 (submitted mode, done), partly in MVP |
 | J7 Sign out, export, delete | M5 |
 
 Automated walk-throughs (Playwright) cover J1 from M1, and J2 and J3 once accounts exist.

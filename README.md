@@ -43,6 +43,7 @@ npm run refresh:data # pull the latest test results into data/schools.json
 - `data/*.json`: schools, open houses and key dates, neighborhoods, steps; `data/schema/` describes each file
 - `src/data.js`: loads the data files for the views
 - `src/state.js`: the family's plan, kept in this browser
+- `src/session.js`: where the family left off (tab, view, open school), on this device and in the account
 - `src/plan-model.js`: the plan as database rows, what changed, and merging two plans (pure functions)
 - `src/account.js`: signing in, syncing the plan with the account, and the account sheet
 - `src/sync/backend.js`: the only code that talks to Supabase; `src/vendor/` holds the pinned Supabase library (`scripts/vendor-supabase.js`)

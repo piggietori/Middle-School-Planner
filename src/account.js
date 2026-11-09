@@ -4,11 +4,12 @@ import {SESSION_KEY} from "./config.js";
 import {CYCLE} from "./data.js";
 import {toRows, fromRows, diffRows, isNoop, isEmpty, mergePlans} from "./plan-model.js";
 import {render} from "./render.js";
+import {applyRemoteSession} from "./session.js";
 import {st, replacePlan} from "./state.js";
 import {$, esc, toast} from "./util.js";
 
 export const acct = {status:"out", email:"", userId:"", sent:"", lastEmail:"", saving:"saved", open:false, error:""};
-let backend=null, planId=null, synced=null, timer=null, busy=null, warned=false;
+let backend=null, planId=null, synced=null, timer=null, busy=null, warned=false, sessionTimer=null, sessionNext=null;
 
 const store = {
   get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},
@@ -24,7 +25,7 @@ async function getBackend(){
 
 export async function initAccount(){
   addEventListener("online",()=>acct.status==="error"?retry():flush());
-  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")refresh()});
+  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")refresh();else saveSession()});
   const hash=new URLSearchParams(location.hash.slice(1));
   if(hash.has("error_description")){ // an expired or already-used sign-in link
     history.replaceState(null,"",location.pathname+location.search);
@@ -59,6 +60,7 @@ async function signedIn(session){
     synced=toRows(remote);
     replacePlan(combine?mergePlans(remote,local):remote);
     store.set(OWNER,session.user.id);
+    await resumeSession();
     acct.status="in";
     render();renderAccount();
     await flush();
@@ -97,6 +99,24 @@ async function flush(){
     if(!warned){warned=true;toast("Couldn't save to your account. We'll keep trying. Your plan is safe on this device.")}
   });
   await busy;busy=null;
+}
+
+// Open where the family left off on their last device, unless they've already moved here (journey J3).
+async function resumeSession(){
+  try{const r=await backend.loadSession();if(r)applyRemoteSession({tab:r.last_tab,dbn:r.last_dbn,view:r.last_view,at:r.updated_at})}
+  catch(e){console.error(e)} // not worth stopping sign-in for
+}
+
+// Called when the tab, school sheet or view changes (session.js). Saved a moment later, or when the page is hidden.
+export function queueSessionSync(s){
+  if(acct.status!=="in")return;
+  sessionNext=s;clearTimeout(sessionTimer);sessionTimer=setTimeout(saveSession,1500);
+}
+async function saveSession(){
+  clearTimeout(sessionTimer);
+  const s=sessionNext;sessionNext=null;
+  if(!s||acct.status!=="in")return;
+  try{await backend.saveSession({user_id:acct.userId,last_tab:s.tab,last_dbn:s.dbn,last_view:s.view})}catch(e){console.error(e)}
 }
 
 // Pick up changes made on another device when this tab comes back into view (journey J3).

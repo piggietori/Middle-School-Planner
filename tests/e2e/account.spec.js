@@ -66,6 +66,50 @@ test("another device signed in to the same account gets the plan, and changes fl
   await expect(laptop.locator("#app .sc h3").first()).toHaveText("I.S. 187 The Christa McAuliffe School");
 });
 
+test("signing in on another device opens where you left off: same tab, view and school (J3)", async ({browser}) => {
+  const server = fakeServer();
+  const laptop = await device(browser, server, {plan: LOCAL_PLAN});
+  await laptop.goto(link("a"));
+  await synced(laptop);
+  await laptop.locator('.tab[data-tab="dates"]').click();
+  await laptop.click('[data-dv="list"]');
+  await laptop.locator('.tab[data-tab="find"]').click();
+  await laptop.locator("#app [data-open]").first().click();
+  const school = (await laptop.locator("#sheet [role=dialog]").getAttribute("aria-label"));
+  await expect.poll(() => server.sessions.a?.last_dbn).toBeTruthy();
+  expect(server.sessions.a).toMatchObject({last_tab: "find", last_view: null});
+
+  const phone = await device(browser, server);
+  await phone.goto(link("a"));
+  await synced(phone);
+  await expect(phone.locator("#sheet [role=dialog]")).toHaveAttribute("aria-label", school);
+  await expect(phone.locator('.tab[data-tab="find"]')).toHaveAttribute("aria-current", "page");
+  await expect(phone).toHaveURL(/#find$/);
+});
+
+test("on the same device, coming back opens the same tab, view and school; closing the school forgets it", async ({page}) => {
+  await useFixtureData(page);
+  await page.clock.setFixedTime(new Date("2026-11-09T10:00:00"));
+  await page.goto("/");
+  await page.locator('.tab[data-tab="dates"]').click();
+  await page.click('[data-dv="list"]');
+  await page.goto("about:blank");
+  await page.goto("/"); // no tab in the address: back where we were
+  await expect(page.locator('[data-dv="list"]')).toHaveAttribute("aria-pressed", "true");
+
+  await page.locator('.tab[data-tab="find"]').click();
+  await page.locator("#app [data-open]").first().click();
+  await page.reload(); // address is /#find, the tab we were on: the school reopens
+  await expect(page.locator("#sheet [role=dialog]")).toBeVisible();
+  await page.click("#sheet button[data-close]");
+  await page.reload();
+  await expect(page.locator("#sheet [role=dialog]")).toHaveCount(0);
+
+  await page.goto("about:blank");
+  await page.goto("/#list"); // a link to another tab wins
+  await expect(page.locator('.tab[data-tab="list"]')).toHaveAttribute("aria-current", "page");
+});
+
 test("signing in on a device that has its own plan combines it with the account (J2 merge)", async ({browser}) => {
   const server = fakeServer();
   const first = await device(browser, server, {plan: LOCAL_PLAN});

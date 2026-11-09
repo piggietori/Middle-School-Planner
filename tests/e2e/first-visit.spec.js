@@ -63,3 +63,23 @@ test("reminders are grouped in one box, and there's no missed-open-house notice"
   await expect(page.getByText("Start here:")).toHaveCount(0);
   await expect(page.getByText("Missed an open house")).toHaveCount(0);
 });
+
+test("with nothing urgent, Next up shows the next step and how to do it", async ({page}) => {
+  await page.addInitScript(p => { if (!localStorage.getItem("d20plan")) localStorage.setItem("d20plan", p); }, JSON.stringify({home: "dyker", done: {s1: true}}));
+  await page.goto("/");
+  const next = page.locator(".notice-list");
+  await expect(next.locator("h2")).toHaveText("Next up");
+  await expect(next).toContainText("Next step:");
+  await next.getByRole("button").click();
+  await expect(page.locator(".tab[aria-current=page]")).toHaveAttribute("data-tab", /find|dates|list/);
+});
+
+test("after the deadline the list is read-only and Next up says when offers arrive (J6)", async ({page}) => {
+  await page.clock.setFixedTime(new Date("2026-12-14T10:00:00"));
+  await page.addInitScript(p => { if (!localStorage.getItem("d20plan")) localStorage.setItem("d20plan", p); }, JSON.stringify({home: "dyker", saved: ["20K187", "20K201"]}));
+  await page.goto("/");
+  await expect(page.locator(".notice-list")).toContainText("Applications are closed. Offers arrive April 7, 2027.");
+  await page.locator('.tab[data-tab="list"]').click();
+  await expect(page.getByText("This is your list as you submitted it.")).toBeVisible();
+  await expect(page.locator("[data-mv]")).toHaveCount(0);
+});

@@ -7,7 +7,7 @@ const DEFAULT_PLAN = {home: "", max_miles: 1.5, need_subway: false, skip_competi
   weights: {distance: 2, scores: 1, safety: 2, bullying: 1, teachers: 1}, programs: []};
 
 export function fakeServer() {
-  const server = {outbox: [], plans: {}, byUser: {}, failSaves: false, saves: 0};
+  const server = {outbox: [], plans: {}, byUser: {}, sessions: {}, failSaves: false, saves: 0};
   server.handle = (op, ...args) => {
     if (op === "sendLink") { server.outbox.push(args[0]); return null; }
     if (op === "openPlan") {
@@ -20,6 +20,8 @@ export function fakeServer() {
       return server.byUser[uid];
     }
     if (op === "load") return structuredClone(server.plans[args[0]]);
+    if (op === "loadSession") return server.sessions[args[0]] ?? null;
+    if (op === "saveSession") { const {user_id, ...row} = args[0]; server.sessions[user_id] = {...row, updated_at: new Date().toISOString()}; return null; }
     if (op === "save") {
       if (server.failSaves) throw new Error("network down");
       const [id, d] = args, p = server.plans[id];
@@ -60,6 +62,8 @@ export async function useFakeBackend(context, server) {
       openPlan: () => call("openPlan", uid),
       load: id => call("load", id),
       save: (id, d) => call("save", id, d),
+      loadSession: () => call("loadSession", uid),
+      saveSession: row => call("saveSession", row),
     };
     window.__fakeAuthEvent = (event, session) => listener(event, session);
   });

@@ -110,6 +110,9 @@ test("each person reads and writes only their own session", async () => {
   await denied(db.query("insert into public.user_session (user_id, last_tab) values ($1, 'home')", [A]));
   await as(A);
   assert.deepEqual(await rows("select last_tab, last_dbn from public.user_session"), [{last_tab: "find", last_dbn: "20K187"}]);
+  // what the app sends: an upsert on user_id (insert the first time, update after)
+  await db.query("insert into public.user_session (user_id, last_tab, last_dbn) values ($1, $2, null) on conflict (user_id) do update set last_tab = excluded.last_tab, last_dbn = excluded.last_dbn", [A, "list"]);
+  assert.deepEqual(await rows("select last_tab, last_dbn from public.user_session"), [{last_tab: "list", last_dbn: null}]);
 });
 
 test("bad values are rejected by the database", async () => {

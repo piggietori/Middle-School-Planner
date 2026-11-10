@@ -181,6 +181,61 @@ test("signing out asks first, and can keep the plan on this device (J7)", async 
   await expect(page.locator("#acct")).toHaveText("Sign in");
   await page.locator('.tab[data-tab="list"]').click();
   expect(await listNames(page)).toHaveLength(2);
+  // Chosen, so not reported as an unexpected sign-out, and the email isn't kept.
+  await page.locator('.tab[data-tab="home"]').click();
+  await expect(page.getByText("Signed out on this device:")).toHaveCount(0);
+  expect(await page.evaluate(() => localStorage.getItem("d20plan-email"))).toBeNull();
+});
+
+// What Supabase does when it ends a session itself: the stored session goes, then SIGNED_OUT.
+const endSession = page => page.evaluate(() => { localStorage.removeItem("fake-session"); window.__fakeAuthEvent("SIGNED_OUT", null); });
+
+test("if the sign-in ends on its own, say so: the plan is still here, and signing in again keeps it in sync (J7)", async ({browser}) => {
+  const server = fakeServer();
+  const page = await device(browser, server, {plan: LOCAL_PLAN});
+  await page.goto(link("a"));
+  await synced(page);
+  await endSession(page);
+  await expect(page.locator("#toast")).toHaveText("You were signed out on this device. Your plan is still here. Sign in again to keep it in sync.");
+  await expect(page.locator("#acct")).toHaveText("Sign in");
+  await page.locator('.tab[data-tab="home"]').click();
+  await expect(page.getByText("Signed out on this device:")).toBeVisible();
+  await expect(page.getByText("Keep your plan safe:")).toHaveCount(0); // it isn't only on this device
+  await page.locator('.tab[data-tab="list"]').click();
+  expect(await listNames(page)).toHaveLength(2);
+
+  // A school saved while signed out is kept when signing in again.
+  await page.locator('.tab[data-tab="find"]').click();
+  await page.locator("#app").getByRole("button", {name: "☆ Save"}).first().click();
+  await page.locator("#acct button").click();
+  await expect(page.locator("#acctsheet h2")).toHaveText("Sign in again");
+  await expect(page.locator("#acct-email")).toHaveValue("a@example.com");
+  await page.goto("about:blank");
+  await page.goto(link("a"));
+  await synced(page);
+  await expect.poll(() => server.plans["plan-a"].saved_schools.length).toBe(3);
+  await page.locator('.tab[data-tab="home"]').click();
+  await expect(page.getByText("Signed out on this device:")).toHaveCount(0);
+});
+
+test("a sign-in that ended while the planner was closed is explained on the next visit; Not you? forgets the email", async ({browser}) => {
+  const server = fakeServer();
+  const page = await device(browser, server, {plan: LOCAL_PLAN});
+  await page.goto(link("a"));
+  await synced(page);
+  await page.evaluate(() => localStorage.removeItem("fake-session"));
+  await page.reload();
+  await expect(page.locator("#acct")).toHaveText("Sign in");
+  await page.locator('.tab[data-tab="home"]').click();
+  await expect(page.getByText("Signed out on this device:")).toBeVisible();
+  await page.locator("#acct button").click();
+  await expect(page.locator("#acct-email")).toHaveValue("a@example.com");
+  await page.getByRole("button", {name: "Forget this email"}).click();
+  await expect(page.locator("#acctsheet h2")).toHaveText("Keep your plan on all your devices");
+  await expect(page.locator("#acct-email")).toHaveValue("");
+  expect(await page.evaluate(() => localStorage.getItem("d20plan-email"))).toBeNull();
+  await page.getByRole("button", {name: "← Back"}).click();
+  await expect(page.getByText("Signed out on this device:")).toHaveCount(0);
 });
 
 test("signing out on a shared computer can remove the plan from it (J7)", async ({browser}) => {

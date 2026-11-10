@@ -16,7 +16,10 @@ export function vHome(){
   const doneN=STEPS.filter(stepDone).length;
   const ask=EVENTS.filter(e=>st.going.includes(e.id)&&!st.attended.includes(e.id)&&daysUntil(e.date)<0);
   // One setup tip at most: Start here on the very first visit, then Keep your plan safe once something is saved
-  const tip=isEmpty(st)?`<b>Start here:</b> pick your neighborhood on <button class="linkbtn" data-tab-go="find">Find schools</button> so we can show distances.`
+  // Signed out without choosing it: the plan is still here, and the account still has it.
+  // A blank start may be a family whose browser lost its data: their plan is waiting in their account.
+  const tip=acct.lost&&acct.status==="out"?`<b>Signed out on this device:</b> your plan is still here. <button class="linkbtn" data-acct="open">Sign in again</button> to keep it in sync with your account.`
+    :isEmpty(st)?`<b>Start here:</b> pick your neighborhood on <button class="linkbtn" data-tab-go="find">Find schools</button> so we can show distances.${acct.status==="out"?` Already made a plan? <button class="linkbtn" data-acct="open">Sign in</button> to get it back.`:""}`
     :acct.status==="out"&&st.saved.length?`<b>Keep your plan safe:</b> it's only on this device right now. <button class="linkbtn" data-acct="open">Sign in</button> to save it to your account and use it on your other devices.`:"";
   // Next up (journey J3): what to do now, most urgent first. With nothing urgent, the next step.
   const alerts=[], deadline=`<b>Deadline ${n===0?"today":"soon"}:</b> ${n===0?"submit your application in MySchools today.":`only ${n} day${n>1?"s":""} left to submit your application in MySchools.`}`;

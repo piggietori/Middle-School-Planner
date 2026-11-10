@@ -5,6 +5,7 @@ import schoolsFile from "../data/schools.json" with {type: "json"};
 import eventsFile from "../data/events.json" with {type: "json"};
 import neighborhoodsFile from "../data/neighborhoods.json" with {type: "json"};
 import stepsFile from "../data/steps.json" with {type: "json"};
+import noticeFile from "../data/notice.json" with {type: "json"};
 
 const {provenance, ...city} = schoolsFile.city_averages;
 export const CITY = city;
@@ -17,6 +18,7 @@ export const OH = eventsFile.events.filter(e=>e.kind==="open").map(e=>({...e,not
 export const KEY = eventsFile.events.filter(e=>e.kind==="key");
 export const EVENTS = [...OH,...KEY].sort((a,b)=>(a.date+(a.start||"")).localeCompare(b.date+(b.start||"")));
 export const HOMES = neighborhoodsFile.neighborhoods;
+export const NOTICE = noticeFile.notice; // the announcement banner, or null (notices.js)
 export const keyDate = id=>KEY.find(e=>e.id===id).date;
 // "December 11, 2026", or "Friday, December 11, 2026" with the weekday
 export const longDate = (s,weekday)=>{const [y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d).toLocaleDateString("en-US",{weekday:weekday?"long":undefined,month:"long",day:"numeric",year:"numeric"})};

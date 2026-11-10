@@ -10,7 +10,8 @@ Start with architecture, then read whichever doc answers your question. Each fac
 | [security.md](security.md) | How data is protected, layer by layer, and the known gaps |
 | [secrets.md](secrets.md) | Every key and password: where it lives, and what to do if one is lost or leaked |
 | [privacy.md](privacy.md) | What personal data exists, who can see it, and how long it's kept |
-| [operations.md](operations.md) | The yearly calendar, how to tell it's healthy, and what to do when something breaks |
+| [operations.md](operations.md) | The yearly calendar, monitoring and alerts, feedback, the banner, and what to do when something breaks |
+| [launch.md](launch.md) | Opening the planner to other families: the setup checklist, the pilot, and when to share more widely |
 | [testing.md](testing.md) | The test and eval layers, what each proves, and how to run them |
 | [journeys.md](journeys.md) | What families do in the planner, step by step |
 | [CHANGELOG.md](../CHANGELOG.md) | What changed in each version, and how to release one |

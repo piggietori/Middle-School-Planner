@@ -43,10 +43,10 @@ function vCal(list){
     const ds=iso(y,m,d), ev=inMonth.filter(e=>e.date===ds);
     const cls=e=>e.kind==="key"?"key":st.going.includes(e.id)?"go":"";
     const name=e=>e.kind==="key"?e.title:BY[e.dbn].short;
-    const inner=`<span class="n">${d}</span>
+    const inner=`${ev.length?`<span class="sr">${MONTHS[m]} </span>`:""}<span class="n">${d}</span>
       <span class="dots">${ev.map(e=>`<i class="${cls(e)}"></i>`).join("")}</span>
-      ${ev.slice(0,2).map(e=>`<span class="lbl ${cls(e)}">${esc(name(e))}</span>`).join("")}${ev.length>2?`<span class="lbl more">+${ev.length-2} more</span>`:""}`;
-    cells+=ev.length?`<button class="day has${ds===tIso?" today":""}${ds<tIso?" gone":""}" aria-pressed="${ui.selDay===ds}" data-day="${ds}" aria-label="${MONTHS[m]} ${d}: ${ev.length} event${ev.length>1?"s":""}">${inner}</button>`
+      ${ev.slice(0,2).map(e=>`<span class="lbl ${cls(e)}">${esc(name(e))}</span>`).join("")}${ev.length>2?`<span class="lbl more">+${ev.length-2} more</span>`:""}${ev.length?`<span class="sr">: ${ev.length} event${ev.length>1?"s":""}</span>`:""}`;
+    cells+=ev.length?`<button class="day has${ds===tIso?" today":""}${ds<tIso?" gone":""}" aria-pressed="${ui.selDay===ds}" data-day="${ds}">${inner}</button>`
       :`<div class="day${ds===tIso?" today":""}${ds<tIso?" gone":""}">${inner}</div>`;
   }
   const sel=ui.selDay?list.filter(e=>e.date===ui.selDay):[];

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Same policy as index.html: see docs/security.md#content-security-policy -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<title>Privacy and terms · D20 Middle School Planner</title>
+<link rel="stylesheet" href="./fonts/fonts.css">
+<link rel="stylesheet" href="./src/styles.css">
+
+<main class="wrap">
+<article class="view card stack policy">
+<p><a href="./">← Back to the planner</a></p>
+<h1>Privacy and terms</h1>
+<p class="muted small">D20 Middle School Planner · Last updated November 10, 2026</p>
+
+<p class="notice warn" data-pilot hidden><span><b>This planner is a pilot.</b> It's being tested with a few families, so features and this notice may change. We'll say so in the planner if anything here changes.</span></p>
+
+<p>The D20 Middle School Planner helps families in Brooklyn's District 20 plan their middle school application. It's an independent tool made by a District 20 parent. It is <b>not</b> run by NYC Public Schools, and it doesn't submit applications: your application only counts when you submit it in <a href="https://www.myschools.nyc/" target="_blank" rel="noopener">MySchools</a>.</p>
+
+<h2>The short version</h2>
+<ul>
+  <li>You can use the planner without an account. Then everything stays in your browser on your device, and nothing is sent to us unless you send feedback.</li>
+  <li>If you sign in, we keep your email address and your plan so it's on all your devices.</li>
+  <li>We never ask for your child's name, age or school, or your address. No passwords, no ads, no trackers.</li>
+  <li>You can download everything we hold about you, or delete your account, at any time from the Account menu.</li>
+</ul>
+
+<h2>What we keep, and why</h2>
+<table>
+  <thead><tr><th scope="col">What</th><th scope="col">Why</th><th scope="col">How long</th></tr></thead>
+  <tbody>
+    <tr><td>Your email address (only if you sign in)</td><td>To email you sign-in links</td><td>Until you delete your account</td></tr>
+    <tr><td>Your plan: neighborhood, priorities, saved schools, open houses, steps done, and your notes and ratings</td><td>It's the planner, and it's what keeps your devices in step</td><td>Until you delete your account or remove it</td></tr>
+    <tr><td>Where you left off (which tab or school)</td><td>To open where you left off on another device</td><td>Until you delete your account</td></tr>
+    <tr><td>A few usage events while signed in: app opened, school saved, open house marked, step done, a save that failed. These hold IDs only, never your notes</td><td>To see whether the planner is used and where it goes wrong</td><td>1 year</td></tr>
+    <tr><td>Error reports while signed in: what went wrong, where in the planner, and your browser type</td><td>To fix problems</td><td>90 days</td></tr>
+    <tr><td>Feedback you send: what it's about, your message, your email if you add it, and which page you were on. It isn't linked to your account, and it's emailed to the person who runs the planner</td><td>To answer you and fix problems</td><td>1 year</td></tr>
+  </tbody>
+</table>
+<p>Our encrypted backups keep copies for up to 90 days more. If you delete your account, your usage events and error reports are kept without anything linking them to you.</p>
+<p><b>About your child:</b> the planner doesn't ask for your child's details. Notes are free text, so please don't write your child's name or other identifying details in them.</p>
+
+<h2>Who can see it</h2>
+<ul>
+  <li><b>You</b>, on any device where you sign in.</li>
+  <li><b>The person who runs the planner</b> can technically see the database, to keep it working. They don't read families' notes, except to fix a problem you've reported. Reports they look at hold counts only.</li>
+  <li><b>The services that run it,</b> under their own terms. We never sell or share your data with anyone else.
+    <ul>
+      <li><b>Supabase</b> stores accounts and plans, in the <span data-region>REGION-TBD</span> region.</li>
+      <li><b>Resend</b> sends the sign-in emails and passes on feedback, so it sees your email address and any feedback you send.</li>
+      <li><b>GitHub</b> hosts the website and stores our encrypted backups, privately.</li>
+    </ul>
+  </li>
+</ul>
+<p>Links to Google Calendar, Google Maps, MySchools and school websites take you to those sites, which have their own privacy policies. Nothing is sent to them unless you click.</p>
+
+<h2>How it's protected</h2>
+<p>Each family can reach only their own plan; this is enforced by the database itself and tested on every change. Everything travels encrypted (HTTPS), the data is encrypted where it's stored, and backups are encrypted with a key only the owner holds. The website only runs its own code, and can only talk to its own database.</p>
+
+<h2>Your choices</h2>
+<ul>
+  <li><b>Download my data</b> (Account menu): a file of everything your account holds.</li>
+  <li><b>Delete my account</b> (Account menu): permanently removes your account and plan.</li>
+  <li><b>Sign out</b>: choose whether to keep a copy on this device. Choose "Remove" on a shared computer.</li>
+  <li>Anything else, or if you'd rather we did it for you: email <a data-help href="#">us</a>. We'll reply within a few days and act within 30 days.</li>
+</ul>
+<p>If we ever find that someone may have seen your data, we'll email you within 72 hours, saying what happened and what to do.</p>
+
+<h2>Terms of use</h2>
+<ul>
+  <li>The planner is free, and it's provided as it is, without guarantees. Dates, test results and school details come from public sources and may be out of date or wrong. <b>Always confirm with the school and in MySchools.</b></li>
+  <li>The match score is a guide to help you choose which schools to visit. It isn't an official rating or a prediction of admission.</li>
+  <li>You're responsible for submitting your application in MySchools by the deadline. The planner isn't responsible for missed deadlines or decisions made using it.</li>
+  <li>Please don't try to reach other people's data or disrupt the service.</li>
+  <li>We may change or stop the planner. If we do, we'll say so in the planner, and you can download your data first.</li>
+</ul>
+
+<h2>Contact</h2>
+<p>Questions, problems, wrong dates, or requests about your data: <a data-help href="#">email us</a>.</p>
+</article>
+</main>
+<script type="module" src="./src/privacy.js"></script>

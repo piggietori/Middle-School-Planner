@@ -8,8 +8,13 @@ import {fakeServer, useFakeBackend} from "./fake-backend.js";
 const link = (uid, email = uid + "@example.com") => `/#access_token=fake&uid=${uid}&email=${encodeURIComponent(email)}`;
 const LOCAL_PLAN = JSON.stringify({home: "dyker", saved: ["20K201", "20K187"], going: ["oh-20K201-2026-11-09-1700"], attended: [], done: {s1: true, s2: true}, notes: {}});
 
+// Each "device" is its own browser context, closed after the test so leftover pages don't slow the next one.
+const contexts = [];
+test.afterEach(async () => { await Promise.all(contexts.splice(0).map(c => c.close())); });
+
 async function device(browser, server, {plan, bypassCSP = false} = {}) {
   const context = await browser.newContext({bypassCSP});
+  contexts.push(context);
   await useFakeBackend(context, server);
   if (plan) await context.addInitScript(p => {
     if (location.protocol === "http:" && !localStorage.getItem("d20plan")) localStorage.setItem("d20plan", p);

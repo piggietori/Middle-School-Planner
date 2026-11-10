@@ -1,6 +1,6 @@
 /* Signing in, keeping the plan in sync with the account, and leaving (journeys J2, J3 and J7 in docs/journeys.md).
    Signed out, nothing here loads or runs: the plan stays on this device, exactly as before. */
-import {SESSION_KEY} from "./config.js";
+import {PILOT, SESSION_KEY} from "./config.js";
 import {CYCLE} from "./data.js";
 import {reportError, setLogging, takeLogs, track} from "./log.js";
 import {CHILD_KEYS, toRows, fromRows, diffRows, isNoop, isEmpty, mergePlans} from "./plan-model.js";
@@ -159,6 +159,7 @@ export async function sendLink(email){
   }catch(e){
     console.error(e);
     acct.error=/rate limit|too many/i.test(e.message||"")?"Too many sign-in emails were sent. Wait a few minutes, then try again."
+      :/signups? not allowed|otp_disabled/i.test((e.message||"")+" "+(e.code||""))?"The planner is invite-only for now. Ask the person who shared it with you to invite this email address."
       :"Couldn't send the email. Check the address and your connection, then try again.";
   }
   renderAccount();
@@ -256,7 +257,7 @@ function sheetBody(){
       <button class="btn primary" type="submit">Email me a sign-in link</button>
     </form>
     ${acct.lost?`<p class="muted small" style="margin:0">Not ${esc(acct.lost)}? <button class="linkbtn" data-acct="forget">Forget this email</button></p>`:""}
-    <p class="muted small" style="margin:0">Signing in is optional. Your plan always stays on this device too.</p>`;
+    <p class="muted small" style="margin:0">Signing in is optional. Your plan always stays on this device too. By signing in you agree to the <a href="privacy.html" target="_blank">privacy notice and terms</a>.${PILOT?" This planner is a pilot, so things may change.":""}</p>`;
 }
 
 export function renderAccount(){

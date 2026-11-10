@@ -7,9 +7,13 @@ const DEFAULT_PLAN = {home: "", max_miles: 1.5, need_subway: false, skip_competi
   weights: {distance: 2, scores: 1, safety: 2, bullying: 1, teachers: 1}, programs: []};
 
 export function fakeServer() {
-  const server = {outbox: [], plans: {}, byUser: {}, sessions: {}, events: [], errors: [], deleted: [], failSaves: false, saves: 0};
+  const server = {outbox: [], plans: {}, byUser: {}, sessions: {}, events: [], errors: [], deleted: [], failSaves: false, saves: 0, invited: null};
   server.handle = (op, ...args) => {
-    if (op === "sendLink") { server.outbox.push(args[0]); return null; }
+    if (op === "sendLink") {
+      // With sign-ups off (the pilot), Supabase refuses addresses nobody invited.
+      if (server.invited && !server.invited.includes(args[0])) throw new Error("Signups not allowed for otp");
+      server.outbox.push(args[0]); return null;
+    }
     if (op === "openPlan") {
       const [uid] = args;
       if (!server.byUser[uid]) {

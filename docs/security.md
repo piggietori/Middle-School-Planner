@@ -32,7 +32,9 @@ For the keys and passwords themselves, see [secrets.md](secrets.md). For what pe
 
 **In the browser**
 - The site holds only the project URL and the publishable key (`src/config.js`).
-- Signed-out visitors never contact Supabase: the library isn't even downloaded. A browser test checks this.
+- Signed-out visitors never contact Supabase, except to send feedback they chose to send: the library isn't even
+  downloaded. A browser test checks this. Feedback is sent without the account, and the `feedback` table can be
+  written but not read through the API.
 - Text from data files and from families (notes) goes through `esc()` before it becomes HTML.
 - The sign-in session is kept in `localStorage`. That's normal for a site without its own server, and it's why
   stopping script injection matters most.
@@ -40,7 +42,8 @@ For the keys and passwords themselves, see [secrets.md](secrets.md). For what pe
 **Sign-in**
 - Emailed links only, so no passwords are stored anywhere.
 - Allowed return addresses are set in Supabase (URL Configuration): only the live site and `localhost` for development.
-- Supabase limits how many sign-in emails can be sent: about 2 an hour on the built-in sender.
+- Sign-in emails go through Resend, from our own domain, limited to 30 an hour in Supabase.
+- During the pilot, new sign-ups are off: only invited addresses can sign in.
 
 **In the database** ([supabase/migrations/](../supabase/migrations/))
 - Row-level security is on for every table, with policies for signed-in people only.
@@ -67,11 +70,10 @@ For the keys and passwords themselves, see [secrets.md](secrets.md). For what pe
 |---|---|---|---|
 | Inline styles allowed by the CSP | Injected styles could change how the page looks (not run code) | Move the views' `style="…"` attributes into classes, then drop `'unsafe-inline'` | Later cleanup |
 | The CSP is a `<meta>` tag, so it can't stop other sites framing the planner (`frame-ancestors`) | Clickjacking. Low risk: no one-click destructive actions, and deleting needs DELETE typed | A host that can set headers | If we move off GitHub Pages |
-| Actions pinned to versions like `@v4`, not commit SHAs; no Dependabot | A compromised Action version could run in our workflows | Pin to SHAs and turn on Dependabot for Actions and npm | Soon |
+| Actions pinned to versions like `@v4`, not commit SHAs | A compromised Action version could run in our workflows | Pin to SHAs. Dependabot already proposes updates weekly (`.github/dependabot.yml`) | After December 11 |
 | 2FA can't be required for the Supabase organization | Anyone added to the Supabase organization later could sign in without 2FA | Requiring it needs the Pro plan; until then keep 2FA on your own accounts | When you scale |
-| Built-in email sender | Rate-limited; emails may land in spam | Custom SMTP (for example Resend) | Before public launch |
 | No audit log | We can't see who changed what in a shared household | Add when households can be shared | v2 |
-| No privacy policy | Required before strangers use it | Write it from [privacy.md](privacy.md) | Before public launch |
+| No CAPTCHA on sign-in or feedback | Someone could send many sign-in emails or feedback messages | Supabase's limits (30 emails an hour), 20 feedback emails an hour, and the monitor's flood alert. Add a CAPTCHA if abuse appears | If needed |
 
 ## Content-Security-Policy
 

@@ -9,7 +9,7 @@ School and open house data isn't covered here: it lives in git, and its history 
 |---|---|---|---|
 | 1. The device | The browser on every device the family uses (`localStorage`) | Instantly | The server being down or unreachable; working offline |
 | 2. The account | Supabase database (encrypted at rest) | Within a second | A lost or wiped phone or laptop, a new device |
-| 3. The backup | Encrypted file in GitHub Actions, kept 90 days | Daily Oct–Dec, twice a week otherwise | A mistake or bug that changes the account and then syncs to every device; a deleted account; a lost Supabase project |
+| 3. The backup | Encrypted file in the private `planner-ops` repository's Actions, kept 90 days | Daily Oct–Dec, twice a week otherwise | A mistake or bug that changes the account and then syncs to every device; a deleted account; a lost Supabase project |
 | 4. The family's own download | Wherever they save it (Account → Download my data) | When they download it | Anything, as long as they keep it |
 
 A family that never signs in has only copy 1. Clearing their browser data or losing the device loses their plan.
@@ -19,14 +19,14 @@ The Home screen suggests signing in ("Keep your plan safe") as soon as they've s
 
 | | |
 |---|---|
-| Workflow | `.github/workflows/backup.yml` (*Backup* in Actions) |
+| Workflow | `.github/workflows/backup.yml` in the private `planner-ops` repository (*Backup* in its Actions). Private, so only you can download the files |
 | When | Every day in October to December, Sundays and Wednesdays the rest of the year, at about 4 AM New York time; or by hand |
 | What | `users.csv` (account ID, email, created date) and `public-data.sql` (every household, plan, saved school, visit, step, note, session, event and error) |
 | Not included | Source data (in git), passwords (there are none: sign-in is by emailed link), plans that exist only on a device |
 | Encryption | gpg, AES-256, with the passphrase in the `BACKUP_PASSPHRASE` secret, before the file leaves GitHub's runner |
 | Kept | 90 days as a workflow artifact, then deleted by GitHub automatically |
 | Size | About 2 KB per household |
-| Needs | Repository secrets `SUPABASE_DB_URL` and `BACKUP_PASSPHRASE` ([secrets.md](secrets.md)) |
+| Needs | `planner-ops` secrets `SUPABASE_DB_URL` and `BACKUP_PASSPHRASE` ([secrets.md](secrets.md)) |
 
 **Why this schedule:** at most a day of changes can be lost during application season, when families change their
 plans almost every day before the December 11 deadline. Outside the season, at most four days, which is a few minutes
@@ -37,7 +37,9 @@ kept 7 days. See [When to revisit](#when-to-revisit).
 
 ## Checking that backups are running
 
-- GitHub → **Actions** → **Backup**: each run should be green, with "Backup <date>: <size>, encrypted." in its summary
+- The hourly monitor opens an `ALERT: Backups` issue, which emails you, if no backup succeeded in 30 hours (October
+  to December) or 5 days (otherwise) ([operations.md](operations.md#monitoring)).
+- `planner-ops` → **Actions** → **Backup**: each run should be green, with "Backup <date>: <size>, encrypted." in its summary
   and a **backup** artifact.
 - GitHub emails you when a scheduled run fails. The usual cause is a database password that was reset without
   updating `SUPABASE_DB_URL` ([secrets.md](secrets.md#reset-the-database-password)).
@@ -48,7 +50,7 @@ How long it takes: about 30 minutes for the database, by hand. Families keep usi
 their changes sync once the account is back.
 
 **One family's plan, after a mistake** (most likely):
-1. Download the backup from before the mistake: Actions → Backup → the run → Artifacts → **backup**. Unzip it.
+1. Download the backup from before the mistake: `planner-ops` → Actions → Backup → the run → Artifacts → **backup**. Unzip it.
 2. Decrypt it in Git Bash: `gpg -d backup-<date>.tar.gz.gpg | tar -xz` (asks for the passphrase).
 3. In `public-data.sql`, find the rows for that household's plan (`plan_id`). In the Supabase SQL Editor, replace that
    plan's rows in `saved_schools`, `visits`, `step_progress` and `school_notes` with those rows.
@@ -75,29 +77,25 @@ Supabase pauses a free project after about a week without database activity. Not
 can be resumed for up to a year), but signing in and syncing fail ("Couldn't reach your account") until you resume
 it. Families keep working on their device copies meanwhile.
 
-**How it's prevented:** each backup's database dump counts as activity, and backups are never more than 4 days
-apart (daily in season, Sundays and Wednesdays otherwise).
+**How it's prevented:** the monitor queries the database every hour, and each backup's dump counts as activity too.
 
 **How you'd be warned,** in order:
 1. Supabase emails the account owner before pausing. Make sure email from supabase.com never goes to spam (in Gmail:
    search `from:supabase.com`, then "Create filter" → "Never send it to Spam").
-2. If it pauses anyway, the next *Backup* run can't connect and fails, and GitHub emails you.
+2. If it pauses anyway, within an hour the monitor opens `ALERT: Supabase up` and `ALERT: Database reachable`.
 
-**To fix:** Supabase dashboard → the project → **Resume project**. Then Actions → *Backup* → Run workflow to check.
+**To fix:** Supabase dashboard → the project → **Resume project**. The alerts close on the next hourly run.
 
-**The trap behind it:** GitHub turns off scheduled workflows in a public repository after 60 days without a commit.
-If that happened to *Backup*, nothing would keep Supabase awake. It's most likely in January–March, before the spring
-data refresh. GitHub shows "This scheduled workflow is disabled…" on the workflow's page. In February and March,
-open Actions → *Backup*: if it says disabled, click **Enable workflow** (any commit to `main` also resets the 60 days).
+**A trap that no longer applies:** GitHub turns off scheduled workflows in a *public* repository after 60 days
+without a commit. *Backup* and *Monitor* now run in a private repository, where that doesn't happen. *Watch sources*
+in the public repository can still be turned off; see [operations.md](operations.md#the-year-at-a-glance).
 
 ## When to revisit
 
 Size isn't the limit: even 100,000 households would be about 200 MB, a dump of a minute or two. Rethink backups when:
 
-- **The first family outside your household signs up.** Backups would then hold other people's data, including
-  email addresses. Even encrypted, a public repository's artifacts are the wrong place for it.
 - **There are more than about 100 households,** or losing a day of changes becomes unacceptable.
-- **You move to a paid Supabase plan,** or write a privacy policy.
+- **You move to a paid Supabase plan.**
 
 The plan then:
 - Move to Supabase Pro, for daily backups kept 7 days. Add point-in-time recovery when even a day of loss matters.

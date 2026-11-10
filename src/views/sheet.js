@@ -35,7 +35,6 @@ export function renderSheet(){
       <div><div class="rank">${s.dbn}</div><h2 style="margin-top:4px">${esc(s.name)}</h2>
       <div class="meta" style="margin-top:6px"><span>${esc(s.addr)}</span>${m.dist!=null?`<span>${m.dist.toFixed(1)} mi from home</span>`:""}<span>Grades ${s.grades}</span><span>${s.size.toLocaleString()} students</span></div></div>
       <div class="card">${meter(m.score)}<p class="muted small" style="margin:.5rem 0 0">How well this school fits the answers you gave on Find schools.</p></div>
-      <div class="card stack notes-card" id="notesbox">${notesCard(s.dbn)}</div>
       <div class="card stack"><h3>Where it is</h3>
         <div class="row"><a class="btn primary" href="${gmaps(s)}" target="_blank" rel="noopener">${homePt(st)?"Directions in Google Maps":"Open in Google Maps"}</a></div>
         <div class="muted small" id="mapnote">${esc(s.addr)}, Brooklyn${m.dist!=null?" · "+m.dist.toFixed(1)+" mi from home in a straight line":" · Pick your neighborhood on Find schools to see the distance"}</div></div>
@@ -57,5 +56,6 @@ export function renderSheet(){
       <div class="card"><h3>Open houses</h3>${ev.map(e=>evRow(e)).join("")}</div>
       <div class="row"><a class="btn" href="${s.web}" target="_blank" rel="noopener">School website</a><a class="btn" href="https://insideschools.org/school/${s.dbn}" target="_blank" rel="noopener">Full review on InsideSchools</a>${s.flyer?`<a class="btn" href="${s.flyer}" target="_blank" rel="noopener">Open house flyer</a>`:""}</div>
       <p class="muted small" style="margin:0">${sources(s)} Check with the school for the latest.</p>
+      <div class="card stack notes-card" id="notesbox">${notesCard(s.dbn)}</div>
     </div></div></div>`;
 }

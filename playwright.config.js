@@ -8,6 +8,7 @@ export default defineConfig({
   projects: [
     {name: "desktop", use: {...devices["Desktop Chrome"]}},
     {name: "phone", use: {...devices["Pixel 7"]}},
+    {name: "iphone", use: {...devices["iPhone 14"]}}, // Safari's engine: many families use iPhones
   ],
   webServer: {command: "node scripts/serve.js 5174", url: "http://localhost:5174", reuseExistingServer: !process.env.CI},
 });

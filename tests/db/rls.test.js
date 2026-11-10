@@ -160,3 +160,17 @@ test("deleting an account removes the person, and their household only if nobody
   assert.deepEqual(await rows("select id from public.plans where id = $1", [planA]), [{id: planA}]);
   assert.deepEqual(await rows("select user_id from public.household_members where user_id in ($1, $2)", [A, C]), [{user_id: A}]);
 });
+
+test("old events and errors are pruned, and only the database owner can prune", async () => {
+  await db.exec("reset role");
+  await db.query("insert into public.events (user_id, name, at) values ($1, 'app_open', now() - interval '13 months'), ($1, 'step_done', now() - interval '11 months')", [A]);
+  await db.query("insert into public.client_errors (user_id, message, at) values ($1, 'old', now() - interval '91 days'), ($1, 'recent', now() - interval '89 days')", [A]);
+  const before = (await rows("select count(*)::int as n from public.events"))[0].n;
+  assert.deepEqual((await rows("select public.prune_logs() as r"))[0].r, {errors: 1, events: 1});
+  assert.equal((await rows("select count(*)::int as n from public.events"))[0].n, before - 1);
+  assert.deepEqual(await rows("select message from public.client_errors where message in ('old', 'recent')"), [{message: "recent"}]);
+  await as(A);
+  await denied(db.query("select public.prune_logs()"));
+  await as(null);
+  await denied(db.query("select public.prune_logs()"));
+});

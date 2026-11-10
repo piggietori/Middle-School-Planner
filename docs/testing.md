@@ -1,8 +1,7 @@
 # Testing
 
 What's tested, what each layer proves, and how to run it. Everything except the live check runs in CI on every
-pull request. Until `main` is protected ([security.md](security.md#known-gaps-and-what-to-do-about-them)), don't merge
-a pull request whose CI is red.
+pull request, and the `main` ruleset doesn't allow merging until it passes.
 
 ## Layers
 
@@ -13,10 +12,10 @@ a pull request whose CI is red.
 | Plan sync | `tests/unit/plan-model.test.js` | 9 | Plans turn into database rows and back without loss; only changed rows are saved; merging two plans follows the rules |
 | Data checks | `tests/unit/data.test.js` | 12 | Each kind of data mistake is caught (bad schema, broken references, removed IDs, impossible dates, stale text), on a frozen copy of the data so a refresh never breaks the tests. The live data has no errors |
 | Source watch | `tests/unit/watch.test.js` | 4 | Page changes are detected; markup and tracking codes aren't mistaken for changes |
-| Database security | `tests/db/rls.test.js` | 11 | Every migration runs in real Postgres (PGlite). Different people try to read and change each other's data, sign up for other households, and delete accounts; the database refuses what it should |
+| Database security | `tests/db/rls.test.js` | 12 | Every migration runs in real Postgres (PGlite). Different people try to read and change each other's data, sign up for other households, and delete accounts; the database refuses what it should. Old events and errors are pruned, and only the database owner can prune |
 | Data files | `npm run check:data` | — | The real `data/*.json` passes every check; compared with `main`, no ID was removed |
-| Browser journeys | `tests/e2e/*.spec.js` | 22 scenarios × 2 (desktop and phone) | The journeys in [journeys.md](journeys.md), end to end in Chromium: first visit, sign-in and merge, a second device, offline saves, resume, Next up, after the deadline, sign-out choices, download, delete, logging, and that signed-out visitors make no requests. An in-memory fake stands in for Supabase |
-| Live check | `node scripts/check-supabase.js` | 15 checks | The real Supabase project, from outside: every table and function refuses signed-out visitors; email sign-in is on and anonymous sign-ins are off. Run by hand after database changes |
+| Browser journeys | `tests/e2e/*.spec.js` | 24 scenarios × 2 (desktop and phone) | The journeys in [journeys.md](journeys.md), end to end in Chromium: first visit, sign-in and merge, a second device, offline saves, resume, Next up, after the deadline, sign-out choices, download, delete, logging, and that signed-out visitors contact no other site. Security: a note that looks like code is shown as text, and the Content-Security-Policy blocks inline scripts. An in-memory fake stands in for Supabase |
+| Live check | `node scripts/check-supabase.js` | 16 checks | The real Supabase project, from outside: every table and function refuses signed-out visitors; email sign-in is on and anonymous sign-ins are off. Run by hand after database changes |
 
 ## Running them
 

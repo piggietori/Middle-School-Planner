@@ -127,7 +127,7 @@ file that talks to Supabase is `src/sync/backend.js`, and signed-out visitors ne
   and browser journeys on desktop and phone sizes ([testing.md](testing.md)).
 - **Scheduled workflows:**
   - *Watch sources*: Mondays.
-  - *Backup*: daily Oct–Dec, Sundays otherwise.
+  - *Backup*: daily Oct–Dec, Sundays and Wednesdays otherwise.
   - *New admissions cycle*: August 15.
   - *Refresh data*: run by hand.
 

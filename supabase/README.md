@@ -24,7 +24,7 @@ Signed-out visitors never talk to it. School data is not here; it lives in `data
 4. **Sign-in emails.** Authentication → Sign In / Providers → Email stays on. Supabase's built-in email sender is limited to a few emails an hour, which is fine for one household. Before opening to the public, set up custom SMTP (Authentication → Emails → SMTP Settings).
 
 5. **Backups.** The free plan has no backups of its own (the Pro plan adds daily backups kept 7 days). The
-   *Backup* workflow (`.github/workflows/backup.yml`) makes an encrypted one instead: daily in October to December (application season), weekly otherwise. To turn it on, add two
+   *Backup* workflow (`.github/workflows/backup.yml`) makes an encrypted one instead: daily in October to December (application season), twice a week otherwise. To turn it on, add two
    repository secrets yourself (GitHub → Settings → Secrets and variables → Actions → New repository secret):
    - `SUPABASE_DB_URL`: Dashboard → **Connect** → **Session pooler** connection string, with your database password
      in place of `[YOUR-PASSWORD]`. (Use the pooler: GitHub's runners can't reach the direct connection.)

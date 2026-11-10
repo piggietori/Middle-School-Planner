@@ -28,6 +28,7 @@ Architecture, data refresh, backups, security, privacy, operations and testing: 
 
 - **MVP** (`v0.1.0`, tag `mvp`): the original single-file planner. [Release](https://github.com/piggietori/Middle-School-Planner/releases/tag/v0.1.0)
 - **v1** (`v1.0.0`): data that stays up to date (with a weekly source watch), optional accounts that keep the plan on every device, picking up where you left off, and download/delete for your data. See [docs/journeys.md](docs/journeys.md). [Release](https://github.com/piggietori/Middle-School-Planner/releases/tag/v1.0.0)
+- **v1.1** (`v1.1.0`): hardening. A Content-Security-Policy that blocks injected scripts, fonts served from the site (no Google requests), events and errors deleted automatically after a year and 90 days, and backups twice a week off-season so Supabase never pauses. Plus the docs in [docs/](docs/README.md).
 
 ## Development
 
@@ -71,4 +72,4 @@ Every source changes about once a year, so each one is pulled once a year by a p
 - Update `as_of` on everything you check by hand.
 - **Never delete or rename an ID** (school DBN, event `id`, neighborhood `id`, step `id`): saved plans point at them. If an open house moves, change its date or time, keep its `id`, and add `"was": {"date": ..., "start": ...}` so families see it moved. If one is cancelled, remove it and add its ID to `retired_ids`.
 
-CI runs lint, the data checks and both test suites on every pull request. Pushes to `main` deploy to GitHub Pages (Settings → Pages → Source must be "GitHub Actions"). The refresh workflow needs Settings → Actions → General → "Allow GitHub Actions to create and approve pull requests". The weekly *Backup* workflow stays off until you add its two secrets ([supabase/README.md](supabase/README.md)).
+CI runs lint, the data checks and both test suites on every pull request. Pushes to `main` deploy to GitHub Pages (Settings → Pages → Source must be "GitHub Actions"). The refresh workflow needs Settings → Actions → General → "Allow GitHub Actions to create and approve pull requests". The *Backup* workflow stays off until you add its two secrets ([supabase/README.md](supabase/README.md)).

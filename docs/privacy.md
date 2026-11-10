@@ -11,8 +11,8 @@ a privacy policy, which the planner needs before it's opened to families outside
 | The plan: home neighborhood, priorities, saved schools, visits, steps | The device; the account if signed in; backups | It's the planner | The household; the project owner | Deleted by the family (device: sign out and remove, or clear the browser) |
 | Notes about schools (rating, likes, concerns) | Same as the plan | Comparing schools | Same as the plan | Same as the plan |
 | Where they left off (tab, open school) | The device; the account if signed in | Resume on any device | The person; the project owner | The account is deleted |
-| Usage events: app opened, signed in, school saved or removed, visit marked, step done, save failed. IDs only | Supabase `events` (signed in only) | Knowing which features are used and where people get stuck | The project owner only | **Forever today** (see below). Unlinked from the person if they delete their account |
-| Errors: message, where in the app, browser type | Supabase `client_errors` (signed in only) | Fixing problems | The project owner only | **Forever today**. Unlinked on account deletion |
+| Usage events: app opened, signed in, school saved or removed, visit marked, step done, save failed. IDs only | Supabase `events` (signed in only) | Knowing which features are used and where people get stuck | The project owner only | 1 year, then deleted automatically (backups keep copies 90 days more). Unlinked from the person if they delete their account |
+| Errors: message, where in the app, browser type | Supabase `client_errors` (signed in only) | Fixing problems | The project owner only | 90 days, then deleted automatically (backups: 90 days more). Unlinked on account deletion |
 
 **What we don't keep:**
 - passwords (sign-in is by emailed link)
@@ -38,11 +38,12 @@ We also don't record anything about visitors who aren't signed in.
 | Service | When | What it learns |
 |---|---|---|
 | GitHub Pages | Every visit | IP address and browser, like any website |
-| Google Fonts | Every visit, even signed out | IP address and browser. To avoid this, serve the fonts from our own site ([security.md](security.md#known-gaps-and-what-to-do-about-them)) |
 | Supabase | Signed in only | The account and plan, as above |
 | Google Calendar, MySchools, school websites, InsideSchools, Google Maps | Only when the family clicks a link | Whatever that site normally collects |
 
-The planner has no ads, analytics scripts or trackers.
+The fonts are served from the site itself, so visiting doesn't contact Google. The planner has no ads, analytics
+scripts or trackers, and its [Content-Security-Policy](security.md#content-security-policy) stops the page contacting
+any other server.
 
 ## Children
 
@@ -58,12 +59,23 @@ child in them. The planner isn't meant to be used by children themselves.
   past usage events and errors stay, without anything linking them to the person.
 - **Sign out and remove:** takes the plan off a shared computer.
 
+## How long it's kept
+
+Every night at 3:30 UTC, a scheduled job in the database (`prune-logs`, using pg_cron) runs `public.prune_logs()`,
+which deletes errors older than 90 days and events older than a year
+(`supabase/migrations/20261111120000_retention.sql`). To check it ran, in the SQL Editor:
+
+```sql
+select jobname, schedule, active from cron.job;
+select status, return_message, start_time from cron.job_run_details order by start_time desc limit 5;
+```
+
+To change the periods, add a new migration that replaces the function (`create or replace function public.prune_logs()…`).
+
 ## To decide before opening to other families
 
 | Decision | Recommendation |
 |---|---|
-| How long to keep usage events and errors | Errors 90 days, events 1 year. A small scheduled delete in the database (pg_cron), added as a migration |
 | Backups holding other families' data | Move backups off GitHub ([backups.md](backups.md#when-to-revisit)) |
 | A privacy policy and terms | Write them from this page, and link them in the app's footer and the sign-in sheet |
-| Google Fonts | Serve the fonts from the site |
 | Where the data is stored | Choose the Supabase region knowingly (the project's region is shown in the dashboard), and say it in the policy |

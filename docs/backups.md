@@ -9,7 +9,7 @@ School and open house data isn't covered here: it lives in git, and its history 
 |---|---|---|---|
 | 1. The device | The browser on every device the family uses (`localStorage`) | Instantly | The server being down or unreachable; working offline |
 | 2. The account | Supabase database (encrypted at rest) | Within a second | A lost or wiped phone or laptop, a new device |
-| 3. The backup | Encrypted file in GitHub Actions, kept 90 days | Daily Oct–Dec, weekly otherwise | A mistake or bug that changes the account and then syncs to every device; a deleted account; a lost Supabase project |
+| 3. The backup | Encrypted file in GitHub Actions, kept 90 days | Daily Oct–Dec, twice a week otherwise | A mistake or bug that changes the account and then syncs to every device; a deleted account; a lost Supabase project |
 | 4. The family's own download | Wherever they save it (Account → Download my data) | When they download it | Anything, as long as they keep it |
 
 A family that never signs in has only copy 1. Clearing their browser data or losing the device loses their plan.
@@ -20,7 +20,7 @@ The Home screen suggests signing in ("Keep your plan safe") as soon as they've s
 | | |
 |---|---|
 | Workflow | `.github/workflows/backup.yml` (*Backup* in Actions) |
-| When | Every day in October to December, Sundays the rest of the year, at about 4 AM New York time; or by hand |
+| When | Every day in October to December, Sundays and Wednesdays the rest of the year, at about 4 AM New York time; or by hand |
 | What | `users.csv` (account ID, email, created date) and `public-data.sql` (every household, plan, saved school, visit, step, note, session, event and error) |
 | Not included | Source data (in git), passwords (there are none: sign-in is by emailed link), plans that exist only on a device |
 | Encryption | gpg, AES-256, with the passphrase in the `BACKUP_PASSPHRASE` secret, before the file leaves GitHub's runner |
@@ -29,7 +29,7 @@ The Home screen suggests signing in ("Keep your plan safe") as soon as they've s
 | Needs | Repository secrets `SUPABASE_DB_URL` and `BACKUP_PASSPHRASE` ([secrets.md](secrets.md)) |
 
 **Why this schedule:** at most a day of changes can be lost during application season, when families change their
-plans almost every day before the December 11 deadline. Outside the season, at most a week, which is a few minutes
+plans almost every day before the December 11 deadline. Outside the season, at most four days, which is a few minutes
 of re-entering.
 
 **Why not Supabase's own backups:** the free plan doesn't have any. The Pro plan ($25/month) adds daily backups
@@ -71,13 +71,24 @@ Steps: [secrets.md](secrets.md#restore-drill-once-then-every-august).
 
 ## Supabase project pausing
 
-Supabase pauses a free project after about a week without database activity, and emails the owner a warning
-first. Nothing is lost, but signing in and syncing fail ("Couldn't reach your account") until you restore it:
-Supabase dashboard → the project → **Restore**. Families keep working on their device copies meanwhile.
+Supabase pauses a free project after about a week without database activity. Nothing is lost (a paused project
+can be resumed for up to a year), but signing in and syncing fail ("Couldn't reach your account") until you resume
+it. Families keep working on their device copies meanwhile.
 
-The backup's database dump counts as activity. Daily in season that's plenty. Weekly, outside the season, it's close
-to the limit if nobody uses the planner, so watch for the warning email. If it becomes a problem, move the
-off-season backup to twice a week.
+**How it's prevented:** each backup's database dump counts as activity, and backups are never more than 4 days
+apart (daily in season, Sundays and Wednesdays otherwise).
+
+**How you'd be warned,** in order:
+1. Supabase emails the account owner before pausing. Make sure email from supabase.com never goes to spam (in Gmail:
+   search `from:supabase.com`, then "Create filter" → "Never send it to Spam").
+2. If it pauses anyway, the next *Backup* run can't connect and fails, and GitHub emails you.
+
+**To fix:** Supabase dashboard → the project → **Resume project**. Then Actions → *Backup* → Run workflow to check.
+
+**The trap behind it:** GitHub turns off scheduled workflows in a public repository after 60 days without a commit.
+If that happened to *Backup*, nothing would keep Supabase awake. It's most likely in January–March, before the spring
+data refresh. GitHub shows "This scheduled workflow is disabled…" on the workflow's page. In February and March,
+open Actions → *Backup*: if it says disabled, click **Enable workflow** (any commit to `main` also resets the 60 days).
 
 ## When to revisit
 

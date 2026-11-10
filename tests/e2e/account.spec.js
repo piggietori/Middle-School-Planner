@@ -8,8 +8,8 @@ import {fakeServer, useFakeBackend} from "./fake-backend.js";
 const link = (uid, email = uid + "@example.com") => `/#access_token=fake&uid=${uid}&email=${encodeURIComponent(email)}`;
 const LOCAL_PLAN = JSON.stringify({home: "dyker", saved: ["20K201", "20K187"], going: ["oh-20K201-2026-11-09-1700"], attended: [], done: {s1: true, s2: true}, notes: {}});
 
-async function device(browser, server, {plan} = {}) {
-  const context = await browser.newContext();
+async function device(browser, server, {plan, bypassCSP = false} = {}) {
+  const context = await browser.newContext({bypassCSP});
   await useFakeBackend(context, server);
   if (plan) await context.addInitScript(p => {
     if (location.protocol === "http:" && !localStorage.getItem("d20plan")) localStorage.setItem("d20plan", p);
@@ -233,7 +233,8 @@ test("deleting an account needs DELETE typed, then removes the account and, if c
 
 test("signed in, usage events and errors are sent, with IDs only (logging)", async ({browser}) => {
   const server = fakeServer();
-  const page = await device(browser, server);
+  // The error is injected as an inline handler, which the Content-Security-Policy would block (security.spec.js).
+  const page = await device(browser, server, {bypassCSP: true});
   page.removeAllListeners("pageerror"); // this test causes an error on purpose
   await page.goto(link("a"));
   await synced(page);
@@ -248,7 +249,7 @@ test("signed in, usage events and errors are sent, with IDs only (logging)", asy
   expect(server.errors[0].context).toMatch(/^page · \/ · find$/);
 });
 
-test("signed-out visitors don't download the account library or contact the server", async ({page}) => {
+test("signed-out visitors don't download the account library or contact any other site", async ({page}) => {
   const requests = [];
   page.on("request", r => requests.push(r.url()));
   await useFixtureData(page);
@@ -256,4 +257,5 @@ test("signed-out visitors don't download the account library or contact the serv
   await expect(page.locator("#acct")).toHaveText("Sign in");
   await page.locator('.tab[data-tab="find"]').click();
   expect(requests.filter(u => u.includes("/vendor/") || u.includes("supabase.co"))).toEqual([]);
+  expect(requests.filter(u => new URL(u).origin !== "http://localhost:5174")).toEqual([]); // no fonts from Google either
 });

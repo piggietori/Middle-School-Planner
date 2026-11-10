@@ -20,7 +20,7 @@ For the keys and passwords themselves, see [secrets.md](secrets.md). For what pe
 | A signed-out visitor probes the database API | Every table refuses the `anon` role; functions can't be called signed out | `scripts/check-supabase.js` against the live project |
 | The key in the website is misused | It's the publishable key, made to be public: it can do only what row-level security allows a signed-out visitor, which is nothing | Same |
 | The secret key or database password leaks | Neither is in the code or the site. The secret key isn't used anywhere; the database password is only in a GitHub secret | [secrets.md](secrets.md) |
-| A script injected into the page steals a session | Everything families type and everything from data files is escaped before it's shown. No third-party scripts run. A Content-Security-Policy is still to do (below) | Code review |
+| A script injected into the page steals a session | Everything families type is escaped before it's shown. No third-party scripts run. The [Content-Security-Policy](#content-security-policy) blocks any script that isn't one of the site's own files, and stops scripts sending data anywhere but Supabase | `tests/e2e/security.spec.js` |
 | A compromised library | The only runtime library (supabase-js) is copied into the repo at a fixed version by `scripts/vendor-supabase.js`, which records its checksum, so any change to it shows up in review. npm packages are used only for development and tests | — |
 | A compromised workflow | Each workflow asks only for the permissions it needs (most only read). Secrets aren't available to pull requests from forks | Workflow files |
 | Someone signs in as you | Sign-in is by emailed link, so it's as safe as your email. Links work once and expire in an hour. Links only send people back to our own site's addresses. Anonymous sign-ins are off | Supabase settings, `check-supabase.js` |
@@ -57,24 +57,58 @@ For the keys and passwords themselves, see [secrets.md](secrets.md). For what pe
 - Backups are encrypted (gpg, AES-256) before they leave GitHub's runner. Only the passphrase opens them.
 
 **In GitHub**
-- Changes reach `main` through pull requests, with CI run on each. (Not yet enforced: see the gaps below.)
+- `main` is protected by a ruleset: changes arrive only through pull requests whose CI check (`check`) passed;
+  force pushes and deleting the branch are blocked, and nobody can bypass it.
 - Workflows ask for the least access they need: CI and the watch only read, and the backup can't write to the repo.
 
 ## Known gaps and what to do about them
 
 | Gap | Risk | Recommendation | When |
 |---|---|---|---|
-| No Content-Security-Policy | If a script were ever injected, nothing would stop it from sending the session elsewhere | Add a CSP `<meta>` tag allowing only this site, Supabase and Google Fonts | Soon: small change |
-| Google Fonts loaded from Google | Google sees every visitor's IP address, signed in or not | Serve the two fonts from the site | With the CSP |
+| Inline styles allowed by the CSP | Injected styles could change how the page looks (not run code) | Move the views' `style="…"` attributes into classes, then drop `'unsafe-inline'` | Later cleanup |
+| The CSP is a `<meta>` tag, so it can't stop other sites framing the planner (`frame-ancestors`) | Clickjacking. Low risk: no one-click destructive actions, and deleting needs DELETE typed | A host that can set headers | If we move off GitHub Pages |
 | Actions pinned to versions like `@v4`, not commit SHAs; no Dependabot | A compromised Action version could run in our workflows | Pin to SHAs and turn on Dependabot for Actions and npm | Soon |
-| `main` isn't a protected branch | A direct push could skip CI | Settings → Branches → protect `main`: require the CI check and pull requests | Soon: settings only |
-| 2FA not required | A stolen GitHub or Supabase password exposes everything | Turn on 2FA for both accounts | Now: you |
+| 2FA can't be required for the Supabase organization | Anyone added to the Supabase organization later could sign in without 2FA | Requiring it needs the Pro plan; until then keep 2FA on your own accounts | When you scale |
 | Built-in email sender | Rate-limited; emails may land in spam | Custom SMTP (for example Resend) | Before public launch |
 | No audit log | We can't see who changed what in a shared household | Add when households can be shared | v2 |
 | No privacy policy | Required before strangers use it | Write it from [privacy.md](privacy.md) | Before public launch |
+
+## Content-Security-Policy
+
+The `<meta http-equiv="Content-Security-Policy">` tag in `index.html` tells the browser what the page may run,
+load and contact. GitHub Pages can't send security headers, so it's a tag instead.
+
+| Rule | What it allows | What it stops |
+|---|---|---|
+| `default-src 'self'` | Only the site's own files, for anything not listed below | Everything from other sites |
+| `script-src 'self'` | Only the site's own `.js` files | Inline `<script>`, `onclick="…"`-style handlers, `javascript:` links, `eval`, and scripts from anywhere else. This is what makes an injected script harmless |
+| `connect-src 'self' https://mhhszsyjxximewcuynis.supabase.co` | Requests to the site and to our Supabase project | A script sending the sign-in session or a plan to any other server |
+| `style-src 'self' 'unsafe-inline'` | The stylesheets, plus the `style="…"` attributes the views use | Stylesheets from other sites. Inline styles can't run code |
+| `font-src 'self'` | The fonts in `fonts/` | Fonts from anywhere else |
+| `img-src 'self' data:` | Images from the site, and inline `data:` images | Images that could leak data to other sites |
+| `object-src 'none'`, `base-uri 'self'`, `form-action 'self'` | — | Plugins, a `<base>` tag redirecting relative links, and forms posting elsewhere |
+
+Links to Google Calendar, Maps, MySchools and school sites still work: following a link isn't covered by the policy.
+
+**Seeing it work:** open the site, then DevTools (F12) → Console. A blocked script or request shows as
+"Refused to execute…" or "Refused to connect…". Seeing none means nothing was blocked.
+
+**When adding a service:** a new server the browser talks to (for example a new API) must be added to
+`connect-src`; a script, stylesheet or font from another site needs its own rule (better: copy it into the repo, as
+`scripts/vendor-supabase.js` and `scripts/vendor-fonts.js` do). Moving to a new Supabase project means changing the
+address here as well as in `src/config.js`. Server-side services, like a custom email sender, need no change.
+Test it locally (`npm run dev`, Console open) before opening the pull request; `tests/e2e/security.spec.js` checks
+the policy still blocks inline scripts.
+
+**Other defenses against malicious script:**
+- Everything a family types goes through `esc()` (`src/util.js`) before it becomes HTML, and attributes always use
+  double quotes. Values that aren't escaped are numbers, IDs the database restricts (school codes, ratings 0–5), or
+  text from the reviewed data files.
+- The only library, supabase-js, is copied into the repo at a fixed version; nothing loads from a CDN.
+- Signed-out visitors' browsers contact no server but the site itself (a browser test checks this).
 
 ## Checking it
 
 - Every pull request: the row-level security tests and the "signed-out visitors make no requests" browser test run in CI.
 - After every database change: `node scripts/check-supabase.js` must print "All checks passed".
-- Yearly (August checklist): the restore drill, and check that 2FA is still on.
+- Yearly (August checklist): the restore drill, check that 2FA is still on, and check the `main` ruleset is still active.

@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Collect site files
-        run: mkdir _site && cp -r index.html src data _site/
+        run: mkdir _site && cp -r index.html src data fonts _site/
       - uses: actions/upload-pages-artifact@v3
       - id: pages
         uses: actions/deploy-pages@v4

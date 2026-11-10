@@ -80,7 +80,11 @@ test("Send feedback goes straight to the owner, without the account, and keeps t
   });
   await page.goto("/#dates");
   await page.locator("footer.data-foot").getByRole("button", {name: "Send feedback"}).click();
-  await page.getByLabel("A date or school detail is wrong").check();
+  const choice = page.getByLabel("A date or school detail is wrong");
+  const [radio, label] = [await choice.boundingBox(), await page.locator(".fb-kinds label").nth(1).boundingBox()];
+  expect(radio.width).toBeLessThan(30); // a radio button, not stretched like the text boxes
+  expect(radio.x - label.x).toBeLessThan(5); // and at the start of its line, next to its words
+  await choice.check();
   await page.fill("#fb-message", "The I.S. 187 open house moved to Thursday.");
   await page.getByRole("button", {name: "Send", exact: true}).click();
   await expect(page.locator("#fbsheet [role=alert]")).toContainText("Couldn't send it.");

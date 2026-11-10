@@ -209,6 +209,7 @@ ul.why.caution li::marker{color:var(--leaf)}
 h1 .pill{vertical-align:middle;font-family:var(--body)}
 .fb-kinds{gap:6px;border:0;padding:0;margin:0}
 .fb-kinds label{gap:8px;flex-wrap:nowrap}
+.fb-kinds input[type=radio]{width:20px;height:20px;min-height:0;padding:0;margin:0;flex:none;accent-color:var(--accent)} /* not the sheet's text-box sizing */
 textarea{font:inherit;width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);resize:vertical}
 /* privacy.html */
 .policy{max-width:760px;margin:24px auto 0}

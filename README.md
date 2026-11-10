@@ -26,10 +26,10 @@ Architecture, data refresh, backups, security, privacy, operations and testing: 
 
 ## Versions
 
-- **MVP** (`v0.1.0`, tag `mvp`): the original single-file planner. [Release](https://github.com/piggietori/Middle-School-Planner/releases/tag/v0.1.0)
-- **v1** (`v1.0.0`): data that stays up to date (with a weekly source watch), optional accounts that keep the plan on every device, picking up where you left off, and download/delete for your data. See [docs/journeys.md](docs/journeys.md). [Release](https://github.com/piggietori/Middle-School-Planner/releases/tag/v1.0.0)
-- **v1.1** (`v1.1.0`): hardening. A Content-Security-Policy that blocks injected scripts, fonts served from the site (no Google requests), events and errors deleted automatically after a year and 90 days, and backups twice a week off-season so Supabase never pauses. Plus the docs in [docs/](docs/README.md). [Release](https://github.com/piggietori/Middle-School-Planner/releases/tag/v1.1.0)
-- **v1.1.1** (`v1.1.1`): a family signed out without choosing it is told their plan is safe and can sign in again with their email filled in; a blank start offers "Already made a plan? Sign in to get it back."
+- **MVP** (`v0.1.0`, tag `mvp`): the original single-file planner.
+- **v1** (`v1.x`): data that stays up to date (with a weekly source watch), optional accounts that keep the plan on every device, picking up where you left off, and download/delete for your data. See [docs/journeys.md](docs/journeys.md).
+
+What changed in each version: [CHANGELOG.md](CHANGELOG.md). Each version is also a [GitHub Release](https://github.com/piggietori/Middle-School-Planner/releases).
 
 ## Development
 

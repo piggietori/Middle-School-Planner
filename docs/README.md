@@ -13,6 +13,7 @@ Start with architecture, then read whichever doc answers your question. Each fac
 | [operations.md](operations.md) | The yearly calendar, how to tell it's healthy, and what to do when something breaks |
 | [testing.md](testing.md) | The test and eval layers, what each proves, and how to run them |
 | [journeys.md](journeys.md) | What families do in the planner, step by step |
+| [CHANGELOG.md](../CHANGELOG.md) | What changed in each version, and how to release one |
 
 Setting up Supabase and adding database changes: [supabase/README.md](../supabase/README.md).
 Running the site locally: [README.md](../README.md#development).

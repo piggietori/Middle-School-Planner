@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "schools.schema.json",
+  "title": "District 20 middle schools",
+  "type": "object",
+  "required": ["schema_version", "cycle", "sources", "programs", "city_averages", "schools"],
+  "properties": {
+    "$schema": {"type": "string"},
+    "schema_version": {"const": 1},
+    "cycle": {"type": "string", "pattern": "^\\d{4}$"},
+    "sources": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object", "required": ["name", "url"],
+        "properties": {
+          "name": {"type": "string"},
+          "url": {"$ref": "common.schema.json#/$defs/url"},
+          "cadence": {"enum": ["yearly", "yearly+watch"], "description": "yearly: updated by hand from the new-cycle checklist. +watch: the Watch sources workflow also opens an issue when it changes."},
+          "update": {"type": "string", "description": "What a person does to update our data from this source."},
+          "watch": {"type": "array", "minItems": 1, "items": {"$ref": "common.schema.json#/$defs/url"}, "description": "Pages (or an NYC Open Data dataset) checked weekly for changes."}
+        },
+        "additionalProperties": false
+      }
+    },
+    "programs": {"type": "object", "additionalProperties": {"type": "string"}},
+    "city_averages": {
+      "type": "object",
+      "required": ["math", "ela", "safe", "bully", "teach", "provenance"],
+      "properties": {
+        "math": {"$ref": "common.schema.json#/$defs/pct"}, "ela": {"$ref": "common.schema.json#/$defs/pct"},
+        "safe": {"$ref": "common.schema.json#/$defs/pct"}, "bully": {"$ref": "common.schema.json#/$defs/pct"},
+        "teach": {"$ref": "common.schema.json#/$defs/pct"},
+        "provenance": {
+          "type": "object", "required": ["scores", "survey"],
+          "properties": {"scores": {"$ref": "common.schema.json#/$defs/provenance"}, "survey": {"$ref": "common.schema.json#/$defs/provenance"}},
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "schools": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/school"}}
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "school": {
+      "type": "object",
+      "required": ["dbn", "name", "short", "addr", "hood", "lat", "lng", "grades", "size", "math", "ela", "safe", "bully", "teach",
+        "subway", "bus", "tags", "admit", "admitText", "good", "concerns", "web", "flyer", "provenance"],
+      "properties": {
+        "dbn": {"$ref": "common.schema.json#/$defs/dbn"},
+        "name": {"type": "string", "minLength": 3},
+        "short": {"type": "string", "minLength": 2, "maxLength": 20},
+        "addr": {"type": "string", "pattern": ", \\d{5}$"},
+        "hood": {"type": "string"},
+        "lat": {"type": "number", "minimum": 40.55, "maximum": 40.75},
+        "lng": {"type": "number", "minimum": -74.1, "maximum": -73.9},
+        "grades": {"type": "string"},
+        "size": {"type": "integer", "minimum": 1},
+        "math": {"$ref": "common.schema.json#/$defs/pct"},
+        "ela": {"$ref": "common.schema.json#/$defs/pct"},
+        "safe": {"type": "integer", "minimum": 0, "maximum": 100},
+        "bully": {"$ref": "common.schema.json#/$defs/pct"},
+        "teach": {"$ref": "common.schema.json#/$defs/pct"},
+        "subway": {
+          "type": "array",
+          "items": {
+            "type": "object", "required": ["l", "st"],
+            "properties": {"l": {"type": "array", "minItems": 1, "items": {"type": "string", "pattern": "^[A-Z0-9]$"}}, "st": {"type": "string"}},
+            "additionalProperties": false
+          }
+        },
+        "bus": {"type": "array", "items": {"type": "string", "pattern": "^B\\d+$"}},
+        "tags": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "admit": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"enum": ["zoned", "screened", "language", "open", "audition"]}},
+        "admitText": {"type": "string"},
+        "good": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+        "concerns": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+        "web": {"$ref": "common.schema.json#/$defs/url"},
+        "flyer": {"oneOf": [{"$ref": "common.schema.json#/$defs/url"}, {"type": "null"}]},
+        "signup": {"$ref": "common.schema.json#/$defs/url"},
+        "provenance": {
+          "type": "object", "required": ["scores", "survey", "profile"],
+          "properties": {
+            "scores": {"$ref": "common.schema.json#/$defs/provenance", "description": "math, ela"},
+            "survey": {"$ref": "common.schema.json#/$defs/provenance", "description": "safe, bully, teach"},
+            "profile": {"$ref": "common.schema.json#/$defs/provenance", "description": "everything else"}
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

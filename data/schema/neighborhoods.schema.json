@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "neighborhoods.schema.json",
+  "title": "Home neighborhoods used for distance",
+  "type": "object",
+  "required": ["schema_version", "neighborhoods"],
+  "properties": {
+    "$schema": {"type": "string"},
+    "schema_version": {"const": 1},
+    "neighborhoods": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object", "required": ["id", "label", "lat", "lng"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z-]+$"},
+          "label": {"type": "string"},
+          "lat": {"type": "number", "minimum": 40.55, "maximum": 40.75},
+          "lng": {"type": "number", "minimum": -74.1, "maximum": -73.9}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

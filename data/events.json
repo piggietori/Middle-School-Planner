@@ -1,0 +1,260 @@
+{
+  "$schema": "./schema/events.schema.json",
+  "schema_version": 1,
+  "cycle": "2027",
+  "retired_ids": [],
+  "events": [
+    {
+      "id": "oh-20K030-2026-10-28-1630",
+      "kind": "open",
+      "dbn": "20K030",
+      "date": "2026-10-28",
+      "start": "16:30",
+      "end": "17:30",
+      "source": "d20-flyer-2026",
+      "as_of": "2026-10-16"
+    },
+    {
+      "id": "oh-20K062-2026-10-27-1630",
+      "kind": "open",
+      "dbn": "20K062",
+      "date": "2026-10-27",
+      "start": "16:30",
+      "end": "18:00",
+      "source": "d20-flyer-2026",
+      "as_of": "2026-10-16"
+    },
+    {
+      "id": "oh-20K104-2026-10-20-1730",
+      "kind": "open",
+      "dbn": "20K104",
+      "date": "2026-10-20",
+      "start": "17:30",
+      "end": "18:30",
+      "source": "d20-flyer-2026",
+      "as_of": "2026-10-16"
+    },
+    {
+      "id": "oh-20K180-2026-10-29-1700",
+      "kind": "open",
+      "dbn": "20K180",
+      "date": "2026-10-29",
+      "start": "17:00",
+      "end": "18:30",
+      "source": "d20-flyer-2026",
+      "as_of": "2026-10-16"
+    },
+    {
+      "id": "oh-20K187-2026-11-10-1730",
+      "kind": "open",
+      "dbn": "20K187",
+      "date": "2026-11-10",
+      "start": "17:30",
+      "end": "19:30",
+      "source": "d20-flyer-2026",
+      "as_of": "2026-10-16"
+    },
+    {
+      "id": "oh-20K192-2026-10-19-1600",
+      "kind": "open",
+      "dbn": "20K192",
+      "date": "2026-10-19",
+      "start": "16:00",
+      "source": "d20-flyer-2026",
+      "as_of": "2026-10-16"
+    },
+    {
+      "id": "oh-20K201-2026-11-09-1700",
+      "kind": "open",
+      "dbn": "20K201",
+      "date": "2026-11-09",
+      "start": "17:00",
+      "end": "19:00",
+      "source": "d20-flyer-2026",
+      "as_of": "2026-10-16"
+    },
+    {
+      "id": "oh-20K220-2026-10-19-1730",
+      "kind": "open",
+      "dbn": "20K220",
+      "date": "2026-10-19",
+      "start": "17:30",
+      "source": "d20-flyer-2026",
+      "as_of": "2026-10-16"
+    },
+    {
+      "id": "oh-20K223-2026-11-04-1730",
+      "kind": "open",
+      "dbn": "20K223",
+      "date": "2026-11-04",
+      "start": "17:30",
+      "end": "19:30",
+      "source": "d20-flyer-2026",
+      "as_of": "2026-10-16"
+    },
+    {
+      "id": "oh-20K227-2026-10-22-1730",
+      "kind": "open",
+      "dbn": "20K227",
+      "date": "2026-10-22",
+      "start": "17:30",
+      "end": "19:30",
+      "source": "d20-flyer-2026",
+      "as_of": "2026-10-16"
+    },
+    {
+      "id": "oh-20K229-2026-11-18-1730",
+      "kind": "open",
+      "dbn": "20K229",
+      "date": "2026-11-18",
+      "start": "17:30",
+      "end": "19:00",
+      "source": "d20-flyer-2026",
+      "as_of": "2026-10-16"
+    },
+    {
+      "id": "oh-20K259-2026-11-02-1800",
+      "kind": "open",
+      "dbn": "20K259",
+      "date": "2026-11-02",
+      "start": "18:00",
+      "end": "20:00",
+      "source": "d20-flyer-2026",
+      "as_of": "2026-10-16"
+    },
+    {
+      "id": "oh-20K407-2026-11-23-1700",
+      "kind": "open",
+      "dbn": "20K407",
+      "date": "2026-11-23",
+      "start": "17:00",
+      "end": "18:15",
+      "note": "Session 1",
+      "source": "d20-flyer-2026",
+      "as_of": "2026-10-16"
+    },
+    {
+      "id": "oh-20K407-2026-11-23-1830",
+      "kind": "open",
+      "dbn": "20K407",
+      "date": "2026-11-23",
+      "start": "18:30",
+      "end": "19:45",
+      "note": "Session 2",
+      "source": "d20-flyer-2026",
+      "as_of": "2026-10-16"
+    },
+    {
+      "id": "oh-20K609-2026-10-29-1700",
+      "kind": "open",
+      "dbn": "20K609",
+      "date": "2026-10-29",
+      "start": "17:00",
+      "end": "19:00",
+      "source": "d20-flyer-2026",
+      "as_of": "2026-10-16"
+    },
+    {
+      "id": "oh-20K609-2026-11-07-1000",
+      "kind": "open",
+      "dbn": "20K609",
+      "date": "2026-11-07",
+      "start": "10:00",
+      "end": "12:00",
+      "source": "d20-flyer-2026",
+      "as_of": "2026-10-16"
+    },
+    {
+      "id": "oh-20K609-2026-11-19-1700",
+      "kind": "open",
+      "dbn": "20K609",
+      "date": "2026-11-19",
+      "start": "17:00",
+      "end": "19:00",
+      "source": "d20-flyer-2026",
+      "as_of": "2026-10-16"
+    },
+    {
+      "id": "oh-20K686-2026-10-29-1730",
+      "kind": "open",
+      "dbn": "20K686",
+      "date": "2026-10-29",
+      "start": "17:30",
+      "end": "18:30",
+      "source": "d20-flyer-2026",
+      "as_of": "2026-10-16"
+    },
+    {
+      "id": "oh-20K936-2026-10-14-1800",
+      "kind": "open",
+      "dbn": "20K936",
+      "date": "2026-10-14",
+      "start": "18:00",
+      "note": "Virtual",
+      "source": "d20-flyer-2026",
+      "as_of": "2026-10-16"
+    },
+    {
+      "id": "oh-20K936-2026-10-28-1600",
+      "kind": "open",
+      "dbn": "20K936",
+      "date": "2026-10-28",
+      "start": "16:00",
+      "source": "d20-flyer-2026",
+      "as_of": "2026-10-16"
+    },
+    {
+      "id": "oh-20K936-2026-11-18-1600",
+      "kind": "open",
+      "dbn": "20K936",
+      "date": "2026-11-18",
+      "start": "16:00",
+      "note": "Virtual",
+      "source": "d20-flyer-2026",
+      "as_of": "2026-10-16"
+    },
+    {
+      "id": "k-open",
+      "date": "2026-10-14",
+      "title": "Middle school applications open",
+      "text": "Apply in your MySchools account.",
+      "kind": "key",
+      "link": "https://www.myschools.nyc/",
+      "source": "nyc-ms-admissions",
+      "as_of": "2026-10-16"
+    },
+    {
+      "id": "k-d20",
+      "date": "2026-10-21",
+      "start": "17:00",
+      "end": "19:00",
+      "title": "District 20 middle school open house",
+      "text": "Meet District 20 staff and learn about all schools.",
+      "kind": "key",
+      "link": "https://sites.google.com/schools.nyc.gov/d20website",
+      "flyer": "https://drive.google.com/file/d/1BOZ1pMthfbC0CGHmrELcQ_uJm0AuVt43/view",
+      "source": "nyc-ms-admissions",
+      "as_of": "2026-10-16"
+    },
+    {
+      "id": "k-close",
+      "date": "2026-12-11",
+      "title": "Application deadline",
+      "text": "Submit your ranked list in MySchools by today.",
+      "kind": "key",
+      "link": "https://www.myschools.nyc/",
+      "source": "nyc-ms-admissions",
+      "as_of": "2026-10-16"
+    },
+    {
+      "id": "k-offer",
+      "date": "2027-04-07",
+      "title": "Offers released",
+      "text": "See your child's middle school offer in MySchools.",
+      "kind": "key",
+      "link": "https://www.myschools.nyc/",
+      "source": "nyc-ms-admissions",
+      "as_of": "2026-10-16"
+    }
+  ]
+}

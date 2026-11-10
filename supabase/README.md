@@ -12,6 +12,7 @@ Signed-out visitors never talk to it. School data is not here; it lives in `data
 
 - The **publishable key** (`sb_publishable_...`) is in `src/config.js`. It is public by design.
 - The **secret key** (`sb_secret_...`, or `service_role`) bypasses all access rules. Never put it in the code, a chat or a pull request. If something ever needs it, add it as a GitHub Actions secret yourself.
+- Every secret, where it lives, and what to do if one is lost or leaked: [docs/secrets.md](../docs/secrets.md).
 
 ## Setting up a project (once)
 
@@ -29,6 +30,9 @@ Signed-out visitors never talk to it. School data is not here; it lives in `data
      in place of `[YOUR-PASSWORD]`. (Use the pooler: GitHub's runners can't reach the direct connection.)
    - `BACKUP_PASSPHRASE`: a long passphrase. Keep it in a password manager: without it a backup can't be opened,
      and with it anyone could read one.
+
+   You don't need to keep the database password: you can reset it any time. The passphrase can't be reset.
+   See [docs/secrets.md](../docs/secrets.md).
 
    Then Actions → *Backup* → Run workflow, and check the run shows "Backup …, encrypted." Families can also download
    their own copy any time from the account sheet (Download my data).

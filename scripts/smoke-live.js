@@ -1,7 +1,7 @@
 // The live site, as a signed-out visitor sees it, in real browsers: Chromium on a desktop and WebKit (Safari's engine)
 // on an iPhone. Signed-out visitors send us no errors (docs/privacy.md), so this is how we'd hear about a crash
 // only they hit. The monitor in planner-ops runs it every 3 hours (docs/failure-modes.md); run it by hand with
-//   node scripts/smoke-live.js https://piggietori.github.io/Middle-School-Planner/
+//   node scripts/smoke-live.js https://d20.torilam.com/
 // It prints one line per browser, and exits 1 if anything is wrong.
 import {chromium, devices, webkit} from "@playwright/test";
 

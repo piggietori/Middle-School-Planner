@@ -9,11 +9,11 @@ more widely. Fill in each step's date as you go.
 
 | Step | How | Done |
 |---|---|---|
-| 1. A domain | Buy one (about $10–12 a year). Add email forwarding for `help@<domain>` to your own inbox | |
-| 2. Sign-in emails from the domain | Resend (free): add the domain, paste its DNS records (SPF, DKIM), create an SMTP key. Supabase → Authentication → **SMTP Settings**: host `smtp.resend.com`, port 465, user `resend`, password the key, sender `D20 Planner <signin@<domain>>`. Then **Rate Limits** → emails per hour: 30 | |
+| 1. A domain | `torilam.com`, at Porkbun: auto-renew on. Add email forwarding for `help@torilam.com` to your own inbox. The root is kept for a portfolio; the planner gets its own subdomain ([security.md](security.md#controls-layer-by-layer)) | |
+| 2. Sign-in emails from the domain | Resend (free): add the domain `mail.torilam.com`, paste its DNS records (SPF, DKIM), create an SMTP key. Supabase → Authentication → **SMTP Settings**: host `smtp.resend.com`, port 465, user `resend`, password the key, sender `D20 Planner <signin@mail.torilam.com>`. Then **Rate Limits** → emails per hour: 30 | |
 | 3. The sign-in email's words | Supabase → Authentication → Emails → **Magic Link**: subject "Your sign-in link for the D20 Middle School Planner"; say who it's from, that the link works once for an hour, and to ignore it if they didn't ask | |
-| 4. The site's address | DNS: `CNAME planner → piggietori.github.io`. GitHub → Settings → Pages → Custom domain `planner.<domain>` → **Enforce HTTPS**. Supabase → URL Configuration: Site URL and Redirect URLs `https://planner.<domain>/**` (keep `localhost`). You'll need to sign in again once, because each address keeps its own copy | |
-| 5. Feedback emails | Resend → API Keys → create one with **Sending access** for the domain only. In the Supabase SQL Editor, run (with your values, never in a file or chat): `select vault.create_secret('<the key>', 'resend_api_key'); select vault.create_secret('<your email>', 'feedback_to'); select vault.create_secret('D20 Planner <feedback@<domain>>', 'feedback_from');` | |
+| 4. The site's address: `d20.torilam.com` | Porkbun DNS: delete the parking wildcard `*` CNAME, add `CNAME d20 → piggietori.github.io`. GitHub profile → Settings → Pages → **Verified domains**: add `torilam.com` with its TXT record. Repo → Settings → Pages → Custom domain `d20.torilam.com` → **Enforce HTTPS**. Supabase → URL Configuration: Site URL `https://d20.torilam.com`, Redirect URLs `https://d20.torilam.com/**` (keep `localhost`). Planner-ops variable `SITE_URL`: `https://d20.torilam.com/`. You'll need to sign in again once, because each address keeps its own copy | |
+| 5. Feedback emails | Resend → API Keys → create one with **Sending access** for the domain only. In the Supabase SQL Editor, run (with your values, never in a file or chat): `select vault.create_secret('<the key>', 'resend_api_key'); select vault.create_secret('<your email>', 'feedback_to'); select vault.create_secret('D20 Planner <feedback@mail.torilam.com>', 'feedback_from');` | |
 | 6. The private ops repository | Create `piggietori/planner-ops`, **private**. Add secrets `SUPABASE_DB_URL` and `BACKUP_PASSPHRASE`, and the variable `SITE_URL`. Delete both secrets from the public repo. **Watch → All activity**, so alerts email you | |
 | 7. Invite-only for the pilot | Supabase → Authentication → Sign In / Providers → turn off **Allow new users to sign up**. Invite each family from **Users → Invite user** | |
 | 8. Hear about problems | **healthchecks.io** (free): create a check with period 1 hour and grace 1 hour, and put its ping URL in the `planner-ops` secret `HEALTHCHECK_URL`. Public repo → Settings → **Code security**: turn on secret scanning and push protection. Install **GitHub Mobile** and allow notifications for `planner-ops` | |
@@ -25,7 +25,7 @@ more widely. Fill in each step's date as you go.
 - Release v1.2.0.
 
 **Check it end to end:**
-- Sign in on `planner.<domain>` with an address you haven't used. The email comes from your domain within a minute, and not in spam.
+- Sign in on `d20.torilam.com` with an address you haven't used. The email comes from your domain within a minute, and not in spam.
 - The old github.io link goes to the new address.
 - With sign-ups off, an address you didn't invite gets "The planner is invite-only for now".
 - Send feedback from the footer. It arrives in your inbox, and the reply address works.
@@ -37,7 +37,7 @@ more widely. Fill in each step's date as you go.
 
 - **The invite:** send each family the link with this note:
 
-  > I'm testing a planner for our District 20 middle school applications: [link]. It's a pilot, so it may have
+  > I'm testing a planner for our District 20 middle school applications: https://d20.torilam.com. It's a pilot, so it may have
   > mistakes. Please confirm dates with the schools, and remember the application itself is only in MySchools.
   > The "Send feedback" link at the bottom comes straight to me. I've invited your email address, so sign in with that.
 - **Every morning:** read the daily report and any feedback. Answer feedback within a day.

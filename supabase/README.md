@@ -19,8 +19,8 @@ Signed-out visitors never talk to it. School data is not here; it lives in `data
 1. **Apply the migrations.** Dashboard → SQL Editor → New query → paste each file in `migrations/` in order → Run. Expect "Success. No rows returned."
 2. **Check it from outside.** `node scripts/check-supabase.js` should print "All checks passed".
 3. **Allow the sign-in links to come back to the site.** Dashboard → Authentication → URL Configuration:
-   - Site URL: `https://planner.<domain>/` (before the custom domain: `https://piggietori.github.io/Middle-School-Planner/`)
-   - Redirect URLs: add `https://planner.<domain>/**` and `http://localhost:5173/**`
+   - Site URL: `https://d20.torilam.com/` (before the custom domain: `https://piggietori.github.io/Middle-School-Planner/`)
+   - Redirect URLs: add `https://d20.torilam.com/**` and `http://localhost:5173/**`
 4. **Sign-in emails.** Authentication → Sign In / Providers → Email stays on. Supabase's built-in sender allows only a few emails an hour, so sign-in emails go through Resend instead: Authentication → Emails → **SMTP Settings**. The steps, and the email's wording, are in [docs/launch.md](../docs/launch.md#before-the-pilot).
 
 5. **Backups.** The free plan has no backups of its own (the Pro plan adds daily backups kept 7 days). The

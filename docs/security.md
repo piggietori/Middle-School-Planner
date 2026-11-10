@@ -38,6 +38,8 @@ For the keys and passwords themselves, see [secrets.md](secrets.md). For what pe
 - Text from data files and from families (notes) goes through `esc()` before it becomes HTML.
 - The sign-in session is kept in `localStorage`. That's normal for a site without its own server, and it's why
   stopping script injection matters most.
+- The planner has its own subdomain (`d20.torilam.com`), never a page under another site such as a portfolio at
+  `torilam.com`: browser storage and sign-in belong to the exact address, so nothing else can read them.
 
 **Sign-in**
 - Emailed links only, so no passwords are stored anywhere.

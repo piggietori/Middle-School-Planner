@@ -128,7 +128,7 @@ file that talks to Supabase is `src/sync/backend.js`, and signed-out visitors ne
 - **No build step.** The files in the repository are the site: plain HTML, CSS and JavaScript modules. The
   Supabase library is vendored into `src/vendor/` and pinned by version and checksum.
 - **Deploy:** merging to `main` publishes `index.html`, `privacy.html`, `src/`, `data/` and `fonts/` to GitHub Pages,
-  at `planner.<domain>`.
+  at `d20.torilam.com`.
 - **CI** runs on every pull request: lint, data checks (compared with the target branch), unit and database tests,
   and browser journeys on desktop, phone, and iPhone in Safari's engine ([testing.md](testing.md)).
 - **Scheduled workflows:**

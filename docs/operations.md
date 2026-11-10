@@ -34,6 +34,7 @@ Running the planner day to day: what happens when, how to tell it's healthy, and
 | Symptom | Likely cause | Fix |
 |---|---|---|
 | The site shows "The planner couldn't load" | A broken deploy, or a data file that didn't load | Actions → Deploy: check the last run. If a recent merge broke it, revert that pull request (GitHub → the PR → Revert) and merge the revert |
+| A family is signed out and their plan looks empty | The browser's site data was cleared (a setting such as Chrome's "Delete data sites have saved to your device when you close all windows" at `chrome://settings/content/siteData`, a cleaner app, or clearing browsing data), or they're on a different address (for example `localhost` instead of the live site) | Sign in again: the account has the plan. Turn that browser setting off, or add the site under "Allowed to save data" |
 | "Couldn't reach your account" for everyone | The Supabase project is paused or down | Supabase dashboard → the project → **Resume project** if paused ([backups.md](backups.md#supabase-project-pausing)); otherwise check status.supabase.com. Families keep working on their devices meanwhile |
 | "Couldn't reach your account" right after a database change | A missing grant or a migration not applied | Run `node scripts/check-supabase.js`; apply the missing migration in the SQL Editor |
 | The sign-in email doesn't arrive | Supabase's built-in sender allows about 2 emails an hour, or it went to spam | Wait an hour and send once; check spam. For more families, set up custom SMTP |

@@ -8,6 +8,13 @@ test.beforeEach(async ({page}) => {
   page.on("pageerror", e => { throw e; });
 });
 
+test("a blank start points families who already made a plan to sign in and get it back", async ({page}) => {
+  await page.goto("/");
+  await expect(page.getByText("Already made a plan?")).toBeVisible();
+  await page.locator(".notice").getByRole("button", {name: "Sign in"}).click();
+  await expect(page.locator("#acctsheet h2")).toHaveText("Keep your plan on all your devices");
+});
+
 test("first visit: pick a neighborhood, save a school, plan a visit, and keep it after reload", async ({page}) => {
   await page.goto("/");
   await expect(page.locator(".hero .big")).toHaveText("32");

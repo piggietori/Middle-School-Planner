@@ -10,8 +10,8 @@ import {st, replacePlan} from "./state.js";
 import {ui} from "./ui.js";
 import {$, esc, toast} from "./util.js";
 
-export const acct = {status:"out", email:"", userId:"", sent:"", lastEmail:"", saving:"saved", open:false, error:"", ask:"", deleting:false};
-let backend=null, planId=null, synced=null, timer=null, busy=null, warned=false, sessionTimer=null, sessionNext=null, logTimer=null, opened=false;
+export const acct = {status:"out", email:"", userId:"", sent:"", lastEmail:"", saving:"saved", open:false, error:"", ask:"", deleting:false, lost:""};
+let backend=null, planId=null, synced=null, timer=null, busy=null, warned=false, sessionTimer=null, sessionNext=null, logTimer=null, opened=false, leaving=false;
 
 const store = {
   get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},
@@ -19,6 +19,7 @@ const store = {
 };
 const UNSYNCED="d20plan-unsynced"; // this device has changes the account doesn't have yet
 const OWNER="d20plan-user";        // whose account the plan on this device was last synced with
+const EMAIL="d20plan-email";       // the account this device signed in to; forgotten only when the family signs out
 
 async function getBackend(){
   if(!backend){const {createBackend}=await import("./sync/backend.js");backend=await createBackend();backend.onChange(onAuth)}
@@ -35,24 +36,37 @@ export async function initAccount(){
     acct.open=true;
   }
   const returning=hash.has("access_token");
-  if(!returning&&!store.get(SESSION_KEY)&&!window.__plannerTestBackend){setLogging(false);return renderAccount()}
+  // Signed in here before, but the sign-in is gone and nobody chose to sign out: say so (journey J7).
+  const was=store.get(EMAIL), noSession=()=>{setLogging(false);if(was){markLost(was);render()}renderAccount()};
+  if(!returning&&!store.get(SESSION_KEY)&&!window.__plannerTestBackend)return noSession();
   try{
     const s=await (await getBackend()).session();
-    if(s)await signedIn(s);else{setLogging(false);renderAccount()}
+    if(s)await signedIn(s);else noSession();
   }catch(e){console.error(e);setLogging(false);renderAccount()}
 }
 
 function onAuth(event,session){
   if(event==="SIGNED_IN"&&session)signedIn(session);
-  if(event==="SIGNED_OUT"&&acct.status!=="out")signedOut();
+  if(event==="SIGNED_OUT"&&acct.status!=="out"&&!leaving)lostSession();
 }
+
+// The sign-in ended without the family choosing it (Supabase ended the session). The plan stays on this
+// device, and signing in again merges anything changed meanwhile, since signedOut() forgets the owner.
+function lostSession(){
+  const email=acct.email||store.get(EMAIL);
+  if(email)markLost(email);
+  signedOut();
+  toast("You were signed out on this device. Your plan is still here. Sign in again to keep it in sync.");
+}
+function markLost(email){acct.lost=email;acct.lastEmail=email}
 
 let lastSession=null;
 async function signedIn(session){
   // A sign-in link can report the same session twice (from the link, then from storage); load once.
   if(session.user.id===acct.userId&&(acct.status==="loading"||acct.status==="in"))return;
   lastSession=session;
-  acct.status="loading";acct.email=session.user.email||"";acct.userId=session.user.id;acct.error="";acct.sent="";
+  acct.status="loading";acct.email=session.user.email||"";acct.userId=session.user.id;acct.error="";acct.sent="";acct.lost="";
+  store.set(EMAIL,acct.email);
   renderAccount();
   try{
     planId=await backend.openPlan(CYCLE);
@@ -164,9 +178,10 @@ async function sendLogs(){
 // Sign out (J7): the account keeps the plan; the family chooses whether this device does too.
 export async function signOut(keep){
   clearTimeout(timer);await flush();await saveSession();await sendLogs();
+  leaving=true;
   try{await backend.signOut()}catch(e){console.error(e)}
   if(!keep)forgetDevice();
-  signedOut();acct.open=false;acct.ask="";renderAccount();
+  store.set(EMAIL,"");signedOut();leaving=false;acct.open=false;acct.ask="";renderAccount();
   toast(keep?"Signed out. Your plan is still on this device.":"Signed out. Your plan was removed from this device.");
 }
 function forgetDevice(){replacePlan(null);forgetSession();store.set(UNSYNCED,"")}
@@ -196,10 +211,10 @@ export async function deleteAccount(removeLocal){
     acct.error="Couldn't delete your account, so nothing was deleted. Check your connection and try again.";
     return renderAccount();
   }
-  setLogging(false);
+  setLogging(false);leaving=true;
   try{await backend.signOut()}catch(e){console.error(e)}
   if(removeLocal)forgetDevice();
-  signedOut();acct.open=false;acct.ask="";acct.deleting=false;renderAccount();
+  store.set(EMAIL,"");signedOut();leaving=false;acct.open=false;acct.ask="";acct.deleting=false;renderAccount();
   toast(removeLocal?"Your account is deleted, and your plan was removed from this device.":"Your account is deleted. Your plan is still on this device.");
 }
 
@@ -229,8 +244,10 @@ function sheetBody(){
   if(acct.sent)return `<h2>Check your email</h2>
     <p style="margin:0">We sent a sign-in link to <b>${esc(acct.sent)}</b>. Open it on this device or any other to sign in. It works once and expires in an hour.</p>
     <p class="muted small" style="margin:0">No email? Check your spam folder, or <button class="linkbtn" data-acct="again">send it again</button>.</p>`;
-  return `<h2>Keep your plan on all your devices</h2>
-    <p style="margin:0">Sign in to save your schools, visits and notes to your account. We'll email you a link. There's no password.</p>
+  return `${acct.lost?`<h2>Sign in again</h2>
+    <p style="margin:0">You were signed out on this device. Your plan is still here; sign in to keep it in sync with your account.</p>`
+    :`<h2>Keep your plan on all your devices</h2>
+    <p style="margin:0">Sign in to save your schools, visits and notes to your account. We'll email you a link. There's no password.</p>`}
     ${acct.status==="error"?`<div class="notice" role="alert"><div>Couldn't reach your account. Your plan is still saved on this device. <button class="linkbtn" data-acct="retry">Try again</button></div></div>`:""}
     ${acct.error?`<div class="notice" role="alert"><div>${esc(acct.error)}</div></div>`:""}
     <form class="stack" style="gap:8px" data-acct-form="1">
@@ -238,6 +255,7 @@ function sheetBody(){
       <input id="acct-email" type="email" autocomplete="email" required maxlength="254" value="${esc(acct.lastEmail)}" placeholder="you@example.com">
       <button class="btn primary" type="submit">Email me a sign-in link</button>
     </form>
+    ${acct.lost?`<p class="muted small" style="margin:0">Not ${esc(acct.lost)}? <button class="linkbtn" data-acct="forget">Forget this email</button></p>`:""}
     <p class="muted small" style="margin:0">Signing in is optional. Your plan always stays on this device too.</p>`;
 }
 
@@ -272,6 +290,11 @@ document.addEventListener("click",e=>{
   if(a==="close"){acct.open=false;acct.ask="";acct.error="";renderAccount()}
   if(a==="again"){acct.sent="";renderAccount();document.getElementById("acct-email")?.focus()}
   if(a==="retry")retry();
+  if(a==="forget"){ // a shared computer
+    store.set(EMAIL,"");acct.lost="";acct.lastEmail="";
+    const i=document.getElementById("acct-email");if(i)i.value=""; // renderAccount keeps what's in the box
+    renderAccount();render();
+  }
   if(a==="signout"||a==="delete"){acct.ask=a;acct.error="";renderAccount();document.getElementById("acct-delete")?.focus()}
   if(a==="cancel"){acct.ask="";acct.error="";renderAccount()}
   if(a==="signout-keep"||a==="signout-remove")signOut(a==="signout-keep");

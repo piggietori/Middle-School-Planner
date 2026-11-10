@@ -145,6 +145,10 @@ Kept small on purpose. No names, notes text, or home location in event propertie
 
 **Failure cases:** delete fails halfway → the server does it in one transaction; the app shows the error and nothing is half-deleted.
 
+**Signed out without choosing it:**
+- The sign-in ends on its own (Supabase ended the session, or it's gone at the next visit) → the plan stays on the device; a toast and Home say "Signed out on this device: your plan is still here", and the sign-in sheet says "Sign in again" with the email filled in. Signing in merges anything changed meanwhile. "Not you? Forget this email" clears it on a shared computer.
+- The browser lost everything (site data cleared, a cleaner app, a new device, a different address) → the device can't know there was an account, so the blank start's "Start here" tip adds "Already made a plan? Sign in to get it back."
+
 ---
 
 ## Coverage by milestone

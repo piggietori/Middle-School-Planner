@@ -91,6 +91,7 @@ auth.users ──< household_members >── households ──< plans (household
 | `d20session` | Where the family left off on this device |
 | `d20plan-unsynced` | "This device has changes the account doesn't have yet" |
 | `d20plan-user` | Whose account this device last synced with |
+| `d20plan-email` | The email of the account this device signed in to. Kept if the sign-in ends on its own, so the planner can say "You were signed out" and fill in the email; removed when the family signs out, deletes the account, or chooses "Not you?" |
 | `sb-mhhszsyjxximewcuynis-auth-token` | The sign-in session (signed in only) |
 
 ## Sync (signed in)

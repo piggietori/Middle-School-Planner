@@ -56,8 +56,13 @@ Running the planner day to day: what happens when, how to tell it's healthy, and
 - **Database:** add a file in `supabase/migrations/`, with tests in `tests/db/rls.test.js`. After merging, paste
   it into the Supabase SQL Editor and run `node scripts/check-supabase.js`. Never edit a migration that has
   already been applied ([supabase/README.md](../supabase/README.md)).
-- **A release:** set `version` in `package.json`, merge to `main`, then tag (`git tag -a vX.Y.Z`) and publish a
-  GitHub Release with notes.
+- **A release** ([CHANGELOG.md](../CHANGELOG.md)):
+  1. As you go, add each change under `## [Unreleased]` in CHANGELOG.md, in words a family would understand.
+  2. In the pull request that releases: rename `## [Unreleased]` to `## [X.Y.Z] - date`, add a new empty
+     `## [Unreleased]` above it, update the links at the bottom, and set `version` in `package.json`. CI fails if the
+     version has no notes.
+  3. Merge, then `git tag -a vX.Y.Z -m vX.Y.Z && git push origin vX.Y.Z`. The *Release* workflow
+     (`.github/workflows/release.yml`) publishes the GitHub Release with that version's notes.
 
 ## Free-plan limits that matter
 

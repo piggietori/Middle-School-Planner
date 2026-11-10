@@ -16,6 +16,8 @@ jobs:
       - run: npm run lint
       - name: Data checks
         run: node scripts/validate-data.js ${{ github.base_ref && format('--base origin/{0}', github.base_ref) || '' }}
+      - name: Release notes
+        run: node scripts/check-changelog.js
       - run: npm test
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e

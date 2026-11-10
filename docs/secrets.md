@@ -31,6 +31,22 @@ Above all of these are the **master keys**: the logins that can reset everything
 - **A failed backup emails you.** GitHub notifies you when a scheduled run fails. The usual cause is a reset
   database password that wasn't updated in `SUPABASE_DB_URL`.
 
+## When to revisit backups
+
+Backups run daily in October to December, when plans change almost every day before the deadline, and weekly
+otherwise. Each household's plan is about 2 KB, so size isn't the limit: even 100,000 households would be about
+200 MB, a dump of a minute or two.
+
+What should make you rethink them:
+- **The first family outside your household signs up.** Backups would then hold other people's data, including
+  email addresses. Even encrypted, a public repository's artifacts are the wrong place for it.
+- **More than about 100 households**, or losing a day of changes becomes unacceptable.
+- **A paid Supabase plan**, or a privacy policy is written.
+
+The plan then: move to Supabase Pro (daily backups kept 7 days), and add point-in-time recovery when even a day
+of loss matters. Keep any extra off-site copy in private storage that deletes old copies automatically, not in
+GitHub artifacts, or drop it. Write down how long a restore takes, and run the restore drill on a copy of the project.
+
 ## Never
 
 - Never put a secret in the code, a commit, a pull request, an issue, or a chat with anyone, including an AI

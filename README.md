@@ -55,6 +55,7 @@ npm run refresh:data # pull the latest test results into data/schools.json
 - `src/views/`: one file per screen, plus the school sheet and notes
 - `src/main.js` loads `src/app.js`, which handles clicks and form changes
 - `scripts/`: dev server, data checks, data refresh, source watch, live Supabase check
+- Secrets (which exist, where they live, what to do if one is lost): [docs/secrets.md](docs/secrets.md)
 
 ### Updating data
 

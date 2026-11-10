@@ -1,4 +1,6 @@
-# Weekly backup of the account data (the free Supabase plan has no backups of its own).
+# Backup of the account data (the free Supabase plan has no backups of its own).
+# Daily in October to December, when families change their plans almost every day before the December deadline,
+# so at most a day of work can be lost; weekly the rest of the year. When to rethink this: docs/secrets.md.
 # The dump is encrypted before it leaves the runner: this repository is public, so only someone with the
 # passphrase can read a backup. Kept as a workflow artifact for 90 days.
 # Off until you add two repository secrets (Settings → Secrets and variables → Actions), see supabase/README.md:
@@ -7,7 +9,8 @@
 name: Backup
 on:
   schedule:
-    - cron: "0 8 * * 0" # Sundays, 4 AM New York time
+    - cron: "0 8 * 10-12 *" # every day in Oct–Dec, early morning New York time
+    - cron: "0 8 * 1-9 0" # Sundays the rest of the year
   workflow_dispatch:
 
 permissions: {contents: read}

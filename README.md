@@ -20,6 +20,10 @@ Every record in `data/` says where it came from and when (`source`, `as_of`), an
 
 This is an independent tool, not an official NYC Public Schools site. Confirm dates and details with each school.
 
+## How it works
+
+Architecture, data refresh, backups, security, privacy, operations and testing: [docs/](docs/README.md).
+
 ## Versions
 
 - **MVP** (`v0.1.0`, tag `mvp`): the original single-file planner. [Release](https://github.com/piggietori/Middle-School-Planner/releases/tag/v0.1.0)

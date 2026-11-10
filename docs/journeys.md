@@ -31,16 +31,18 @@ without breaking a saved plan.
 
 ## Events we log (v1)
 
-Kept small on purpose. No names, notes text, or home location in event properties.
+Kept small on purpose. No names, notes text, or home location in event properties. Sent only while signed in
+(signed-out visitors send nothing), a few seconds after they happen. Errors nobody caught go to `client_errors`
+(message, stack, where, browser), at most 10 per visit.
 
 | Event | When | Properties |
 |---|---|---|
-| `app_open` | Page load | `signed_in`, `tab` |
-| `sign_in` | Sign-in completes | `method` (email, google), `claimed_local` (true/false) |
+| `app_open` | Page load, once signed in | `tab` |
+| `sign_in` | First sign-in on a device | `method` (email), `claimed_local` (true/false) |
 | `school_saved` / `school_removed` | Save toggled | `dbn` |
 | `visit_marked` | "Yes, I went" | `event_id` |
 | `step_done` | Step checked off | `step_id` |
-| `sync_failed` | A save to the server fails | `table`, `error_code` |
+| `sync_failed` | A save to the server fails | `error_code` |
 
 ---
 
@@ -137,9 +139,9 @@ Kept small on purpose. No names, notes text, or home location in event propertie
 
 ## J7. Leave, delete, or take my data
 
-1. **Sign out** → clears the cached plan from this device (asks first: "Keep a copy on this device?").
-2. **Export my data** → downloads a JSON file of the plan and notes.
-3. **Delete my account** → confirm by typing DELETE → removes the person, and the household if they were the only member. Events are kept only without the user ID.
+1. **Sign out** → asks "Keep a copy of your plan on this device?": keep it, or remove it (for a shared computer). The account keeps the plan either way.
+2. **Download my data** → a JSON file of everything the account holds: settings, saved schools, visits, steps, notes and where they left off, without internal IDs.
+3. **Delete my account** → confirm by typing DELETE, and choose whether to remove the plan from this device too → removes the person, and the household if they were the only member. Events and errors are kept without the user ID.
 
 **Failure cases:** delete fails halfway → the server does it in one transaction; the app shows the error and nothing is half-deleted.
 
@@ -155,6 +157,6 @@ Kept small on purpose. No names, notes text, or home location in event propertie
 | J4 Second parent | Schema in M3, feature after v1 |
 | J5 Source data changes | M2 |
 | J6 Deadline and after | M4 (submitted mode, done), partly in MVP |
-| J7 Sign out, export, delete | M5 |
+| J7 Sign out, export, delete | M5 (done) |
 
 Automated walk-throughs (Playwright) cover J1 from M1, and J2 and J3 once accounts exist.

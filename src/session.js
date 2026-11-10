@@ -36,6 +36,12 @@ export function noteSession(){
   queueSessionSync(s);
 }
 
+// Signing out without keeping a copy: forget where this device was, too.
+export function forgetSession(){
+  try{localStorage.removeItem(KEY)}catch(e){}
+  ui.openDbn=null;last=JSON.stringify(current());
+}
+
 // From the account, after signing in: use it if it's newer than this device's and the family hasn't
 // moved since the page opened. Returns whether it changed the screen.
 export function applyRemoteSession(s){

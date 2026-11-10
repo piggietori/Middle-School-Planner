@@ -3,7 +3,7 @@
 //   node scripts/check-supabase.js
 import {SUPABASE_URL, SUPABASE_KEY} from "../src/config.js";
 
-const TABLES = ["households", "household_members", "plans", "saved_schools", "visits", "step_progress", "school_notes", "user_session"];
+const TABLES = ["households", "household_members", "plans", "saved_schools", "visits", "step_progress", "school_notes", "user_session", "events", "client_errors"];
 const headers = {apikey: SUPABASE_KEY, "content-type": "application/json"};
 let failed = 0;
 const report = (ok, what, detail) => { console.log(`${ok ? "ok  " : "FAIL"} ${what}: ${detail}`); if (!ok) failed++; };
@@ -16,6 +16,10 @@ for (const t of TABLES) {
 }
 const rpc = await fetch(`${SUPABASE_URL}/rest/v1/rpc/open_plan`, {method: "POST", headers, body: JSON.stringify({p_cycle: "2027"})});
 report(rpc.status === 401 || rpc.status === 403, "call open_plan", rpc.status === 404 ? "404, function missing: apply the migration" : `${rpc.status} ${(await rpc.text()).slice(0, 80)}`);
+const del = await fetch(`${SUPABASE_URL}/rest/v1/rpc/delete_my_account`, {method: "POST", headers, body: "{}"});
+report(del.status === 401 || del.status === 403, "call delete_my_account", del.status === 404 ? "404, function missing: apply the migration" : `${del.status} ${(await del.text()).slice(0, 80)}`);
+const ev = await fetch(`${SUPABASE_URL}/rest/v1/events`, {method: "POST", headers, body: JSON.stringify({name: "app_open"})});
+report(ev.status === 401 || ev.status === 403, "add an event signed out", `${ev.status} ${(await ev.text()).slice(0, 80)}`);
 const auth = await fetch(`${SUPABASE_URL}/auth/v1/settings`, {headers});
 const s = await auth.json();
 report(s.external?.email === true, "email sign-in enabled", String(s.external?.email));

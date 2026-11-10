@@ -1,4 +1,5 @@
 import {initAccount} from "./account.js";
+import {reportError, track} from "./log.js";
 import {STEPS} from "./data.js";
 import {toggleSave, toggleGoing, toggleWent, setNote, stepDone} from "./plan.js";
 import {render, go} from "./render.js";
@@ -34,7 +35,7 @@ document.addEventListener("click",e=>{
   if(d.compare){commitDrafts();ui.listView="compare";return go("list")}
   if(d.cm){ui.calMonth=Math.max(0,Math.min(CAL_RANGE.length-1,ui.calMonth+(+d.cm)));ui.selDay=null;return render()}
   if(d.day){ui.selDay=d.day;return render()}
-  if(d.step){st.done[d.step]=!st.done[d.step];ui.openStep=null;persist();return render()}
+  if(d.step){st.done[d.step]=!st.done[d.step];if(st.done[d.step])track("step_done",{step_id:d.step});ui.openStep=null;persist();return render()}
   if(d.ostep){const cur=STEPS.find(s=>!stepDone(s)),openId=ui.openStep??cur?.id;ui.openStep=openId===d.ostep?"":d.ostep;return render()}
   if(d.df){ui.dateFilter=d.df;return render()}
   if(d.w){const [k,v]=d.w.split(":");st.w[k]=+v;st.done.s1=true;persist();return render()}
@@ -55,6 +56,9 @@ document.addEventListener("keydown",e=>{
   if(ni&&e.key==="Enter"){e.preventDefault();const [s,k]=ni.split(":");return addNote(s,k)}
   if(e.key==="Escape"&&ui.openDbn)closeSheet();
 });
+// Errors nobody caught: sent to us when signed in (log.js), so we hear about problems families hit.
+addEventListener("error",e=>reportError(e.error||e.message,"page"));
+addEventListener("unhandledrejection",e=>reportError(e.reason,"promise"));
 restoreSession();
 render();
 initAccount();

@@ -30,6 +30,11 @@ export async function createBackend() {
       return check(await sb.from("user_session").select("last_tab, last_dbn, last_view, updated_at").maybeSingle());
     },
     async saveSession(row) { check(await sb.from("user_session").upsert(row, {onConflict: "user_id"})); },
+    async log(events, errors) {
+      if (events.length) check(await sb.from("events").insert(events));
+      if (errors.length) check(await sb.from("client_errors").insert(errors));
+    },
+    async deleteAccount() { check(await sb.rpc("delete_my_account")); },
     async save(planId, d) {
       if (d.plan) check(await sb.from("plans").update(d.plan).eq("id", planId));
       for (const [t, rows] of Object.entries(d.upsert))

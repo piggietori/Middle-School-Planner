@@ -1,5 +1,6 @@
 // Journeys J2 (sign in and keep what I did) and J3 (come back on another device). See docs/journeys.md.
 // Uses an in-memory fake of the account server (fake-backend.js), shared by both "devices".
+import fs from "node:fs";
 import {test, expect} from "@playwright/test";
 import {useFixtureData} from "./fixture-data.js";
 import {fakeServer, useFakeBackend} from "./fake-backend.js";
@@ -167,17 +168,84 @@ test("an expired sign-in link explains what happened and offers a new one", asyn
   expect(new URL(page.url()).hash).toBe("");
 });
 
-test("signing out keeps the plan on this device", async ({browser}) => {
+test("signing out asks first, and can keep the plan on this device (J7)", async ({browser}) => {
   const server = fakeServer();
   const page = await device(browser, server, {plan: LOCAL_PLAN});
   await page.goto(link("a"));
   await synced(page);
   await page.locator("#acct button").click();
   await page.getByRole("button", {name: "Sign out on this device"}).click();
+  await expect(page.locator("#acctsheet")).toContainText("Keep a copy of your plan on this device?");
+  await page.getByRole("button", {name: "Keep a copy and sign out"}).click();
   await expect(page.locator("#toast")).toHaveText("Signed out. Your plan is still on this device.");
   await expect(page.locator("#acct")).toHaveText("Sign in");
   await page.locator('.tab[data-tab="list"]').click();
   expect(await listNames(page)).toHaveLength(2);
+});
+
+test("signing out on a shared computer can remove the plan from it (J7)", async ({browser}) => {
+  const server = fakeServer();
+  const page = await device(browser, server, {plan: LOCAL_PLAN});
+  await page.goto(link("a"));
+  await synced(page);
+  await page.locator("#acct button").click();
+  await page.getByRole("button", {name: "Sign out on this device"}).click();
+  await page.getByRole("button", {name: "Remove it and sign out"}).click();
+  await expect(page.locator("#toast")).toHaveText("Signed out. Your plan was removed from this device.");
+  await page.locator('.tab[data-tab="list"]').click();
+  await expect(page.getByText("Your list is empty.")).toBeVisible();
+  expect(server.plans[server.byUser.a].saved_schools).toHaveLength(2); // still in the account
+});
+
+test("download my data gives a JSON file of everything in the account (J7)", async ({browser}) => {
+  const server = fakeServer();
+  const page = await device(browser, server, {plan: LOCAL_PLAN});
+  await page.goto(link("a", "parent@example.com"));
+  await synced(page);
+  await page.locator("#acct button").click();
+  const [download] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", {name: "Download my data"}).click()]);
+  expect(download.suggestedFilename()).toMatch(/^middle-school-plan-\d{4}-\d{2}-\d{2}\.json$/);
+  const data = JSON.parse(fs.readFileSync(await download.path(), "utf8"));
+  expect(data.account).toEqual({email: "parent@example.com"});
+  expect(data.saved_schools.map(r => r.dbn).sort()).toEqual(["20K187", "20K201"]);
+  expect(data.plan.home).toBe("dyker");
+  expect(JSON.stringify(data)).not.toContain("plan-a"); // no internal IDs
+});
+
+test("deleting an account needs DELETE typed, then removes the account and, if chosen, this device's copy (J7)", async ({browser}) => {
+  const server = fakeServer();
+  const page = await device(browser, server, {plan: LOCAL_PLAN});
+  await page.goto(link("a"));
+  await synced(page);
+  await page.locator("#acct button").click();
+  await page.getByRole("button", {name: "Delete my account…"}).click();
+  const del = page.getByRole("button", {name: "Delete my account", exact: true});
+  await expect(del).toBeDisabled();
+  await page.fill("#acct-delete", "delete");
+  await expect(del).toBeEnabled();
+  await del.click();
+  await expect(page.locator("#toast")).toHaveText("Your account is deleted, and your plan was removed from this device.");
+  await expect(page.locator("#acct")).toHaveText("Sign in");
+  expect(server.deleted).toEqual(["a"]);
+  expect(server.byUser.a).toBeUndefined();
+  await expect(page.getByText("Start here:")).toBeVisible();
+});
+
+test("signed in, usage events and errors are sent, with IDs only (logging)", async ({browser}) => {
+  const server = fakeServer();
+  const page = await device(browser, server);
+  page.removeAllListeners("pageerror"); // this test causes an error on purpose
+  await page.goto(link("a"));
+  await synced(page);
+  await page.locator('.tab[data-tab="find"]').click();
+  await page.locator("#app [data-save]").first().click();
+  await page.locator("#app").evaluate(app => app.setAttribute("onclick", "throw new Error('test error')"));
+  await page.locator("#app h2").first().click(); // an error in the page that nothing catches
+  await expect.poll(() => server.events.map(e => e.name).sort()).toEqual(["app_open", "school_saved", "sign_in"]);
+  await expect.poll(() => server.errors.map(e => e.message)).toEqual(["test error"]);
+  expect(server.events.every(e => e.user_id === "a")).toBe(true);
+  expect(server.events.find(e => e.name === "school_saved").props).toEqual({dbn: expect.stringMatching(/^\d{2}[KMXQR]\d{3}$/)});
+  expect(server.errors[0].context).toMatch(/^page · \/ · find$/);
 });
 
 test("signed-out visitors don't download the account library or contact the server", async ({page}) => {

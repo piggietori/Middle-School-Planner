@@ -43,6 +43,7 @@ npm run refresh:data # pull the latest test results into data/schools.json
 - `data/*.json`: schools, open houses and key dates, neighborhoods, steps; `data/schema/` describes each file
 - `src/data.js`: loads the data files for the views
 - `src/state.js`: the family's plan, kept in this browser
+- `src/log.js`: usage events and errors, sent only while signed in
 - `src/session.js`: where the family left off (tab, view, open school), on this device and in the account
 - `src/plan-model.js`: the plan as database rows, what changed, and merging two plans (pure functions)
 - `src/account.js`: signing in, syncing the plan with the account, and the account sheet
@@ -65,4 +66,4 @@ Every source changes about once a year, so each one is pulled once a year by a p
 - Update `as_of` on everything you check by hand.
 - **Never delete or rename an ID** (school DBN, event `id`, neighborhood `id`, step `id`): saved plans point at them. If an open house moves, change its date or time, keep its `id`, and add `"was": {"date": ..., "start": ...}` so families see it moved. If one is cancelled, remove it and add its ID to `retired_ids`.
 
-CI runs lint, the data checks and both test suites on every pull request. Pushes to `main` deploy to GitHub Pages (Settings → Pages → Source must be "GitHub Actions"). The refresh workflow needs Settings → Actions → General → "Allow GitHub Actions to create and approve pull requests".
+CI runs lint, the data checks and both test suites on every pull request. Pushes to `main` deploy to GitHub Pages (Settings → Pages → Source must be "GitHub Actions"). The refresh workflow needs Settings → Actions → General → "Allow GitHub Actions to create and approve pull requests". The weekly *Backup* workflow stays off until you add its two secrets ([supabase/README.md](supabase/README.md)).

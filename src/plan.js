@@ -1,4 +1,5 @@
 import {BY, OH, EVENTS} from "./data.js";
+import {track} from "./log.js";
 import {render} from "./render.js";
 import {st, persist} from "./state.js";
 import {toast} from "./util.js";
@@ -6,10 +7,11 @@ import {openNotes} from "./views/notes.js";
 
 /* Changes to the plan, and progress worked out from it. */
 export const isSaved=d=>st.saved.includes(d);
-export function toggleSave(d){st.saved=isSaved(d)?st.saved.filter(x=>x!==d):[...st.saved,d];if(st.saved.length)st.done.s2=true;persist();toast(isSaved(d)?"Saved to My list":"Removed from My list");render()}
+export function toggleSave(d){st.saved=isSaved(d)?st.saved.filter(x=>x!==d):[...st.saved,d];track(isSaved(d)?"school_saved":"school_removed",{dbn:d});if(st.saved.length)st.done.s2=true;persist();toast(isSaved(d)?"Saved to My list":"Removed from My list");render()}
 export function toggleGoing(id){st.going=st.going.includes(id)?st.going.filter(x=>x!==id):[...st.going,id];persist();render()}
 export function toggleWent(id){const on=!st.attended.includes(id);st.attended=on?[...st.attended,id]:st.attended.filter(x=>x!==id);
   if(on&&!st.going.includes(id))st.going=[...st.going,id];persist();
+  if(on)track("visit_marked",{event_id:id});
   const ev=OH.find(e=>e.id===id);
   if(on&&ev){toast("Marked as visited. Add your notes while they're fresh.");render();openNotes(ev.dbn)} // jump straight to notes after a visit
   else{toast(on?"Marked as visited":"Visit unmarked");render()}}

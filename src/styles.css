@@ -59,6 +59,8 @@ section.view{padding-top:22px;display:grid;gap:18px}
 .btn:hover{border-color:var(--accent)}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
 .btn.on{background:var(--good-soft);border-color:var(--good);color:var(--good)}
+.btn.danger{background:var(--bad);border-color:var(--bad);color:#fff}
+.btn:disabled{opacity:.5;cursor:not-allowed}
 .btn.saved{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
 .linkbtn{border:0;background:none;color:var(--accent);font-weight:700;cursor:pointer;padding:6px 0;text-decoration:underline;text-underline-offset:3px}
 

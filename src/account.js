@@ -2,6 +2,7 @@
    Signed out, nothing here loads or runs: the plan stays on this device, exactly as before. */
 import {PILOT, SESSION_KEY} from "./config.js";
 import {CYCLE} from "./data.js";
+import {feedbackButton} from "./feedback.js"; // a sign-in failure isn't logged (signed out), so let them tell us
 import {reportError, setLogging, takeLogs, track} from "./log.js";
 import {CHILD_KEYS, toRows, fromRows, diffRows, isNoop, isEmpty, mergePlans} from "./plan-model.js";
 import {render} from "./render.js";
@@ -231,7 +232,7 @@ function sheetBody(){
   if(acct.status==="in"&&acct.ask==="delete")return `<h2>Delete your account</h2>
     <p style="margin:0">This permanently deletes your account and the plan saved in it: your schools, visits, steps and notes. It can't be undone. If someone else shares your plan, it stays for them.</p>
     <p class="small muted" style="margin:0">Want a copy first? <button class="linkbtn" data-acct="export">Download my data</button></p>
-    ${acct.error?`<div class="notice" role="alert"><div>${esc(acct.error)}</div></div>`:""}
+    ${acct.error?`<div class="notice" role="alert"><div>${esc(acct.error)} Still stuck? ${feedbackButton("Tell us")}</div></div>`:""}
     <label for="acct-delete" class="lab">Type DELETE to confirm</label>
     <input id="acct-delete" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="10">
     <label class="row small" style="gap:8px;flex-wrap:nowrap"><input type="checkbox" id="acct-delete-local" checked> Also remove my plan from this device</label>
@@ -250,7 +251,7 @@ function sheetBody(){
     :`<h2>Keep your plan on all your devices</h2>
     <p style="margin:0">Sign in to save your schools, visits and notes to your account. We'll email you a link. There's no password.</p>`}
     ${acct.status==="error"?`<div class="notice" role="alert"><div>Couldn't reach your account. Your plan is still saved on this device. <button class="linkbtn" data-acct="retry">Try again</button></div></div>`:""}
-    ${acct.error?`<div class="notice" role="alert"><div>${esc(acct.error)}</div></div>`:""}
+    ${acct.error?`<div class="notice" role="alert"><div>${esc(acct.error)} Still stuck? ${feedbackButton("Tell us")}</div></div>`:""}
     <form class="stack" style="gap:8px" data-acct-form="1">
       <label for="acct-email" class="lab">Email</label>
       <input id="acct-email" type="email" autocomplete="email" required maxlength="254" value="${esc(acct.lastEmail)}" placeholder="you@example.com">

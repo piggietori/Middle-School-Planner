@@ -16,7 +16,8 @@ more widely. Fill in each step's date as you go.
 | 5. Feedback emails | Resend → API Keys → create one with **Sending access** for the domain only. In the Supabase SQL Editor, run (with your values, never in a file or chat): `select vault.create_secret('<the key>', 'resend_api_key'); select vault.create_secret('<your email>', 'feedback_to'); select vault.create_secret('D20 Planner <feedback@<domain>>', 'feedback_from');` | |
 | 6. The private ops repository | Create `piggietori/planner-ops`, **private**. Add secrets `SUPABASE_DB_URL` and `BACKUP_PASSPHRASE`, and the variable `SITE_URL`. Delete both secrets from the public repo. **Watch → All activity**, so alerts email you | |
 | 7. Invite-only for the pilot | Supabase → Authentication → Sign In / Providers → turn off **Allow new users to sign up**. Invite each family from **Users → Invite user** | |
-| 8. The restore drill | Download the newest backup from the ops repo, decrypt it, check both files open ([backups.md](backups.md#the-restore-drill)) | |
+| 8. Hear about problems | **healthchecks.io** (free): create a check with period 1 hour and grace 1 hour, and put its ping URL in the `planner-ops` secret `HEALTHCHECK_URL`. Public repo → Settings → **Code security**: turn on secret scanning and push protection. Install **GitHub Mobile** and allow notifications for `planner-ops` | |
+| 9. The restore drill | Download the newest backup from the ops repo, decrypt it, check both files open ([backups.md](backups.md#the-restore-drill)) | |
 
 **In the code (merged before the pilot):**
 - `src/config.js`: `HELP_EMAIL` and `SUPABASE_REGION` filled in. A unit test fails until they are.
@@ -30,6 +31,7 @@ more widely. Fill in each step's date as you go.
 - Send feedback from the footer. It arrives in your inbox, and the reply address works.
 - In the ops repo, run *Monitor* with "Also post the daily report": the checks pass and the report posts.
 - Run *Monitor* with a wrong `site_url`: an `ALERT: Site up` issue opens and emails you. The next normal run closes it.
+- Run *Monitor* with "Run the real-browser check instead": it passes. healthchecks.io shows the hourly pings.
 
 ## The pilot (fewer than 5 households, about a week)
 
@@ -50,6 +52,8 @@ All of these must be true:
 - [ ] Sign-in emails arrive within a minute, and not in spam (ask the pilot families)
 - [ ] All feedback answered, and anything wrong fixed or on a banner
 - [ ] The restore drill done
+- [ ] `App works for visitors` has passed for 3 days
+- [ ] The highest risks in [failure-modes.md](failure-modes.md#highest-risks) re-scored with what the pilot showed
 
 ## Sharing with parent groups
 

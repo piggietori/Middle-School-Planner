@@ -36,13 +36,16 @@ Running the planner day to day: what happens when, how to tell it's healthy, and
 ## Monitoring
 
 *Monitor* (`planner-ops`: `.github/workflows/monitor.yml` and `scripts/monitor.js`) runs at 17 minutes past every
-hour. Each check that fails opens an `ALERT: <check>` issue, comments on it each hour while it keeps failing, and
+hour, and checks the live site in real browsers every 3 hours. Each check guards against rows in
+[failure-modes.md](failure-modes.md), the register of what can go wrong. Each check that fails opens an `ALERT: <check>` issue, comments on it each hour while it keeps failing, and
 closes it when it passes. GitHub emails you about each, as long as you watch `planner-ops` (Watch → All activity).
 
 | Check | Fails when |
 |---|---|
 | Site up | The live page doesn't load, or doesn't say "Middle School Planner" |
 | Data loads | `data/events.json` doesn't load |
+| HTTPS certificate | Fewer than 14 days left, or it can't be checked |
+| App works for visitors | Every 3 hours: the site in Chromium and in Safari's engine (iPhone), signed out, doesn't load, logs an error, or can't show Dates or open a school (`scripts/smoke-live.js`) |
 | Supabase up | Supabase's sign-in service doesn't answer (paused or down) |
 | Security unchanged | `scripts/check-supabase.js` fails: something opened to signed-out visitors |
 | Database reachable | The monitor can't query the database (password reset, or paused) |
@@ -50,10 +53,15 @@ closes it when it passes. GitHub emails you about each, as long as you watch `pl
 | Saves failing | 3 or more failed saves in an hour |
 | Retention job | `prune-logs` hasn't succeeded in 36 hours |
 | Feedback flood | 20 or more feedback messages in an hour (only 20 an hour are emailed) |
+| Feedback not emailed | A message from the last day still wasn't emailed an hour later |
 | Capacity | The database is over 400 MB (the free limit is 500) |
 | Backups | No successful backup in 30 hours (October to December) or 5 days (otherwise) |
 
 The monitor reads counts only, never emails or notes. Its database password is `planner-ops`'s `SUPABASE_DB_URL`.
+After each hourly run it pings healthchecks.io (`HEALTHCHECK_URL`), which emails you if the pings stop: that's how
+you'd hear that the monitor itself stopped.
+
+To check the site in real browsers yourself: `node scripts/smoke-live.js <site address>`.
 
 **When an alert arrives:** do what the issue says, or find the symptom in [When something breaks](#when-something-breaks).
 If families will notice, post a [banner](#the-banner).
@@ -62,7 +70,8 @@ If families will notice, post a [banner](#the-banner).
 doesn't exist. `ALERT: Site up` opens and emails you; the next hourly run closes it.
 
 **The daily report** posts at 13:00 UTC (8 AM in New York in winter) as a comment on the pinned *Daily report* issue:
-households, people, new sign-ups, how many opened the planner, schools saved, visits, steps, failed saves, feedback
+households, people, new sign-ups, how many signed in with an emailed link (a quiet day can mean sign-in emails
+aren't arriving), how many opened the planner, schools saved, visits, steps, failed saves, feedback
 received, and the top errors. To post one now: Run workflow with **report** ticked.
 
 ## Feedback

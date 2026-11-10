@@ -62,6 +62,10 @@ document.addEventListener("keydown",e=>{
 // Errors nobody caught: sent to us when signed in (log.js), so we hear about problems families hit.
 addEventListener("error",e=>reportError(e.error||e.message,"page"));
 addEventListener("unhandledrejection",e=>reportError(e.reason,"promise"));
+// Something the Content-Security-Policy blocked: an injection attempt, or a change that needs the policy updated.
+// The address loses its query, which could hold someone's details.
+addEventListener("securitypolicyviolation",e=>{const u=e.blockedURI||"";
+  reportError(`CSP blocked ${e.effectiveDirective}: ${/^https?:/.test(u)?u.split(/[?#]/)[0]:u}`,"csp")});
 restoreSession();
 render();
 initAccount();

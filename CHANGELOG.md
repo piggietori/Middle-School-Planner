@@ -22,6 +22,7 @@ Ready for other families, starting with a small pilot.
   your account, and you choose whether to leave an email for a reply. If it can't be sent, your message is kept.
 - **Announcements:** a banner on every tab when something changes, such as an open house that moved.
 - **Invite-only sign-in during the pilot.** An address that wasn't invited is told so, instead of seeing an error.
+- **"Still stuck? Tell us"** on sign-in and account errors opens the feedback form.
 - **Sign-in emails come from the planner's own address,** so they arrive faster and stay out of spam.
 - **The changelog** (this file). CI checks that every version has its notes, and tagging a version publishes them as
   the GitHub Release.
@@ -35,6 +36,9 @@ Ready for other families, starting with a small pilot.
   secrets.
 - **Hourly monitoring:** the site, Supabase, security settings, errors, failed saves, backups and capacity are checked
   every hour. Problems open an alert that emails the owner, and a daily report shows how the planner is used (counts only).
+- **The live site is checked in real browsers** (Chromium and Safari's engine) every 3 hours, and anything the
+  Content-Security-Policy blocks is reported. Every known failure, how we'd notice it, and its risk score is listed in
+  `docs/failure-modes.md`.
 - **Dependabot** proposes updates to the tools and workflows each week.
 - **Tested on iPhone (Safari's engine) and for accessibility** on every pull request.
 

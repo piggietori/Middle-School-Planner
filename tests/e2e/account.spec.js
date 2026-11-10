@@ -168,7 +168,7 @@ test("changes made offline are combined with the account on the next visit, not 
 test("an expired sign-in link explains what happened and offers a new one", async ({browser}) => {
   const page = await device(browser, fakeServer());
   await page.goto("/#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired");
-  await expect(page.locator("#acctsheet [role=alert]")).toHaveText("That sign-in link has expired or was already used. Send yourself a new one.");
+  await expect(page.locator("#acctsheet [role=alert]")).toHaveText("That sign-in link has expired or was already used. Send yourself a new one. Still stuck? Tell us");
   await expect(page.locator("#acct-email")).toBeVisible();
   expect(new URL(page.url()).hash).toBe("");
 });
@@ -307,6 +307,16 @@ test("signed in, usage events and errors are sent, with IDs only (logging)", asy
   expect(server.events.every(e => e.user_id === "a")).toBe(true);
   expect(server.events.find(e => e.name === "school_saved").props).toEqual({dbn: expect.stringMatching(/^\d{2}[KMXQR]\d{3}$/)});
   expect(server.errors[0].context).toMatch(/^page · \/ · find$/);
+});
+
+test("signed in, anything the Content-Security-Policy blocks is reported, without the address's query (logging)", async ({browser}) => {
+  const server = fakeServer();
+  const page = await device(browser, server);
+  await page.goto(link("a"));
+  await synced(page);
+  await page.evaluate(() => document.body.insertAdjacentHTML("beforeend", '<img src="https://injected.example/pixel.png?email=parent@example.com">'));
+  await expect.poll(() => server.errors.map(e => e.message)).toEqual(["CSP blocked img-src: https://injected.example/pixel.png"]);
+  expect(server.errors[0].context).toMatch(/^csp · /);
 });
 
 test("signed-out visitors don't download the account library or contact any other site", async ({page}) => {

@@ -63,6 +63,10 @@ test("while sign-ups are off, an address nobody invited is told the planner is i
   await page.fill("#acct-email", "stranger@example.com");
   await page.getByRole("button", {name: "Email me a sign-in link"}).click();
   await expect(page.locator("#acctsheet [role=alert]")).toContainText("The planner is invite-only for now.");
+  // a failed sign-in isn't logged (they're signed out), so the message offers a way to tell us
+  await page.locator("#acctsheet [role=alert]").getByRole("button", {name: "Tell us"}).click();
+  await expect(page.locator("#fbsheet h2")).toHaveText("Send feedback");
+  await page.locator("#fbsheet").getByRole("button", {name: "← Back"}).click();
   await page.fill("#acct-email", "invited@example.com");
   await page.getByRole("button", {name: "Email me a sign-in link"}).click();
   await expect(page.locator("#acctsheet h2")).toHaveText("Check your email");
@@ -104,6 +108,7 @@ const serious = async page => (await new AxeBuilder({page}).analyze()).violation
   .map(v => `${v.id}: ${v.nodes.map(n => n.target.join(" ")).slice(0, 3).join(", ")}`);
 
 test("no serious accessibility problems on any tab, the account sheet, or the privacy notice", async ({page}) => {
+  test.slow(); // eight full axe scans; WebKit needs longer than the default when the machine is busy
   await page.emulateMedia({reducedMotion: "reduce"}); // check sheets as they settle, not mid slide-in
   await page.addInitScript(() => { if (!localStorage.getItem("d20plan")) localStorage.setItem("d20plan", JSON.stringify({home: "dyker", saved: ["20K201", "20K187"], going: [], attended: [], done: {s1: true}, notes: {}})); });
   await page.goto("/");

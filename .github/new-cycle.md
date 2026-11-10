@@ -23,7 +23,7 @@ See README → Updating data.
 
 **Safety**
 - [ ] Restore drill: open the latest backup with the passphrase ([docs/secrets.md](../docs/secrets.md#restore-drill-once-then-every-august)).
-- [ ] 2FA is still on for the Supabase and GitHub accounts.
+- [ ] 2FA is still on for the Supabase and GitHub accounts, and the `main` ruleset is still active (Settings → Rules).
 
 **Finish**
 - [ ] `node scripts/watch-sources.js --accept` and commit `data/watch.json`, so the weekly watch starts from what you just checked.

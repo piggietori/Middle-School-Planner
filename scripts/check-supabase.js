@@ -18,6 +18,8 @@ const rpc = await fetch(`${SUPABASE_URL}/rest/v1/rpc/open_plan`, {method: "POST"
 report(rpc.status === 401 || rpc.status === 403, "call open_plan", rpc.status === 404 ? "404, function missing: apply the migration" : `${rpc.status} ${(await rpc.text()).slice(0, 80)}`);
 const del = await fetch(`${SUPABASE_URL}/rest/v1/rpc/delete_my_account`, {method: "POST", headers, body: "{}"});
 report(del.status === 401 || del.status === 403, "call delete_my_account", del.status === 404 ? "404, function missing: apply the migration" : `${del.status} ${(await del.text()).slice(0, 80)}`);
+const prune = await fetch(`${SUPABASE_URL}/rest/v1/rpc/prune_logs`, {method: "POST", headers, body: "{}"});
+report(prune.status === 401 || prune.status === 403, "call prune_logs", prune.status === 404 ? "404, function missing: apply the migration" : `${prune.status} ${(await prune.text()).slice(0, 80)}`);
 const ev = await fetch(`${SUPABASE_URL}/rest/v1/events`, {method: "POST", headers, body: JSON.stringify({name: "app_open"})});
 report(ev.status === 401 || ev.status === 403, "add an event signed out", `${ev.status} ${(await ev.text()).slice(0, 80)}`);
 const auth = await fetch(`${SUPABASE_URL}/auth/v1/settings`, {headers});

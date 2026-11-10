@@ -23,7 +23,7 @@ This is an independent tool, not an official NYC Public Schools site. Confirm da
 ## Versions
 
 - **MVP** (`v0.1.0`, tag `mvp`): the original single-file planner. [Release](https://github.com/piggietori/Middle-School-Planner/releases/tag/v0.1.0)
-- **v1** (in progress on the `v1` branch): data that stays up to date, accounts, and picking up where you left off. See [docs/journeys.md](docs/journeys.md).
+- **v1** (`v1.0.0`): data that stays up to date (with a weekly source watch), optional accounts that keep the plan on every device, picking up where you left off, and download/delete for your data. See [docs/journeys.md](docs/journeys.md). [Release](https://github.com/piggietori/Middle-School-Planner/releases/tag/v1.0.0)
 
 ## Development
 
@@ -33,7 +33,7 @@ Plain HTML, CSS and JavaScript modules. There is no build step: the files in the
 npm install
 npm run dev        # http://localhost:5173
 npm run lint
-npm run check:data # data checks (add -- --base origin/v1 to also catch removed IDs)
+npm run check:data # data checks (add -- --base origin/main to also catch removed IDs)
 npm test           # unit and database tests: match score, data checks, plan sync, row-level security
 npm run test:e2e   # browser walk-throughs of the user journeys
 npm run refresh:data # pull the latest test results into data/schools.json

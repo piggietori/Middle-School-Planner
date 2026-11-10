@@ -88,6 +88,42 @@ an automatic **watch** says when a source changed, so nobody has to remember to 
 - **Steps** (`data/steps.json`): the step-by-step checklist on Home. Reviewed each August against the city's
   current process. Step text can name a key date as `{k-close}`; the app fills in the date.
 
+## How a change reaches the site
+
+1. **Something says it's due:** a *Watch sources* issue (a page or dataset changed), the August checklist
+   (*New admissions cycle*), or a family reporting a wrong date.
+2. **A person makes the change:** edits `data/*.json` by hand, or runs Actions → *Refresh data* for the test results,
+   which opens a pull request itself.
+3. **The data checks run** (`npm run check:data`, and again in CI), comparing with `main` so removed IDs are caught.
+4. **Someone reviews the pull request.** The diff shows exactly which dates and numbers changed.
+5. **Merging to `main` deploys it** to GitHub Pages within a minute or two.
+6. **Families see it** the next time they open the planner: "last updated" dates change, and a moved open house
+   shows what it was before (`was`), so families who planned to go notice.
+
+Nothing changes on the site without a merged pull request, so every change has a record and can be reverted.
+
+## What the data checks catch
+
+`scripts/lib/data-checks.js`, tested in `tests/unit/data.test.js`. Errors block the pull request; warnings are
+shown for a person to judge.
+
+| Check | Level |
+|---|---|
+| A file doesn't match its schema (`data/schema/`) | Error |
+| Duplicate DBN, event, neighborhood or step ID | Error |
+| `events.json` or `steps.json` is for a different `cycle` from `schools.json` | Error |
+| A reference points nowhere: a program tag, a source, an open house's school | Error |
+| An event ends before it starts, or falls outside the admissions cycle | Error |
+| `was` is the same as the current date and time | Error |
+| A retired event ID is still listed | Error |
+| A key date the app needs is missing (`k-close`, `k-offer`), or a step names a `{k-…}` that doesn't exist | Error |
+| A school, event, neighborhood or step was removed compared with `main` (saved plans point at them) | Error |
+| An event's date or time changed without `was` | Warning |
+| A score moved by 15 points or more | Warning |
+| A school's text quotes a number that no longer matches its data, or says "too new for full test results" when results exist | Warning |
+| An event not checked for 30 days during application season | Warning |
+| A school fact not checked for over 400 days | Warning |
+
 ## Rules for every update
 
 - Update `as_of` on everything you check, even if nothing changed.

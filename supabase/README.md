@@ -34,8 +34,8 @@ Signed-out visitors never talk to it. School data is not here; it lives in `data
    You don't need to keep the database password: you can reset it any time. The passphrase can't be reset.
    See [docs/secrets.md](../docs/secrets.md).
 
-   Then Actions → *Backup* → Run workflow, and check the run shows "Backup …, encrypted." Families can also download
-   their own copy any time from the account sheet (Download my data).
+   Then Actions → *Backup* → Run workflow, and check the run shows "Backup …, encrypted." How backups work and
+   how to restore one: [docs/backups.md](../docs/backups.md).
 
 ## Usage and errors
 
@@ -49,10 +49,7 @@ select at, message, context from client_errors order by at desc limit 20;
 
 ## Restoring a backup
 
-1. Download the artifact from the *Backup* run, then `gpg -d backup-<date>.tar.gz.gpg | tar -xz` (asks for the passphrase).
-   You get `users.csv` (who has an account) and `public-data.sql` (households, plans and everything in them).
-2. In a new project, apply the migrations. Recreate the people with the same IDs (`users.csv`) following Supabase's
-   guide to migrating auth users, then run `public-data.sql` in the SQL Editor.
+See [docs/backups.md](../docs/backups.md#restoring).
 
 ## Adding a change to the database
 

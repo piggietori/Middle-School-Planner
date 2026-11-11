@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: {name: github-pages, url: "${{ steps.pages.outputs.page_url }}"}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Collect site files
         run: mkdir _site && cp -r index.html privacy.html src data fonts _site/
       - uses: actions/upload-pages-artifact@v3

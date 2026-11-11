@@ -66,7 +66,7 @@ Kept small on purpose. No names, notes text, or home location in event propertie
 **Goal:** turn the plan on this device into an account plan.
 
 1. Taps **Sign in** → chooses email link or Google.
-2. Email: enters email → "Check your email" → taps link → back in the app, signed in.
+2. Email: enters email → "Check your email" → taps the link, **or types the code** from the same email on the device where they asked → signed in.
 3. App checks the account:
    - **No plan yet:** creates a household and uploads the local plan. Toast: "Your plan is saved to your account."
    - **Has a plan, device has nothing:** loads the account plan.
@@ -75,7 +75,8 @@ Kept small on purpose. No names, notes text, or home location in event propertie
 
 **Stored:** `households`, `household_members`, `plans` and child tables; `sign_in` event.
 **Failure cases:**
-- Link expired or opened on another device → "This link expired. Send a new one." The local plan is untouched.
+- Link expired, or used up by an email app that opens links to check them → the message explains and says to type the code from a new email. The local plan is untouched.
+- Wrong or expired code → "That code didn't work or has expired." The box keeps what they typed.
 - Offline when signing in → no account call is made, the local plan stays, retry later.
 - Merge can't reach the server halfway → don't clear local data until the upload is confirmed.
 

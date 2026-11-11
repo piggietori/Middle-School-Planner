@@ -11,7 +11,7 @@ import {st, replacePlan} from "./state.js";
 import {ui} from "./ui.js";
 import {$, esc, toast} from "./util.js";
 
-export const acct = {status:"out", email:"", userId:"", sent:"", lastEmail:"", saving:"saved", open:false, error:"", ask:"", deleting:false, lost:""};
+export const acct = {status:"out", email:"", userId:"", sent:"", lastEmail:"", saving:"saved", open:false, error:"", ask:"", deleting:false, lost:"", codeBusy:false, via:""};
 let backend=null, planId=null, synced=null, timer=null, busy=null, warned=false, sessionTimer=null, sessionNext=null, logTimer=null, opened=false, leaving=false;
 
 const store = {
@@ -33,7 +33,7 @@ export async function initAccount(){
   const hash=new URLSearchParams(location.hash.slice(1));
   if(hash.has("error_description")){ // an expired or already-used sign-in link
     history.replaceState(null,"",location.pathname+location.search);
-    acct.error="That sign-in link has expired or was already used. Send yourself a new one.";
+    acct.error="That sign-in link has expired or was already used. Some email apps open links to check them, which uses them up. Send yourself a new email, and type the code from it instead.";
     acct.open=true;
   }
   const returning=hash.has("access_token");
@@ -81,7 +81,8 @@ async function signedIn(session){
     acct.status="in";
     setLogging(true,queueLogs);
     if(!opened){opened=true;track("app_open",{tab:ui.tab})}
-    if(firstHere)track("sign_in",{method:"email",claimed_local:combine&&!isEmpty(local)});
+    if(firstHere)track("sign_in",{method:acct.via==="code"?"code":"email",claimed_local:combine&&!isEmpty(local)});
+    acct.via="";
     render();renderAccount();
     await flush();
     if(firstHere)toast(isEmpty(local)?"Signed in. Your plan is loaded.":isEmpty(remote)?"Signed in. Your plan is saved to your account.":"Signed in. We added this device's plan to your account.");
@@ -166,6 +167,22 @@ export async function sendLink(email){
   renderAccount();
 }
 
+// The code in the same email as the link (F-11 in docs/failure-modes.md): it works even when an email app has
+// already opened, and so used up, the link. Signing in then arrives through onAuth like the link does.
+export async function signInWithCode(code){
+  if(acct.codeBusy)return;
+  if(!/^\d{6,10}$/.test(code)){acct.error="Type the code from the email: it's 6 digits.";renderAccount();return}
+  acct.codeBusy=true;acct.error="";acct.via="code";renderAccount();
+  try{
+    await (await getBackend()).verifyCode(acct.sent,code);
+  }catch(e){
+    console.error(e);acct.via="";
+    acct.error=/rate limit|too many/i.test(e.message||"")?"Too many tries. Wait a few minutes, then try again."
+      :"That code didn't work or has expired. Check it, or send yourself a new email.";
+  }
+  acct.codeBusy=false;renderAccount();
+}
+
 // Usage events and errors (log.js), sent in small batches while signed in.
 function queueLogs(){clearTimeout(logTimer);logTimer=setTimeout(sendLogs,2000)}
 async function sendLogs(){
@@ -244,7 +261,13 @@ function sheetBody(){
     <div><button class="linkbtn" data-acct="delete">Delete my account…</button></div>`;
   if(acct.status==="loading")return `<h2>Signing in…</h2><p class="muted" style="margin:0">Loading your plan.</p>`;
   if(acct.sent)return `<h2>Check your email</h2>
-    <p style="margin:0">We sent a sign-in link to <b>${esc(acct.sent)}</b>. Open it on this device or any other to sign in. It works once and expires in an hour.</p>
+    <p style="margin:0">We sent a sign-in link and a code to <b>${esc(acct.sent)}</b>. Open the link on this device or any other, or type the code here. Each works once, within an hour.</p>
+    ${acct.error?`<div class="notice" role="alert"><div>${esc(acct.error)} Still stuck? ${feedbackButton("Tell us")}</div></div>`:""}
+    <form class="stack" style="gap:8px" data-acct-code="1">
+      <label for="acct-code" class="lab">Code from the email</label>
+      <input id="acct-code" type="text" inputmode="numeric" autocomplete="one-time-code" required maxlength="12">
+      <button class="btn primary" type="submit"${acct.codeBusy?' disabled aria-busy="true"':""}>${acct.codeBusy?"Signing in…":"Sign in with the code"}</button>
+    </form>
     <p class="muted small" style="margin:0">No email? Check your spam folder, or <button class="linkbtn" data-acct="again">send it again</button>.</p>`;
   return `${acct.lost?`<h2>Sign in again</h2>
     <p style="margin:0">You were signed out on this device. Your plan is still here; sign in to keep it in sync with your account.</p>`
@@ -269,11 +292,13 @@ export function renderAccount(){
   const s=$("#acctsheet");
   if(!s)return;
   // keep what's being typed across re-renders
-  const typed=document.getElementById("acct-email")?.value, del=document.getElementById("acct-delete")?.value, local=document.getElementById("acct-delete-local")?.checked;
+  const typed=document.getElementById("acct-email")?.value, code=document.getElementById("acct-code")?.value, del=document.getElementById("acct-delete")?.value, local=document.getElementById("acct-delete-local")?.checked;
   s.innerHTML=acct.open?`<div class="sheet" data-acct="close"><div class="sheet-in acct-sheet" role="dialog" aria-modal="true" aria-label="Account">
     <div class="sheet-bar"><button class="btn" data-acct="close">← Back</button></div><div class="stack">${sheetBody()}</div></div></div>`:"";
   const input=document.getElementById("acct-email");
   if(input&&typed!=null)input.value=typed;
+  const ci=document.getElementById("acct-code");
+  if(ci&&code!=null)ci.value=code;
   const d=document.getElementById("acct-delete");
   if(d&&del!=null){d.value=del;document.getElementById("acct-delete-local").checked=local}
   canDelete();
@@ -290,7 +315,7 @@ document.addEventListener("click",e=>{
   if(a==="close"&&e.target!==t&&!e.target.closest("button[data-acct]"))return; // clicks inside the sheet
   if(a==="open"){acct.open=true;renderAccount();document.getElementById("acct-email")?.focus()}
   if(a==="close"){acct.open=false;acct.ask="";acct.error="";renderAccount()}
-  if(a==="again"){acct.sent="";renderAccount();document.getElementById("acct-email")?.focus()}
+  if(a==="again"){acct.sent="";acct.error="";renderAccount();document.getElementById("acct-email")?.focus()}
   if(a==="retry")retry();
   if(a==="forget"){ // a shared computer
     store.set(EMAIL,"");acct.lost="";acct.lastEmail="";
@@ -304,6 +329,11 @@ document.addEventListener("click",e=>{
   if(a==="delete-now"&&!t.disabled)deleteAccount(document.getElementById("acct-delete-local").checked);
 });
 document.addEventListener("submit",e=>{
+  if(e.target.dataset.acctCode){
+    e.preventDefault();
+    signInWithCode(document.getElementById("acct-code").value.replace(/\D/g,""));
+    return;
+  }
   if(!e.target.dataset.acctForm)return;
   e.preventDefault();
   const email=document.getElementById("acct-email").value.trim();

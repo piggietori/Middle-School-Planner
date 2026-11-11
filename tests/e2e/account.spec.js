@@ -1,6 +1,7 @@
 // Journeys J2 (sign in and keep what I did) and J3 (come back on another device). See docs/journeys.md.
 // Uses an in-memory fake of the account server (fake-backend.js), shared by both "devices".
 import fs from "node:fs";
+import AxeBuilder from "@axe-core/playwright";
 import {test, expect} from "@playwright/test";
 import {useFixtureData} from "./fixture-data.js";
 import {fakeServer, useFakeBackend} from "./fake-backend.js";
@@ -36,7 +37,7 @@ test("sign in from a device with a plan: the plan is saved to the new account (J
   await page.locator("#acct").getByRole("button", {name: "Sign in"}).click();
   await page.fill("#acct-email", "parent@example.com");
   await page.getByRole("button", {name: "Email me a sign-in link"}).click();
-  await expect(page.locator("#acctsheet")).toContainText("We sent a sign-in link to parent@example.com");
+  await expect(page.locator("#acctsheet")).toContainText("We sent a sign-in link and a code to parent@example.com");
   expect(server.outbox).toEqual(["parent@example.com"]);
 
   await page.goto("about:blank"); // the link from the email opens as a new page load, not a hash change
@@ -168,9 +169,39 @@ test("changes made offline are combined with the account on the next visit, not 
 test("an expired sign-in link explains what happened and offers a new one", async ({browser}) => {
   const page = await device(browser, fakeServer());
   await page.goto("/#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired");
-  await expect(page.locator("#acctsheet [role=alert]")).toHaveText("That sign-in link has expired or was already used. Send yourself a new one. Still stuck? Tell us");
+  await expect(page.locator("#acctsheet [role=alert]")).toHaveText("That sign-in link has expired or was already used. Some email apps open links to check them, which uses them up. Send yourself a new email, and type the code from it instead. Still stuck? Tell us");
   await expect(page.locator("#acct-email")).toBeVisible();
   expect(new URL(page.url()).hash).toBe("");
+});
+
+test("the code from the email signs in on this device, even when the link was used up (F-11)", async ({browser}) => {
+  const server = fakeServer();
+  const page = await device(browser, server, {plan: LOCAL_PLAN});
+  await page.emulateMedia({reducedMotion: "reduce"}); // check the sheet as it settles, not mid slide-in
+  await page.goto("/");
+  await page.locator("#acct").getByRole("button", {name: "Sign in"}).click();
+  await page.fill("#acct-email", "parent@example.com");
+  await page.getByRole("button", {name: "Email me a sign-in link"}).click();
+  await expect(page.locator("#acctsheet")).toContainText("We sent a sign-in link and a code to parent@example.com");
+  expect((await new AxeBuilder({page}).analyze()).violations.filter(v => ["serious", "critical"].includes(v.impact)).map(v => `${v.id}: ${v.nodes.map(n => n.target.join(" ")).join(", ")}`)).toEqual([]);
+
+  // Too short, then wrong: explained, and the code box keeps what was typed.
+  await page.fill("#acct-code", "123");
+  await page.getByRole("button", {name: "Sign in with the code"}).click();
+  await expect(page.locator("#acctsheet [role=alert]")).toContainText("Type the code from the email: it's 6 digits.");
+  await page.fill("#acct-code", "111 111");
+  await page.getByRole("button", {name: "Sign in with the code"}).click();
+  await expect(page.locator("#acctsheet [role=alert]")).toContainText("That code didn't work or has expired.");
+  await expect(page.locator("#acct-code")).toHaveValue("111 111");
+
+  // The right code (spaces are fine): signed in, and this device's plan is saved to the new account.
+  await page.fill("#acct-code", "246 810");
+  await page.getByRole("button", {name: "Sign in with the code"}).click();
+  await expect(page.locator("#toast")).toHaveText("Signed in. Your plan is saved to your account.");
+  await synced(page);
+  await expect.poll(() => server.plans[server.byUser.parent]?.saved_schools.map(r => r.dbn)).toEqual(["20K201", "20K187"]);
+  await expect.poll(() => server.events.find(e => e.name === "sign_in")?.props).toEqual({method: "code", claimed_local: true}); // sent in a batch
+  expect(server.codes).toEqual({}); // used once
 });
 
 test("signing out asks first, and can keep the plan on this device (J7)", async ({browser}) => {

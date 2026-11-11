@@ -1,18 +1,25 @@
 // An in-memory stand-in for Supabase, shared by every page in a test, so two browser contexts act like
 // two devices signed in to the same account. The app uses it through window.__plannerTestBackend.
-// A "sign-in link" is just /#access_token=fake&uid=<id>&email=<email>.
+// A "sign-in link" is just /#access_token=fake&uid=<id>&email=<email>. Each email also carries server.code; typing it
+// signs in as the part of the address before the @ (parent@example.com → uid "parent").
 
 const KEYS = {saved_schools: "dbn", visits: "event_id", step_progress: "step_id", school_notes: "dbn"};
 const DEFAULT_PLAN = {home: "", max_miles: 1.5, need_subway: false, skip_competitive: false,
   weights: {distance: 2, scores: 1, safety: 2, bullying: 1, teachers: 1}, programs: []};
 
 export function fakeServer() {
-  const server = {outbox: [], plans: {}, byUser: {}, sessions: {}, events: [], errors: [], deleted: [], failSaves: false, saves: 0, invited: null};
+  const server = {outbox: [], plans: {}, byUser: {}, sessions: {}, events: [], errors: [], deleted: [], failSaves: false, saves: 0, invited: null, code: "246810", codes: {}};
   server.handle = (op, ...args) => {
     if (op === "sendLink") {
       // With sign-ups off (the pilot), Supabase refuses addresses nobody invited.
       if (server.invited && !server.invited.includes(args[0])) throw new Error("Signups not allowed for otp");
-      server.outbox.push(args[0]); return null;
+      server.outbox.push(args[0]); server.codes[args[0]] = server.code; return null;
+    }
+    if (op === "verifyCode") {
+      const [email, code] = args;
+      if (!code || server.codes[email] !== code) throw new Error("Token has expired or is invalid");
+      delete server.codes[email]; // works once
+      return {id: email.split("@")[0], email};
     }
     if (op === "openPlan") {
       const [uid] = args;
@@ -70,6 +77,11 @@ export async function useFakeBackend(context, server) {
       },
       onChange(cb) { listener = cb; },
       sendLink: email => call("sendLink", email),
+      async verifyCode(email, code) {
+        const s = {user: await call("verifyCode", email, code)};
+        localStorage.setItem("fake-session", JSON.stringify(s)); uid = s.user.id;
+        listener("SIGNED_IN", s);
+      },
       async signOut() { localStorage.removeItem("fake-session"); uid = null; },
       openPlan: () => call("openPlan", uid),
       load: id => call("load", id),

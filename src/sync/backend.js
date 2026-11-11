@@ -17,6 +17,8 @@ export async function createBackend() {
     async sendLink(email) {
       check(await sb.auth.signInWithOtp({email, options: {emailRedirectTo: location.origin + location.pathname, shouldCreateUser: true}}));
     },
+    // The code in the same email. On success Supabase reports SIGNED_IN through onChange, as the link does.
+    async verifyCode(email, token) { check(await sb.auth.verifyOtp({email, token, type: "email"})); },
     async signOut() { check(await sb.auth.signOut({scope: "local"})); }, // this device only
     async openPlan(cycle) { return check(await sb.rpc("open_plan", {p_cycle: cycle})); },
     async load(planId) {

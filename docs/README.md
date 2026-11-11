@@ -12,6 +12,7 @@ Start with architecture, then read whichever doc answers your question. Each fac
 | [privacy.md](privacy.md) | What personal data exists, who can see it, and how long it's kept |
 | [operations.md](operations.md) | The yearly calendar, monitoring and alerts, feedback, the banner, and what to do when something breaks |
 | [launch.md](launch.md) | Opening the planner to other families: the setup checklist, the pilot, and when to share more widely |
+| [governance.md](governance.md) | Who runs the planner, who steps in when the owner can't, and what they can do |
 | [failure-modes.md](failure-modes.md) | Everything that can go wrong, how we'd know, what we do, and how much risk is left (scored) |
 | [testing.md](testing.md) | The test and eval layers, what each proves, and how to run them |
 | [journeys.md](journeys.md) | What families do in the planner, step by step |

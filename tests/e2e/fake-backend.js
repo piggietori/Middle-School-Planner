@@ -1,7 +1,7 @@
 // An in-memory stand-in for Supabase, shared by every page in a test, so two browser contexts act like
 // two devices signed in to the same account. The app uses it through window.__plannerTestBackend.
-// A "sign-in link" is just /#access_token=fake&uid=<id>&email=<email>. Each email also carries server.code; typing it
-// signs in as the part of the address before the @ (parent@example.com → uid "parent").
+// Each sign-in email carries server.code; typing it signs in as the part of the address before the @
+// (parent@example.com → uid "parent"). As a shortcut, tests sign in with /#access_token=fake&uid=<id>&email=<email>.
 
 const KEYS = {saved_schools: "dbn", visits: "event_id", step_progress: "step_id", school_notes: "dbn"};
 const DEFAULT_PLAN = {home: "", max_miles: 1.5, need_subway: false, skip_competitive: false,
@@ -69,7 +69,7 @@ export async function useFakeBackend(context, server) {
     window.__plannerTestBackend = {
       async session() {
         const h = new URLSearchParams(location.hash.slice(1));
-        if (h.get("access_token") === "fake") { // arriving from a sign-in link
+        if (h.get("access_token") === "fake") { // the test shortcut for a completed sign-in
           localStorage.setItem("fake-session", JSON.stringify({user: {id: h.get("uid"), email: h.get("email")}}));
           history.replaceState(null, "", location.pathname);
         }

@@ -7,7 +7,7 @@ A simple planner for families applying to middle school in Brooklyn's District 2
 - **Find schools:** pick your neighborhood and what matters to you; schools are ranked with a match score and the reasons behind it
 - **My list:** put your saved schools in order before entering them in MySchools
 
-Signing in is optional. Without it, choices are saved in your own browser on your device. Signed in (with an emailed link, no password), they're saved to your account and stay the same on all your devices.
+Signing in is optional. Without it, choices are saved in your own browser on your device. Signed in (with a 6-digit code sent by email, no password), they're saved to your account and stay the same on all your devices.
 
 ## Sources
 
@@ -27,7 +27,7 @@ Architecture, data refresh, backups, security, privacy, operations and testing: 
 ## Versions
 
 - **MVP** (`v0.1.0`, tag `mvp`): the original single-file planner.
-- **v1** (`v1.x`): data that stays up to date (with a weekly source watch), optional accounts that keep the plan on every device, picking up where you left off, and download/delete for your data. See [docs/journeys.md](docs/journeys.md).
+- **v1** (`v1.x`): data that stays up to date (with a source watch, daily in application season), optional accounts that keep the plan on every device, picking up where you left off, and download/delete for your data. See [docs/journeys.md](docs/journeys.md).
 
 What changed in each version: [CHANGELOG.md](CHANGELOG.md). Each version is also a [GitHub Release](https://github.com/piggietori/Middle-School-Planner/releases).
 

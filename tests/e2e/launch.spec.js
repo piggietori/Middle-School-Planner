@@ -12,16 +12,14 @@ test.beforeEach(async ({page}) => {
 
 const banner = (page, notice) => page.route(/\/data\/notice\.json$/, r => r.fulfill({json: {schema_version: 1, notice}}));
 
-test("the pilot is labeled, its notice can be dismissed, and My list says where the application really happens", async ({page}) => {
+// PILOT is off since v1.3.0 (src/config.js). With it on, the header says "Pilot" and Home has a dismissible notice.
+test("with the pilot over, nothing says pilot, and My list says where the application really happens", async ({page}) => {
   await page.goto("/");
-  await expect(page.locator("#pilot")).toBeVisible();
-  const notice = page.locator(".notice", {hasText: "This planner is a pilot."});
-  await expect(notice).toContainText("not by NYC Public Schools");
-  await expect(notice.getByRole("button", {name: "Tell us about a problem"})).toBeVisible();
-  await notice.getByRole("button", {name: "Got it"}).click();
-  await expect(notice).toHaveCount(0);
-  await page.reload();
-  await expect(page.locator(".notice", {hasText: "This planner is a pilot."})).toHaveCount(0); // once per device
+  await expect(page.locator("#pilot")).toBeHidden();
+  await expect(page.getByText("This planner is a pilot")).toHaveCount(0);
+  await page.locator("#acct").getByRole("button", {name: "Sign in"}).click();
+  await expect(page.locator("#acctsheet")).not.toContainText("pilot");
+  await page.locator("#acctsheet").getByRole("button", {name: "← Back"}).click();
   await page.locator('.tab[data-tab="list"]').click();
   await expect(page.locator("#app")).toContainText("Your application counts only when you submit it in MySchools.");
 });
@@ -34,7 +32,7 @@ test("every page links to the privacy notice and to help, and the notice page wo
   await expect(foot.getByRole("button", {name: "Send feedback"})).toBeVisible();
   await foot.getByRole("link", {name: "Privacy & terms"}).click();
   await expect(page.locator("h1")).toHaveText("Privacy and terms");
-  await expect(page.locator("[data-pilot]")).toBeVisible();
+  await expect(page.locator("[data-pilot]").first()).toBeHidden();
   await expect(page.locator("a[data-help]").first()).toHaveAttribute("href", /^mailto:help@/);
   expect(violations).toEqual([]);
 });
@@ -61,14 +59,14 @@ test("while sign-ups are off, an address nobody invited is told the planner is i
   await page.locator("#acct button").click();
   await expect(page.locator("#acctsheet")).toContainText("By signing in you agree to the privacy notice and terms.");
   await page.fill("#acct-email", "stranger@example.com");
-  await page.getByRole("button", {name: "Email me a sign-in link"}).click();
+  await page.getByRole("button", {name: "Email me a code"}).click();
   await expect(page.locator("#acctsheet [role=alert]")).toContainText("The planner is invite-only for now.");
   // a failed sign-in isn't logged (they're signed out), so the message offers a way to tell us
   await page.locator("#acctsheet [role=alert]").getByRole("button", {name: "Tell us"}).click();
   await expect(page.locator("#fbsheet h2")).toHaveText("Send feedback");
   await page.locator("#fbsheet").getByRole("button", {name: "← Back"}).click();
   await page.fill("#acct-email", "invited@example.com");
-  await page.getByRole("button", {name: "Email me a sign-in link"}).click();
+  await page.getByRole("button", {name: "Email me a code"}).click();
   await expect(page.locator("#acctsheet h2")).toHaveText("Check your email");
   expect(server.outbox).toEqual(["invited@example.com"]);
   await context.close();

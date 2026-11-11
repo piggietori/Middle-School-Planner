@@ -8,7 +8,7 @@ is a change there, with its "Last updated" date.
 
 | Data | Where | Why | Who can see it | Kept until |
 |---|---|---|---|---|
-| Email address | Supabase sign-in; backups (`users.csv`); the device, while signed in or after an unexpected sign-out (`d20plan-email`) | To send sign-in links, and to fill it in when signing in again | The person; the project owner | The account is deleted (backups: 90 days more). On the device: until they sign out or choose "Not you? Forget this email" |
+| Email address | Supabase sign-in; backups (`users.csv`); the device, while signed in or after an unexpected sign-out (`d20plan-email`) | To send sign-in codes, and to fill it in when signing in again | The person; the project owner | The account is deleted (backups: 90 days more). On the device: until they sign out or choose "Not you? Forget this email" |
 | The plan: home neighborhood, priorities, saved schools, visits, steps | The device; the account if signed in; backups | It's the planner | The household; the project owner | Deleted by the family (device: sign out and remove, or clear the browser) |
 | Notes about schools (rating, likes, concerns) | Same as the plan | Comparing schools | Same as the plan | Same as the plan |
 | Where they left off (tab, open school) | The device; the account if signed in | Resume on any device | The person; the project owner | The account is deleted |

@@ -35,7 +35,6 @@ Sorted by RPN after the planned fixes: what's still worth watching.
 | F-05 | The app breaks only for signed-out visitors | 192 → 120 | Accepted after the browser check: signed-out visitors send nothing, by design |
 | F-30 | We publish a wrong date | 144 → 120 | Accepted: review and checks catch most; the pilot notice says to confirm with schools |
 | F-52 | An alert arrives and nobody sees it | 224 → 112 | Turn on GitHub Mobile notifications for `planner-ops` |
-| F-11 | The sign-in link is "expired" before they click it | 105 → 105 | Accepted since v1.3.0: the email has a code too, so a used-up link no longer stops anyone; left is a family who misses the code as well, and the message tells them what to do |
 
 ## The register
 
@@ -59,7 +58,7 @@ Status: **Covered**, **Partial** (works, with a known gap), **Gap → fix**, **A
 | ID | Failure | Harm | How we'd know | Response | S | O | D | RPN now | After | Status |
 |---|---|---|---|---|---|---|---|---|---|---|
 | F-10 | The sign-in email doesn't arrive (spam, Resend, rate limit) | Can't sign in on a new device | Daily report: sign-ins per day; "Tell us" on sign-in errors; Resend → Logs | [operations.md](operations.md#when-something-breaks) | 7 | 6 | 8 | 336 | 140 | Partial → confirm delivery with pilot families |
-| F-11 | The link shows "expired" before they use it (an email scanner opened it, or an older link) | Can't sign in until they try again | Only if they tell us ("Tell us") | The email has a code as well as the link; the message explains and offers a new email | 5 | 3 | 7 | 105 | 105 | Accepted: the code works when the link was used up; what's left needs the family to miss both |
+| F-11 | The code doesn't work (mistyped, expired, or the email is slow) | Can't sign in until they try again | Only if they tell us ("Tell us") | The planner says what went wrong; send a new email. Sign-in is by code only since v1.3.0, so link checkers and links opening in the wrong browser can't get in the way | 4 | 3 | 7 | 84 | 84 | Covered |
 | F-12 | Signed out without choosing it (Safari's 7 days, cleared site data) | Worry that the plan is lost | Not reported | The planner says so and offers to sign in again (v1.1.1) | 3 | 7 | 7 | 147 | 147 | Accepted: handled in the app |
 | F-13 | Saves fail | Changes stay on one device | `ALERT: Saves failing` | Supabase status; recent database changes | 7 | 3 | 3 | 63 | 63 | Covered |
 | F-14 | Combining plans goes wrong at sign-in | Schools missing or doubled | Unit tests on every change; otherwise only if a family tells us | Restore their plan ([backups.md](backups.md#restoring)) | 8 | 2 | 6 | 96 | 96 | Covered by tests |

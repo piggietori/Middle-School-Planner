@@ -1,4 +1,5 @@
 /* Layout: one calm column of big, tappable cards; tabs at the bottom on phones, at the top on wide screens. Subway bullets carry the only loud color. */
+[hidden]{display:none!important} /* hidden always wins over a class that sets display (.pill, .notice) */
 :root{
   --bg:#f3f5f9; --surface:#ffffff; --ink:#18213a; --muted:#59627a; --line:#dde2ec;
   --accent:#1f4fa3; --accent-soft:#e3ebfa; --on-accent:#ffffff;

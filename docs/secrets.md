@@ -24,7 +24,7 @@ Above all of these are the **master keys**: the logins that can reset everything
 | GitHub account | Master key | Password manager, with 2FA | Yes | Recover by email | They could read and change secrets and workflows |
 | Resend account | Master key | Password manager, with 2FA | Yes | Recover by email | They could send email as the domain and read who was emailed |
 | Domain registrar | Master key | Password manager, with 2FA. Turn on auto-renew | Yes | Recover by email | They could point the site and email somewhere else. If the domain lapses, the site and sign-in emails stop |
-| Your email account | Master key | Password manager, with 2FA | Yes | Your provider's recovery | Sign-in links go there, so it protects your planner account too |
+| Your email account | Master key | Password manager, with 2FA | Yes | Your provider's recovery | Sign-in codes go there, so it protects your planner account too |
 
 **Notes**
 - **The database password doesn't need to be remembered.** The app never uses it. Only the backup uses it, through
@@ -82,7 +82,7 @@ To restore into a project, see [supabase/README.md](../supabase/README.md#restor
 ### Rotate a Resend key
 
 1. Resend → API Keys: create the new key (SMTP or **Sending access** for the domain), then delete the old one.
-2. The SMTP key: paste it in Supabase → Authentication → SMTP Settings. Send yourself a sign-in link to check.
+2. The SMTP key: paste it in Supabase → Authentication → SMTP Settings. Send yourself a sign-in code to check.
 3. The API key: in the Supabase SQL Editor, run
    `select vault.update_secret((select id from vault.secrets where name = 'resend_api_key'), '<the new key>');`
    with the key typed there only. Send feedback from the planner to check it arrives.

@@ -7,7 +7,8 @@ export const SESSION_KEY = "sb-mhhszsyjxximewcuynis-auth-token";
 // Where Supabase keeps the data (Dashboard → Project Settings → General), for the privacy notice.
 export const SUPABASE_REGION = "East US (N. Virginia)";
 
-// While true, the header says "Pilot" and each device sees the pilot notice once (docs/launch.md).
-export const PILOT = true;
+// While true, the header says "Pilot", each device sees the pilot notice once, and the privacy notice and sign-in
+// screen say it's a pilot (docs/launch.md). Off since v1.3.0; turn it on again for a future pilot.
+export const PILOT = false;
 // Where families report problems and ask about their data. It forwards to the owner.
 export const HELP_EMAIL = "help@torilam.com";

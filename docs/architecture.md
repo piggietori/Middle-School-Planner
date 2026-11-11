@@ -27,7 +27,7 @@ For the journeys this supports, see [journeys.md](journeys.md).
          │ Deploy on merge to main                      │ migrations pasted into
          ▼                                              ▼ the SQL Editor
  ┌──── GITHUB PAGES ─────────────┐        ┌──────── SUPABASE ───────────────────────┐
- │ index.html, privacy.html,     │        │ Auth: emailed sign-in links             │
+ │ index.html, privacy.html,     │        │ Auth: emailed sign-in codes             │
  │ src/, data/, fonts/           │        │ Postgres, row-level security on every   │
  └──────────────┬────────────────┘        │ table:                                  │
                 │ loads                   │  households, household_members          │

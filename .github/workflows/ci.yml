@@ -7,6 +7,7 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    timeout-minutes: 20 # a normal run takes 2–3 minutes; a hang (say Ubuntu's package servers down) fails instead of running 6 hours
     steps:
       - uses: actions/checkout@v4
         with: {fetch-depth: 0}
@@ -19,7 +20,9 @@ jobs:
       - name: Release notes
         run: node scripts/check-changelog.js
       - run: npm test
-      - run: npx playwright install --with-deps chromium webkit
+      - name: Install the browsers
+        run: npx playwright install --with-deps chromium webkit
+        timeout-minutes: 10
       - run: npm run test:e2e
       - uses: actions/upload-artifact@v4
         if: failure()

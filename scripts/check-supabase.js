@@ -3,7 +3,7 @@
 //   node scripts/check-supabase.js
 import {SUPABASE_URL, SUPABASE_KEY} from "../src/config.js";
 
-const TABLES = ["households", "household_members", "plans", "saved_schools", "visits", "step_progress", "school_notes", "user_session", "events", "client_errors"];
+const TABLES = ["households", "household_members", "plans", "saved_schools", "visits", "step_progress", "school_notes", "user_session", "events", "client_errors", "feedback"];
 const headers = {apikey: SUPABASE_KEY, "content-type": "application/json"};
 let failed = 0;
 const report = (ok, what, detail) => { console.log(`${ok ? "ok  " : "FAIL"} ${what}: ${detail}`); if (!ok) failed++; };

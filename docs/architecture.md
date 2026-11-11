@@ -20,28 +20,32 @@ For the journeys this supports, see [journeys.md](journeys.md).
  │ supabase/migrations/  (the database, as SQL)                              │
  │                                                                           │
  │ CI on every pull request: lint · data checks · unit + database tests ·    │
- │                           browser journeys (desktop + phone)              │
- │ Scheduled: Watch sources (Mon) · Backup (daily Oct–Dec, else Sun) ·       │
- │            New admissions cycle (Aug 15)                                  │
+ │                           browser journeys (desktop, phone, iPhone)       │
+ │ Scheduled: Watch sources (Mon) · New admissions cycle (Aug 15)            │
+ │ (Backup and the hourly Monitor run in the private planner-ops repo)       │
  └───────┬──────────────────────────────────────────────┬────────────────────┘
          │ Deploy on merge to main                      │ migrations pasted into
          ▼                                              ▼ the SQL Editor
  ┌──── GITHUB PAGES ─────────────┐        ┌──────── SUPABASE ───────────────────────┐
- │ index.html, src/, data/       │        │ Auth: emailed sign-in links             │
- └──────────────┬────────────────┘        │ Postgres, row-level security on every   │
-                │ loads                   │ table:                                  │
-                ▼                         │  households, household_members          │
- ┌──────────── BROWSER ───────────────┐   │  plans (one per household per cycle)    │
- │ Home · Dates · Find · My list      │   │  saved_schools, visits, step_progress,  │
- │ match score (pure functions)       │   │  school_notes                           │
- │ plan in localStorage (always)      │◄─►│  user_session (where you left off)      │
- │ sync with the account (signed in)  │   │  events, client_errors (insert only)    │
+ │ index.html, privacy.html,     │        │ Auth: emailed sign-in links             │
+ │ src/, data/, fonts/           │        │ Postgres, row-level security on every   │
+ └──────────────┬────────────────┘        │ table:                                  │
+                │ loads                   │  households, household_members          │
+                ▼                         │  plans (one per household per cycle)    │
+ ┌──────────── BROWSER ───────────────┐   │  saved_schools, visits, step_progress,  │
+ │ Home · Dates · Find · My list      │   │  school_notes                           │
+ │ match score (pure functions)       │   │  user_session (where you left off)      │
+ │ plan in localStorage (always)      │◄─►│  events, client_errors (insert only)    │
+ │ sync with the account (signed in)  │   │  feedback (insert only, anyone)         │
  │ errors + usage events (signed in)  │──►│                                         │
+ │ feedback (only when sent)          │──►│                                         │
  └────────────────────────────────────┘   └───────────────┬─────────────────────────┘
                                                           │ pg_dump, encrypted
                                                           ▼
-                                          Backup artifacts in GitHub (90 days)
+                                          Backup artifacts in private planner-ops (90 days)
 ```
+
+Feedback is the one thing signed-out visitors can send. The database emails each message to the owner through Resend.
 
 Read it top to bottom. **Source data** flows through review into static files. **User data** flows only between
 the browser and Supabase. The two meet only in the browser.
@@ -123,12 +127,14 @@ file that talks to Supabase is `src/sync/backend.js`, and signed-out visitors ne
 
 - **No build step.** The files in the repository are the site: plain HTML, CSS and JavaScript modules. The
   Supabase library is vendored into `src/vendor/` and pinned by version and checksum.
-- **Deploy:** merging to `main` publishes `index.html`, `src/` and `data/` to GitHub Pages.
+- **Deploy:** merging to `main` publishes `index.html`, `privacy.html`, `src/`, `data/` and `fonts/` to GitHub Pages,
+  at `d20.torilam.com`.
 - **CI** runs on every pull request: lint, data checks (compared with the target branch), unit and database tests,
-  and browser journeys on desktop and phone sizes ([testing.md](testing.md)).
+  and browser journeys on desktop, phone, and iPhone in Safari's engine ([testing.md](testing.md)).
 - **Scheduled workflows:**
   - *Watch sources*: Mondays.
-  - *Backup*: daily Oct–Dec, Sundays and Wednesdays otherwise.
+  - In the private `planner-ops` repository: *Backup* (daily Oct–Dec, Sundays and Wednesdays otherwise) and
+    *Monitor* (hourly, plus the daily report). Private, because they handle families' data.
   - *New admissions cycle*: August 15.
   - *Refresh data*: run by hand.
 
@@ -155,5 +161,6 @@ See the file list in the [root README](../README.md#development). In short:
 - `src/account.js` and `src/sync/backend.js`: sign-in and sync.
 - `src/session.js`: where the family left off.
 - `src/log.js`: usage events and errors.
+- `src/notices.js` and `src/feedback.js`: the pilot notice, the announcement banner, and Send feedback.
 - `src/views/`: the screens.
 - `scripts/`: data checks, refresh, source watch, and the live Supabase check.

@@ -13,21 +13,97 @@ Running the planner day to day: what happens when, how to tell it's healthy, and
 | September–October | The D20 flyer comes out; open house season starts | Add the open houses (prompted by the watch) |
 | October 1 – December 31 | Backups run daily; the busiest season | Watch for issues and error reports |
 | December 11 | Application deadline; My list becomes read-only the next day | Nothing |
-| Sundays and Wednesdays the rest of the year | Backup, which also keeps Supabase from pausing | Nothing, unless GitHub emails you that it failed |
-| February and March | The quietest stretch: GitHub may turn off scheduled workflows after 60 days without a commit | Open Actions → *Backup* and *Watch sources*; if either says disabled, click **Enable workflow** |
+| Sundays and Wednesdays the rest of the year | *Backup* (in `planner-ops`) | Nothing, unless an alert says it failed |
+| Every hour | *Monitor* (in `planner-ops`) checks the site, Supabase, security, errors, saves, backups and capacity | Nothing, unless an `ALERT:` issue emails you ([monitoring](#monitoring)) |
+| Every morning | The daily report: a comment on the pinned *Daily report* issue in `planner-ops` | Read it during the pilot and in season |
+| February and March | The quietest stretch: GitHub may turn off scheduled workflows in the public repository after 60 days without a commit | Open Actions → *Watch sources*; if it says disabled, click **Enable workflow** |
 | Every night | The database deletes errors over 90 days old and events over a year old | Nothing ([privacy.md](privacy.md#how-long-its-kept)) |
 
 ## Is it healthy?
 
 | Check | How | How often |
 |---|---|---|
-| Site is up | Open https://piggietori.github.io/Middle-School-Planner/ | When you use it |
+| Everything the monitor checks | An `ALERT: <check>` issue opens in `planner-ops` and emails you. It says what to do, and closes itself when the check passes ([monitoring](#monitoring)) | Every hour, automatically |
+| Use, and problems that build slowly | The daily report | Every morning in season |
+| What families tell you | Feedback emails ([feedback](#feedback)) | As they arrive. During the pilot, answer within a day |
 | Workflows are passing | GitHub emails you when a scheduled run fails; or look at the Actions tab | When an email arrives |
-| Errors families hit | Supabase → SQL Editor: `select at, message, context from client_errors order by at desc limit 20;` | Weekly in season |
+| Errors families hit | Supabase → SQL Editor: `select at, message, context from client_errors order by at desc limit 20;` | When an alert or the report points to them |
 | What's being used | `select name, count(*) from events where at > now() - interval '7 days' group by name order by 2 desc;` | When curious |
-| Database is locked down | `node scripts/check-supabase.js` → "All checks passed" | After every database change |
+| Database is locked down | `node scripts/check-supabase.js` → "All checks passed" (the monitor also runs it hourly) | After every database change |
 | Supabase project | Emails from Supabase (pausing, usage limits); keep supabase.com out of spam | When an email arrives |
-| Scheduled workflows still on | Actions → *Backup*: no "disabled" banner, and a run this week | February and March |
+| Scheduled workflows still on | Actions → *Watch sources*: no "disabled" banner | February and March |
+
+## Monitoring
+
+*Monitor* (`planner-ops`: `.github/workflows/monitor.yml` and `scripts/monitor.js`) runs at 17 minutes past every
+hour, and checks the live site in real browsers every 3 hours. Each check guards against rows in
+[failure-modes.md](failure-modes.md), the register of what can go wrong. Each check that fails opens an `ALERT: <check>` issue, comments on it each hour while it keeps failing, and
+closes it when it passes. GitHub emails you about each, as long as you watch `planner-ops` (Watch → All activity).
+
+| Check | Fails when |
+|---|---|
+| Site up | The live page doesn't load, or doesn't say "Middle School Planner" |
+| Data loads | `data/events.json` doesn't load |
+| HTTPS certificate | Fewer than 14 days left, or it can't be checked |
+| App works for visitors | Every 3 hours: the site in Chromium and in Safari's engine (iPhone), signed out, doesn't load, logs an error, or can't show Dates or open a school (`scripts/smoke-live.js`) |
+| Supabase up | Supabase's sign-in service doesn't answer (paused or down) |
+| Security unchanged | `scripts/check-supabase.js` fails: something opened to signed-out visitors |
+| Database reachable | The monitor can't query the database (password reset, or paused) |
+| Errors from families | 10 or more errors in an hour, or the same error for 3 or more people |
+| Saves failing | 3 or more failed saves in an hour |
+| Retention job | `prune-logs` hasn't succeeded in 36 hours |
+| Feedback flood | 20 or more feedback messages in an hour (only 20 an hour are emailed) |
+| Feedback not emailed | A message from the last day still wasn't emailed an hour later |
+| Capacity | The database is over 400 MB (the free limit is 500) |
+| Backups | No successful backup in 30 hours (October to December) or 5 days (otherwise) |
+
+The monitor reads counts only, never emails or notes. Its database password is `planner-ops`'s `SUPABASE_DB_URL`.
+After each hourly run it pings healthchecks.io (`HEALTHCHECK_URL`), which emails you if the pings stop: that's how
+you'd hear that the monitor itself stopped.
+
+To check the site in real browsers yourself: `node scripts/smoke-live.js <site address>`.
+
+**When an alert arrives:** do what the issue says, or find the symptom in [When something breaks](#when-something-breaks).
+If families will notice, post a [banner](#the-banner).
+
+**To test the alerts:** `planner-ops` → Actions → *Monitor* → Run workflow, with **site_url** set to an address that
+doesn't exist. `ALERT: Site up` opens and emails you; the next hourly run closes it.
+
+**The daily report** posts at 13:00 UTC (8 AM in New York in winter) as a comment on the pinned *Daily report* issue:
+households, people, new sign-ups, how many signed in with an emailed link (a quiet day can mean sign-in emails
+aren't arriving), how many opened the planner, schools saved, visits, steps, failed saves, feedback
+received, and the top errors. To post one now: Run workflow with **report** ticked.
+
+## Feedback
+
+*Send feedback* (in the footer, and in the pilot notice) saves the message in the `feedback` table, and the database
+emails it to the address in the Vault secret `feedback_to`. If the family left an address, reply to the email to
+answer them.
+
+- **During the pilot,** answer within a day.
+- **A wrong date or fact:** fix it in a pull request ([data-sources.md](data-sources.md)), and post a banner if it matters.
+- **A bug:** open an issue in the public repository. Describe the problem; never copy the family's email or notes into it.
+- **Not emailed** (over 20 an hour, or Resend failed): the daily report counts them. Read them in the SQL Editor:
+  `select at, kind, message, reply_to, page from feedback where not emailed order by at desc;`
+- Messages are deleted automatically after a year. Delete the emails from your inbox when they're dealt with.
+
+## The banner
+
+To tell every family something (an open house moved, sign-in having problems), edit `data/notice.json` in a pull request:
+
+```json
+"notice": {"text": "The I.S. 187 open house moved to Thursday, Nov 13.", "level": "warn", "until": "2026-11-13"}
+```
+
+`level` is `info` or `warn`; `until` (the last day it shows) and `link` (`{"url": …, "label": …}`) are optional.
+It's live a minute or two after merging, on every tab. Set it back to `null` when it's over; the data checks warn once
+its `until` date has passed.
+
+## Invite-only
+
+During the pilot, Supabase → Authentication → Sign In / Providers → **Allow new users to sign up** is off. Invite a
+family from Authentication → Users → **Invite user**. Anyone else who asks for a sign-in link sees "The planner is
+invite-only for now". Turn it back on to open to everyone ([launch.md](launch.md#sharing-with-parent-groups)).
 
 ## When something breaks
 
@@ -37,12 +113,14 @@ Running the planner day to day: what happens when, how to tell it's healthy, and
 | A family is signed out and their plan looks empty | The browser's site data was cleared (a setting such as Chrome's "Delete data sites have saved to your device when you close all windows" at `chrome://settings/content/siteData`, a cleaner app, or clearing browsing data), or they're on a different address (for example `localhost` instead of the live site) | Sign in again: the account has the plan. Turn that browser setting off, or add the site under "Allowed to save data" |
 | "Couldn't reach your account" for everyone | The Supabase project is paused or down | Supabase dashboard → the project → **Resume project** if paused ([backups.md](backups.md#supabase-project-pausing)); otherwise check status.supabase.com. Families keep working on their devices meanwhile |
 | "Couldn't reach your account" right after a database change | A missing grant or a migration not applied | Run `node scripts/check-supabase.js`; apply the missing migration in the SQL Editor |
-| The sign-in email doesn't arrive | Supabase's built-in sender allows about 2 emails an hour, or it went to spam | Wait an hour and send once; check spam. For more families, set up custom SMTP |
+| The sign-in email doesn't arrive | It went to spam; Supabase's limit (30 an hour) was reached; or Resend refused it | Check spam. Resend → **Logs** shows each email and why it failed. Supabase → Authentication → Logs shows the request |
+| "The planner is invite-only for now" | Sign-ups are off and that address wasn't invited | Invite it ([invite-only](#invite-only)), or check they typed the address you invited |
+| Feedback doesn't arrive by email | A Vault secret is missing, the Resend key was revoked, or the hourly limit was reached | Read it in the SQL Editor ([feedback](#feedback)). Check Resend → Logs; [rotate the key](secrets.md#rotate-a-resend-key) if needed |
 | "That sign-in link has expired or was already used" | Links work once and expire in an hour; a newer link cancels older ones | Send a new link and use the newest email |
 | "Couldn't save. We'll try again when you're back online." | Offline, or the server refused the save | Changes are kept on the device and sent when back online. If it persists online, look in `client_errors` |
 | The site looks unstyled or a feature stopped working after a change, with "Refused to…" in the Console | The Content-Security-Policy blocked something new | Add the new server to the policy ([security.md](security.md#content-security-policy)), or revert |
 | A wrong date or fact is live | A data mistake that got through review | Fix it in a pull request (keep the event's `id`, add `was` if the time moved), or revert the pull request that caused it |
-| *Backup* failed | The project is paused, the database password was reset, or a secret is missing | If paused, resume it. Otherwise update `SUPABASE_DB_URL` ([secrets.md](secrets.md#reset-the-database-password)), then run Backup by hand |
+| *Backup* failed, or `ALERT: Database reachable` | The project is paused, the database password was reset, or a secret is missing | If paused, resume it. Otherwise update `SUPABASE_DB_URL` in `planner-ops` ([secrets.md](secrets.md#reset-the-database-password)), then run Backup by hand |
 | *Watch sources* opened an issue saying a page couldn't be checked | The page moved or was down | Open the page; if its address changed, update `watch` in `data/schools.json` |
 | A family deleted their plan by mistake | — | Restore their plan from a backup ([backups.md](backups.md#restoring)) |
 | Locked out of GitHub or Supabase | Lost password or 2FA device | Use the account's recovery codes or email recovery. Keep recovery codes in the password manager |
@@ -68,9 +146,10 @@ Running the planner day to day: what happens when, how to tell it's healthy, and
 
 | Service | Limit | Effect here |
 |---|---|---|
-| Supabase | Pauses after about a week without database activity | Backups, at most 4 days apart, keep it active ([backups.md](backups.md#supabase-project-pausing)) |
-| GitHub Actions | Scheduled workflows turn off after 60 days without a commit (public repos) | Check in February and March (calendar above) |
-| Supabase | About 2 sign-in emails an hour (built-in sender) | Fine for one household; custom SMTP before opening up |
+| Supabase | Pauses after about a week without database activity | The hourly monitor keeps it active ([backups.md](backups.md#supabase-project-pausing)) |
+| GitHub Actions | Scheduled workflows turn off after 60 days without a commit (public repos) | Only *Watch sources* is affected. Check in February and March (calendar above) |
+| Resend | 100 emails a day, 3,000 a month | Enough for hundreds of families. If sign-ups pass about 80 a day, consider the paid plan |
+| Supabase | 30 sign-in emails an hour (our setting) | Raise it in Authentication → Rate Limits if families are refused at busy times |
 | Supabase | 500 MB database, no backups of its own | Thousands of households would still fit; we make our own backups |
-| GitHub Actions | Free for public repositories | No cost for CI, watch, refresh or backups |
+| GitHub Actions | Free for public repositories; 2,000 minutes a month for private ones | The monitor and backups in `planner-ops` use about 800 |
 | GitHub Pages | Public site, 1 GB, about 100 GB of traffic a month | Far more than needed |

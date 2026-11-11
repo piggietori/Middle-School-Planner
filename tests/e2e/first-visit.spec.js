@@ -66,7 +66,7 @@ test("reminders are grouped in one box, and there's no missed-open-house notice"
   await expect(box).toContainText("tomorrow");
   await expect(box).toContainText("today");
   await expect(box).toContainText("Did you go?");
-  await expect(page.locator("#app .notice")).toHaveCount(2); // reminders + Keep your plan safe
+  await expect(page.locator("#app .notice")).toHaveCount(3); // the pilot notice + reminders + Keep your plan safe
   await expect(page.getByText("Start here:")).toHaveCount(0);
   await expect(page.getByText("Missed an open house")).toHaveCount(0);
 });

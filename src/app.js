@@ -8,15 +8,18 @@ import {ui} from "./ui.js";
 import {CAL_RANGE} from "./views/dates.js";
 import {msText, copyText} from "./views/list.js";
 import {renderNotes, addNote, commitDrafts, openNotes, closeSheet} from "./views/notes.js";
+import "./feedback.js";
+import {dismissPilot} from "./notices.js";
 import {restoreSession} from "./session.js";
 import {renderSheet} from "./views/sheet.js";
 
 /* ---------------- EVENTS ---------------- */
 document.addEventListener("click",e=>{
-  const t=e.target.closest("[data-tab],[data-tab-go],[data-open],[data-close],[data-save],[data-going],[data-step],[data-df],[data-w],[data-prog],[data-mv],[data-went],[data-dv],[data-cm],[data-day],[data-ostep],[data-copy],[data-copyall],[data-star],[data-addnote],[data-delnote],[data-notes],[data-lv],[data-compare]");
+  const t=e.target.closest("[data-pilot-ok],[data-tab],[data-tab-go],[data-open],[data-close],[data-save],[data-going],[data-step],[data-df],[data-w],[data-prog],[data-mv],[data-went],[data-dv],[data-cm],[data-day],[data-ostep],[data-copy],[data-copyall],[data-star],[data-addnote],[data-delnote],[data-notes],[data-lv],[data-compare]");
   if(!t)return;
   const d=t.dataset;
   if(d.close&&e.target!==t&&!e.target.closest("button[data-close]"))return; // clicks inside the sheet
+  if(d.pilotOk){dismissPilot();return render()}
   if(d.tab)return go(d.tab);
   if(d.tabGo)return go(d.tabGo);
   if(d.open){ui.openDbn=d.open;renderSheet();return}
@@ -59,6 +62,10 @@ document.addEventListener("keydown",e=>{
 // Errors nobody caught: sent to us when signed in (log.js), so we hear about problems families hit.
 addEventListener("error",e=>reportError(e.error||e.message,"page"));
 addEventListener("unhandledrejection",e=>reportError(e.reason,"promise"));
+// Something the Content-Security-Policy blocked: an injection attempt, or a change that needs the policy updated.
+// The address loses its query, which could hold someone's details.
+addEventListener("securitypolicyviolation",e=>{const u=e.blockedURI||"";
+  reportError(`CSP blocked ${e.effectiveDirective}: ${/^https?:/.test(u)?u.split(/[?#]/)[0]:u}`,"csp")});
 restoreSession();
 render();
 initAccount();

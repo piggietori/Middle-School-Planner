@@ -1,0 +1,12 @@
+# Weekly pull requests for outdated GitHub Actions and npm packages (dev and test tools only: the site's
+# one library, supabase-js, is vendored by scripts/vendor-supabase.js). Each one runs CI like any other change.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: {interval: weekly}
+  - package-ecosystem: npm
+    directory: /
+    schedule: {interval: weekly}
+    groups:
+      dev-tools: {patterns: ["*"]}

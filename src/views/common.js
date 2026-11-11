@@ -1,5 +1,6 @@
 import {BY, SOURCES, DATA_AS_OF, S, EVENTS} from "../data.js";
 import {label} from "../match.js";
+import {feedbackButton} from "../feedback.js";
 import {isSaved, RATING_WORDS, noteOf, hasNotes, starText} from "../plan.js";
 import {st} from "../state.js";
 import {esc, pd, daysUntil, MON, when, rel, gcal, fmtDay} from "../util.js";
@@ -42,5 +43,5 @@ export const sourceName=id=>(SOURCES[id]?.name||id).split(" (")[0];
 // Footer on every tab: how fresh the data is and where it comes from.
 export function dataFooter(){
   const used=[...new Set([...S.flatMap(s=>Object.values(s.provenance).map(p=>p.source)),...EVENTS.map(e=>e.source)])];
-  return `<footer class="muted small data-foot">Data last updated ${fmtDay(DATA_AS_OF)}. Sources: ${used.map(id=>`<a href="${SOURCES[id].url}" target="_blank" rel="noopener">${esc(sourceName(id))}</a>`).join(", ")}. This is an independent tool, not an official NYC Public Schools site.</footer>`;
+  return `<footer class="muted small data-foot">Data last updated ${fmtDay(DATA_AS_OF)}. Sources: ${used.map(id=>`<a href="${SOURCES[id].url}" target="_blank" rel="noopener">${esc(sourceName(id))}</a>`).join(", ")}. This is an independent tool, not an official NYC Public Schools site. <a href="privacy.html">Privacy &amp; terms</a> · ${feedbackButton()}</footer>`;
 }

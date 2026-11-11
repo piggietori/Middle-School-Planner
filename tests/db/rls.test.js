@@ -97,7 +97,7 @@ test("a second member of the same household shares the plan", async () => {
 
 test("signed-out visitors can't read anything or open a plan", async () => {
   await as(null);
-  for (const t of ["households", "household_members", "plans", "saved_schools", "visits", "step_progress", "school_notes", "user_session", "events", "client_errors"])
+  for (const t of ["households", "household_members", "plans", "saved_schools", "visits", "step_progress", "school_notes", "user_session", "events", "client_errors", "feedback"])
     await denied(db.query(`select * from public.${t}`));
   await denied(db.query("select public.open_plan('2027')"));
   await denied(db.query("insert into public.events (name) values ('app_open')"));
@@ -166,11 +166,27 @@ test("old events and errors are pruned, and only the database owner can prune", 
   await db.query("insert into public.events (user_id, name, at) values ($1, 'app_open', now() - interval '13 months'), ($1, 'step_done', now() - interval '11 months')", [A]);
   await db.query("insert into public.client_errors (user_id, message, at) values ($1, 'old', now() - interval '91 days'), ($1, 'recent', now() - interval '89 days')", [A]);
   const before = (await rows("select count(*)::int as n from public.events"))[0].n;
-  assert.deepEqual((await rows("select public.prune_logs() as r"))[0].r, {errors: 1, events: 1});
+  assert.deepEqual((await rows("select public.prune_logs() as r"))[0].r, {errors: 1, events: 1, feedback: 0});
   assert.equal((await rows("select count(*)::int as n from public.events"))[0].n, before - 1);
   assert.deepEqual(await rows("select message from public.client_errors where message in ('old', 'recent')"), [{message: "recent"}]);
   await as(A);
   await denied(db.query("select public.prune_logs()"));
   await as(null);
   await denied(db.query("select public.prune_logs()"));
+});
+
+test("anyone can send feedback, nobody can read it back, and it's saved even when it can't be emailed", async () => {
+  await as(null);
+  await db.query("insert into public.feedback (kind, message, page) values ('wrong_info', 'The open house moved', 'dates')");
+  await denied(db.query("select * from public.feedback"));
+  await denied(db.query("update public.feedback set message = 'x'"));
+  await denied(db.query("insert into public.feedback (kind, message, emailed) values ('idea', 'x', true)")); // only the database marks it sent
+  await denied(db.query("insert into public.feedback (kind, message) values ('spam', 'x')"), "23514");
+  await denied(db.query("insert into public.feedback (kind, message, reply_to) values ('idea', 'x', 'not an email')"), "23514");
+  await denied(db.query("insert into public.feedback (kind, message) values ('idea', $1)", ["x".repeat(2001)]), "23514");
+  await as(A);
+  await db.query("insert into public.feedback (kind, message, reply_to) values ('problem', 'Saving failed', 'a@test.local')");
+  await db.exec("reset role");
+  // No Vault or pg_net here, like a project before setup: kept, not emailed.
+  assert.deepEqual(await rows("select kind, emailed from public.feedback order by id"), [{kind: "wrong_info", emailed: false}, {kind: "problem", emailed: false}]);
 });

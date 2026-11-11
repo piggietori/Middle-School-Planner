@@ -1,7 +1,8 @@
 /* Signing in, keeping the plan in sync with the account, and leaving (journeys J2, J3 and J7 in docs/journeys.md).
    Signed out, nothing here loads or runs: the plan stays on this device, exactly as before. */
-import {SESSION_KEY} from "./config.js";
+import {PILOT, SESSION_KEY} from "./config.js";
 import {CYCLE} from "./data.js";
+import {feedbackButton} from "./feedback.js"; // a sign-in failure isn't logged (signed out), so let them tell us
 import {reportError, setLogging, takeLogs, track} from "./log.js";
 import {CHILD_KEYS, toRows, fromRows, diffRows, isNoop, isEmpty, mergePlans} from "./plan-model.js";
 import {render} from "./render.js";
@@ -159,6 +160,7 @@ export async function sendLink(email){
   }catch(e){
     console.error(e);
     acct.error=/rate limit|too many/i.test(e.message||"")?"Too many sign-in emails were sent. Wait a few minutes, then try again."
+      :/signups? not allowed|otp_disabled/i.test((e.message||"")+" "+(e.code||""))?"The planner is invite-only for now. Ask the person who shared it with you to invite this email address."
       :"Couldn't send the email. Check the address and your connection, then try again.";
   }
   renderAccount();
@@ -230,7 +232,7 @@ function sheetBody(){
   if(acct.status==="in"&&acct.ask==="delete")return `<h2>Delete your account</h2>
     <p style="margin:0">This permanently deletes your account and the plan saved in it: your schools, visits, steps and notes. It can't be undone. If someone else shares your plan, it stays for them.</p>
     <p class="small muted" style="margin:0">Want a copy first? <button class="linkbtn" data-acct="export">Download my data</button></p>
-    ${acct.error?`<div class="notice" role="alert"><div>${esc(acct.error)}</div></div>`:""}
+    ${acct.error?`<div class="notice" role="alert"><div>${esc(acct.error)} Still stuck? ${feedbackButton("Tell us")}</div></div>`:""}
     <label for="acct-delete" class="lab">Type DELETE to confirm</label>
     <input id="acct-delete" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="10">
     <label class="row small" style="gap:8px;flex-wrap:nowrap"><input type="checkbox" id="acct-delete-local" checked> Also remove my plan from this device</label>
@@ -249,14 +251,14 @@ function sheetBody(){
     :`<h2>Keep your plan on all your devices</h2>
     <p style="margin:0">Sign in to save your schools, visits and notes to your account. We'll email you a link. There's no password.</p>`}
     ${acct.status==="error"?`<div class="notice" role="alert"><div>Couldn't reach your account. Your plan is still saved on this device. <button class="linkbtn" data-acct="retry">Try again</button></div></div>`:""}
-    ${acct.error?`<div class="notice" role="alert"><div>${esc(acct.error)}</div></div>`:""}
+    ${acct.error?`<div class="notice" role="alert"><div>${esc(acct.error)} Still stuck? ${feedbackButton("Tell us")}</div></div>`:""}
     <form class="stack" style="gap:8px" data-acct-form="1">
       <label for="acct-email" class="lab">Email</label>
       <input id="acct-email" type="email" autocomplete="email" required maxlength="254" value="${esc(acct.lastEmail)}" placeholder="you@example.com">
       <button class="btn primary" type="submit">Email me a sign-in link</button>
     </form>
     ${acct.lost?`<p class="muted small" style="margin:0">Not ${esc(acct.lost)}? <button class="linkbtn" data-acct="forget">Forget this email</button></p>`:""}
-    <p class="muted small" style="margin:0">Signing in is optional. Your plan always stays on this device too.</p>`;
+    <p class="muted small" style="margin:0">Signing in is optional. Your plan always stays on this device too. By signing in you agree to the <a href="privacy.html" target="_blank">privacy notice and terms</a>.${PILOT?" This planner is a pilot, so things may change.":""}</p>`;
 }
 
 export function renderAccount(){

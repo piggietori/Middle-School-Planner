@@ -1,3 +1,5 @@
+<!doctype html>
+<html lang="en">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <!-- Only this site's own files may run or load, and only Supabase may be contacted. See docs/security.md#content-security-policy -->
@@ -10,7 +12,7 @@
   <div class="top-in">
     <div class="brand">
       <div class="brand-mark" aria-hidden="true">20</div>
-      <div><h1>Middle School Planner</h1><small>Brooklyn District 20 · <span id="cycle">Fall 2027 admission</span></small></div>
+      <div><h1>Middle School Planner <span class="pill warn" id="pilot" hidden>Pilot</span></h1><small>Brooklyn District 20 · <span id="cycle">Fall 2027 admission</span></small></div>
     </div>
     <nav class="tabs" aria-label="Main">
       <button class="tab" data-tab="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home</button>
@@ -25,5 +27,6 @@
 <main class="wrap" id="app"></main>
 <div id="sheet"></div>
 <div id="acctsheet"></div>
+<div id="fbsheet"></div>
 <div id="toast" class="toast" hidden></div>
 <script type="module" src="./src/main.js"></script>

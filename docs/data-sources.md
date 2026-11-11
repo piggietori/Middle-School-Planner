@@ -14,7 +14,7 @@ an automatic **watch** says when a source changed, so nobody has to remember to 
 | [District 20 open house flyer](#district-20-open-house-flyer) | Open house dates and times | `data/events.json` | Once a year (Sep–Oct), plus fixes through December | Weekly watch |
 | [NYC middle school admissions](#nyc-middle-school-admissions) | Key dates: applications open, deadline, offers | `data/events.json` | Once a year | Weekly watch |
 | [InsideSchools and the NYC School Survey](#insideschools-and-the-nyc-school-survey) | School facts, highlights and concerns, survey numbers | `data/schools.json` | Once a year (August) | August checklist |
-| [Our own data](#our-own-data) | Neighborhoods, the step-by-step checklist | `data/neighborhoods.json`, `data/steps.json` | When we decide; steps reviewed each August | August checklist |
+| [Our own data](#our-own-data) | Neighborhoods, the step-by-step checklist, the announcement banner | `data/neighborhoods.json`, `data/steps.json`, `data/notice.json` | When we decide; steps reviewed each August | August checklist |
 
 **How the reminders work**
 - **Weekly watch:** every Monday the *Watch sources* workflow (`.github/workflows/watch-sources.yml`) checks
@@ -87,6 +87,8 @@ an automatic **watch** says when a source changed, so nobody has to remember to 
   approximate center point used for straight-line distances. Changes only if we add neighborhoods.
 - **Steps** (`data/steps.json`): the step-by-step checklist on Home. Reviewed each August against the city's
   current process. Step text can name a key date as `{k-close}`; the app fills in the date.
+- **Announcement banner** (`data/notice.json`): `null`, or one message shown on every tab until its `until` date.
+  How to post one: [operations.md](operations.md#the-banner). The data checks warn once its date has passed.
 
 ## How a change reaches the site
 

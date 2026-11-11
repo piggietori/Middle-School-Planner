@@ -1,7 +1,8 @@
 # Privacy
 
-What personal data the planner keeps, why, who can see it, and how long it's kept. This is the raw material for
-a privacy policy, which the planner needs before it's opened to families outside our household.
+What personal data the planner keeps, why, who can see it, and how long it's kept. Families read the short version,
+[privacy.html](../privacy.html) (linked from every page and the sign-in sheet). Keep the two in step: a change here
+is a change there, with its "Last updated" date.
 
 ## What we keep
 
@@ -13,6 +14,7 @@ a privacy policy, which the planner needs before it's opened to families outside
 | Where they left off (tab, open school) | The device; the account if signed in | Resume on any device | The person; the project owner | The account is deleted |
 | Usage events: app opened, signed in, school saved or removed, visit marked, step done, save failed. IDs only | Supabase `events` (signed in only) | Knowing which features are used and where people get stuck | The project owner only | 1 year, then deleted automatically (backups keep copies 90 days more). Unlinked from the person if they delete their account |
 | Errors: message, where in the app, browser type | Supabase `client_errors` (signed in only) | Fixing problems | The project owner only | 90 days, then deleted automatically (backups: 90 days more). Unlinked on account deletion |
+| Feedback: what it's about, the message, a reply address if they give one, and which tab or school they were on | Supabase `feedback` (anyone, signed in or not; never linked to an account); emailed to the owner | Answering problems and fixing wrong dates | The project owner; Resend while sending it | 1 year, then deleted automatically (backups: 90 days more). The email stays in the owner's inbox until deleted |
 
 **What we don't keep:**
 - passwords (sign-in is by emailed link)
@@ -21,7 +23,7 @@ a privacy policy, which the planner needs before it's opened to families outside
 - location
 - payment details
 
-We also don't record anything about visitors who aren't signed in.
+We also don't record anything about visitors who aren't signed in, unless they send feedback.
 
 ## Who can see it
 
@@ -30,15 +32,17 @@ We also don't record anything about visitors who aren't signed in.
   household will see the same plan.
 - **The project owner** (you), through the Supabase dashboard, which can read every table. Be honest about this in
   the privacy policy, and don't browse families' notes.
-- **Our hosts:** Supabase stores the database, and GitHub hosts the site and the encrypted backups. Both handle data
-  under their own terms.
+- **Our hosts:** Supabase stores the database, in the region named in `SUPABASE_REGION` (`src/config.js`, shown in
+  the notice). Resend sends the sign-in and feedback emails, so it sees email addresses and feedback messages. GitHub
+  hosts the site and keeps the encrypted backups in the private `planner-ops` repository. Each handles data under its
+  own terms.
 
 ## What a visitor's browser contacts
 
 | Service | When | What it learns |
 |---|---|---|
 | GitHub Pages | Every visit | IP address and browser, like any website |
-| Supabase | Signed in only | The account and plan, as above |
+| Supabase | Signed in, or when sending feedback | The account and plan, as above; or the feedback, without the account |
 | Google Calendar, MySchools, school websites, InsideSchools, Google Maps | Only when the family clicks a link | Whatever that site normally collects |
 
 The fonts are served from the site itself, so visiting doesn't contact Google. The planner has no ads, analytics
@@ -62,7 +66,7 @@ child in them. The planner isn't meant to be used by children themselves.
 ## How long it's kept
 
 Every night at 3:30 UTC, a scheduled job in the database (`prune-logs`, using pg_cron) runs `public.prune_logs()`,
-which deletes errors older than 90 days and events older than a year
+which deletes errors older than 90 days, and events and feedback older than a year
 (`supabase/migrations/20261111120000_retention.sql`). To check it ran, in the SQL Editor:
 
 ```sql
@@ -72,10 +76,12 @@ select status, return_message, start_time from cron.job_run_details order by sta
 
 To change the periods, add a new migration that replaces the function (`create or replace function public.prune_logs()…`).
 
-## To decide before opening to other families
+## Decided before opening to other families (November 2026)
 
-| Decision | Recommendation |
+| Decision | What we did |
 |---|---|
-| Backups holding other families' data | Move backups off GitHub ([backups.md](backups.md#when-to-revisit)) |
-| A privacy policy and terms | Write them from this page, and link them in the app's footer and the sign-in sheet |
-| Where the data is stored | Choose the Supabase region knowingly (the project's region is shown in the dashboard), and say it in the policy |
+| Backups holding other families' data | Moved to the private `planner-ops` repository ([backups.md](backups.md)) |
+| A privacy notice and terms | [privacy.html](../privacy.html), linked from the footer and the sign-in sheet ("By signing in you agree to…") |
+| Where the data is stored | The project's existing region, stated in the notice. Moving it wasn't worth a new project |
+| Requests from families | Most are self-serve (download, delete). Otherwise by email to `help@`: reply within a few days, act within 30 |
+| If data may have been seen | Email the families affected within 72 hours: what happened and what to do |

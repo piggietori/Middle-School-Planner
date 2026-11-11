@@ -3,7 +3,7 @@ import Ajv from "ajv/dist/2020.js";
 import fs from "node:fs";
 import path from "node:path";
 
-export const FILES = ["schools", "events", "neighborhoods", "steps"];
+export const FILES = ["schools", "events", "neighborhoods", "steps", "notice"];
 const schemaDir = path.resolve(import.meta.dirname, "../../data/schema");
 
 let validators;
@@ -86,6 +86,8 @@ export function checkData(data, {base = null, today = new Date().toISOString().s
   const close = events.find(e => e.id === "k-close")?.date;
   const season = close && today >= from && today <= close;
   if (season) for (const e of events) if (days(e.as_of, today) > 30) warnings.push(`events.json ${e.id}: last checked ${e.as_of} (${days(e.as_of, today)} days ago) during application season`);
+  const n = data.notice.notice;
+  if (n?.until && n.until < today) warnings.push(`notice.json: the banner ended on ${n.until}. Set "notice" to null`);
   for (const s of schools) for (const [k, p] of Object.entries(s.provenance)) if (days(p.as_of, today) > 400) warnings.push(`schools.json ${s.dbn}: ${k} last checked ${p.as_of}`);
   return {errors, warnings};
 }

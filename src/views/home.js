@@ -5,6 +5,7 @@ import {isEmpty} from "../plan-model.js";
 import {st} from "../state.js";
 import {ui} from "../ui.js";
 import {esc, daysUntil, fmtT, fmtDay, when, rel, evTitle} from "../util.js";
+import {pilotNotice} from "../notices.js";
 import {evRow} from "./common.js";
 
 /* Home: countdown, Next up, steps, coming up. */
@@ -39,6 +40,7 @@ export function vHome(){
       <div><h2>${n>0?"days left to apply":n===0?"Applications close today":"Applications are closed"}</h2>
       <p>Middle school applications close <b>${longDate(close,true)}</b>. Offers arrive ${longDate(offer)}.</p></div>
     </div>
+    ${pilotNotice()}
     ${tip?`<div class="notice" role="status"><span aria-hidden="true">👋</span><div>${tip}</div></div>`:""}
     ${alerts.length?`<div class="notice" role="status"><span aria-hidden="true">🔔</span><div class="notice-list"><h2>Next up</h2>${alerts.map(a=>`<div>${a}</div>`).join("")}</div></div>`:""}
     <div class="grid2">

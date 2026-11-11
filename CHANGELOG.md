@@ -8,9 +8,39 @@ feature the middle one (1.1 → 1.2), and a change that needs families or the da
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-11-11
+
+Ready for other families, starting with a small pilot.
+
 ### Added
+- **It says it's a pilot.** A "Pilot" tag next to the title, and a notice on Home: the planner is made by a District 20
+  parent, not by NYC Public Schools, so confirm dates with the schools. Dismiss it once per device.
+- **My list says where the application really happens:** "This list is for planning. Your application counts only
+  when you submit it in MySchools."
+- **Privacy and terms,** in plain language, linked from the bottom of every page and from the sign-in screen.
+- **Send feedback,** at the bottom of every page. It goes straight to the parent who runs the planner, isn't linked to
+  your account, and you choose whether to leave an email for a reply. If it can't be sent, your message is kept.
+- **Announcements:** a banner on every tab when something changes, such as an open house that moved.
+- **Invite-only sign-in during the pilot.** An address that wasn't invited is told so, instead of seeing an error.
+- **"Still stuck? Tell us"** on sign-in and account errors opens the feedback form.
+- **Sign-in emails come from the planner's own address,** so they arrive faster and stay out of spam.
 - **The changelog** (this file). CI checks that every version has its notes, and tagging a version publishes them as
   the GitHub Release.
+
+### Changed
+- **On a school's page, "Our notes" is now at the end,** after the school's details and sources.
+- **Easier to read:** darker orange and amber text, and calendar days that read properly with a screen reader.
+
+### Security
+- **Backups moved to a private repository,** so only the owner can download them, and the public repository holds no
+  secrets.
+- **Hourly monitoring:** the site, Supabase, security settings, errors, failed saves, backups and capacity are checked
+  every hour. Problems open an alert that emails the owner, and a daily report shows how the planner is used (counts only).
+- **The live site is checked in real browsers** (Chromium and Safari's engine) every 3 hours, and anything the
+  Content-Security-Policy blocks is reported. Every known failure, how we'd notice it, and its risk score is listed in
+  `docs/failure-modes.md`.
+- **Dependabot** proposes updates to the tools and workflows each week.
+- **Tested on iPhone (Safari's engine) and for accessibility** on every pull request.
 
 ## [1.1.1] - 2026-11-10
 
@@ -79,7 +109,8 @@ The MVP: one HTML file, no sign-up, choices saved in the browser.
 - **My list:** put saved schools in order, with a "Ready for MySchools" guide showing school codes.
 - **Notes and compare:** your rating, likes and concerns for each school, and a side-by-side compare view.
 
-[Unreleased]: https://github.com/piggietori/Middle-School-Planner/compare/v1.1.1...HEAD
+[Unreleased]: https://github.com/piggietori/Middle-School-Planner/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/piggietori/Middle-School-Planner/releases/tag/v1.2.0
 [1.1.1]: https://github.com/piggietori/Middle-School-Planner/releases/tag/v1.1.1
 [1.1.0]: https://github.com/piggietori/Middle-School-Planner/releases/tag/v1.1.0
 [1.0.0]: https://github.com/piggietori/Middle-School-Planner/releases/tag/v1.0.0

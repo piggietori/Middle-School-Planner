@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "notice.schema.json",
+  "title": "Announcement banner shown to everyone (null for none)",
+  "type": "object",
+  "required": ["schema_version", "notice"],
+  "properties": {
+    "$schema": {"type": "string"},
+    "schema_version": {"const": 1},
+    "notice": {
+      "oneOf": [
+        {"type": "null"},
+        {
+          "type": "object", "required": ["text", "level"],
+          "properties": {
+            "text": {"type": "string", "minLength": 1, "maxLength": 300},
+            "level": {"enum": ["info", "warn"]},
+            "until": {"$ref": "common.schema.json#/$defs/date", "description": "Last day to show it"},
+            "link": {
+              "type": "object", "required": ["url", "label"],
+              "properties": {"url": {"$ref": "common.schema.json#/$defs/url"}, "label": {"type": "string", "maxLength": 40}},
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  "additionalProperties": false
+}

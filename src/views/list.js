@@ -38,7 +38,7 @@ export function vList(){
     <div><h2>Compare our notes</h2><p class="muted" style="margin:.3rem 0 0">Your own ratings and notes for each school, side by side. Highest rated first.</p></div>
     ${views}${vCompare()}</section>`;
   return `<section class="view">
-    <div><h2>My list</h2><p class="muted" style="margin:.3rem 0 0">${closed?`Applications closed on ${longDate(keyDate("k-close"))}. This is your list as you submitted it.`:"Put your favorite first. This is the order to enter in MySchools. Use the arrows to move schools up or down."}</p></div>
+    <div><h2>My list</h2><p class="small" style="margin:.3rem 0 0"><b>This list is for planning.</b> Your application counts only when you submit it in MySchools.</p><p class="muted" style="margin:.3rem 0 0">${closed?`Applications closed on ${longDate(keyDate("k-close"))}. This is your list as you submitted it.`:"Put your favorite first. This is the order to enter in MySchools. Use the arrows to move schools up or down."}</p></div>
     ${views}
     ${saved.length?`<div class="stack">${saved.map((s,i)=>{const m=match(s,st),ev=OH.filter(e=>e.dbn===s.dbn&&daysUntil(e.date)>=0);
       return `<article class="sc"><div class="sc-head">

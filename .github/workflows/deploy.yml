@@ -19,4 +19,4 @@ jobs:
         run: mkdir _site && cp -r index.html privacy.html src data fonts _site/
       - uses: actions/upload-pages-artifact@v3
       - id: pages
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

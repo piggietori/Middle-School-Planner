@@ -11,7 +11,7 @@ more widely. Fill in each step's date as you go.
 |---|---|---|
 | 1. A domain | `torilam.com`, at Porkbun: auto-renew on. Add email forwarding for `help@torilam.com` to your own inbox. The root is kept for a portfolio; the planner gets its own subdomain ([security.md](security.md#controls-layer-by-layer)) | |
 | 2. Sign-in emails from the domain | Resend (free): add the domain `d20mail.torilam.com`, paste its DNS records (SPF, DKIM), create an SMTP key. Supabase → Authentication → **SMTP Settings**: host `smtp.resend.com`, port 465, user `resend`, password the key, sender `D20 Planner <signin@d20mail.torilam.com>`. Then **Rate Limits** → emails per hour: 30 | |
-| 3. The sign-in email's words | Supabase → Authentication → Emails → **Magic Link**: subject "Your sign-in code for the D20 Middle School Planner". The body shows the code large, `<b>{{ .Token }}</b>`, says to type it in the planner, that it works once within an hour, who it's from, and to ignore the email if they didn't ask. **No link** (no `{{ .ConfirmationURL }}`): since v1.3.0 sign-in is by code only ([failure-modes.md](failure-modes.md), F-11). Authentication → Sign In / Providers → Email: **Email OTP Length** 6, **Email OTP Expiration** 3600 | |
+| 3. The sign-in email's words | Supabase → Authentication → Emails → **Magic Link**: subject "Your sign-in code for the D20 Middle School Planner". The body shows the code large, `<b>{{ .Token }}</b>`, says to type it in the planner, that it works once within 30 minutes, who it's from, and to ignore the email if they didn't ask. **No link** (no `{{ .ConfirmationURL }}`): since v1.3.0 sign-in is by code only ([failure-modes.md](failure-modes.md), F-11). Authentication → Sign In / Providers → Email: **Email OTP Length** 6, **Email OTP Expiration** 1800 | |
 | 4. The site's address: `d20.torilam.com` | Porkbun DNS: delete the parking wildcard `*` CNAME, add `CNAME d20 → piggietori.github.io`. GitHub profile → Settings → Pages → **Verified domains**: add `torilam.com` with its TXT record. Repo → Settings → Pages → Custom domain `d20.torilam.com` → **Enforce HTTPS**. Supabase → URL Configuration: Site URL `https://d20.torilam.com`, Redirect URLs `https://d20.torilam.com/**` (keep `localhost`). Planner-ops variable `SITE_URL`: `https://d20.torilam.com/`. You'll need to sign in again once, because each address keeps its own copy | 2026-11-11 |
 | 5. Feedback emails | Resend → API Keys → create one with **Sending access** for the domain only. In the Supabase SQL Editor, run (with your values, never in a file or chat): `select vault.create_secret('<the key>', 'resend_api_key'); select vault.create_secret('<your email>', 'feedback_to'); select vault.create_secret('D20 Planner <feedback@d20mail.torilam.com>', 'feedback_from');` | |
 | 6. The private ops repository | Create `piggietori/planner-ops`, **private**. Add secrets `SUPABASE_DB_URL` and `BACKUP_PASSPHRASE`, and the variable `SITE_URL`. Delete both secrets from the public repo. **Watch → All activity**, so alerts email you | |
@@ -58,7 +58,7 @@ All of these must be true:
 ## Sharing with parent groups
 
 1. Turn **Allow new users to sign up** back on.
-2. Decide whether to keep the Pilot label: `PILOT` in `src/config.js`. Keeping it through December 11 is reasonable.
+2. The Pilot label is off since v1.3.0 (`PILOT` in `src/config.js`). Turn it on again only for a future pilot.
 3. Share the link, with the same note minus the invite sentence.
 4. Keep reading the daily report every day until December 11.
 

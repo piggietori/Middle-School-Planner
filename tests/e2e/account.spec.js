@@ -212,7 +212,7 @@ async function askForEmail(page) {
   await expect(page.locator("#acctsheet h2")).toHaveText("Check your email");
 }
 
-test("the code box comes back after the page reloads, for an hour (phones reload while you read your email)", async ({browser}) => {
+test("the code box comes back after the page reloads, while the code still works (phones reload while you read your email)", async ({browser}) => {
   const server = fakeServer();
   const page = await device(browser, server);
   await page.goto("/");
@@ -228,7 +228,7 @@ test("the code box comes back after the page reloads, for an hour (phones reload
   const later = await device(browser, fakeServer());
   await later.goto("/");
   await askForEmail(later);
-  await later.clock.setFixedTime(new Date("2026-11-09T11:01:00")); // an hour and a minute later
+  await later.clock.setFixedTime(new Date("2026-11-09T10:31:00")); // 31 minutes later: the code has expired
   await later.reload();
   await later.locator("#acct").getByRole("button", {name: "Sign in"}).click();
   await expect(later.locator("#acctsheet h2")).toHaveText("Keep your plan on all your devices");

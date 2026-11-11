@@ -116,7 +116,7 @@ invite-only for now". Turn it back on to open to everyone ([launch.md](launch.md
 | The sign-in email doesn't arrive | It went to spam; Supabase's limit (30 an hour) was reached; or Resend refused it | Check spam. Resend → **Logs** shows each email and why it failed. Supabase → Authentication → Logs shows the request |
 | "The planner is invite-only for now" | Sign-ups are off and that address wasn't invited | Invite it ([invite-only](#invite-only)), or check they typed the address you invited |
 | Feedback doesn't arrive by email | A Vault secret is missing, the Resend key was revoked, or the hourly limit was reached | Read it in the SQL Editor ([feedback](#feedback)). Check Resend → Logs; [rotate the key](secrets.md#rotate-a-resend-key) if needed |
-| "That code didn't work or has expired" | Codes work once and expire in an hour; a newer email cancels older codes | Send a new email and type the newest code |
+| "That code didn't work or has expired" | Codes work once and expire after 30 minutes; a newer email cancels older codes | Send a new email and type the newest code |
 | "That sign-in link has expired" | A link from an email sent before v1.3.0 | Send a new email; it has a code |
 | "Couldn't save. We'll try again when you're back online." | Offline, or the server refused the save | Changes are kept on the device and sent when back online. If it persists online, look in `client_errors` |
 | The site looks unstyled or a feature stopped working after a change, with "Refused to…" in the Console | The Content-Security-Policy blocked something new | Add the new server to the policy ([security.md](security.md#content-security-policy)), or revert |

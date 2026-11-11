@@ -20,6 +20,8 @@ Getting ready to share with parent groups.
   and the access they need.
 
 ### Changed
+- **No more "Pilot" label.** The pilot tag, the pilot notice on Home and the pilot lines in the privacy notice and
+  sign-in screen are gone.
 - **Open house pages are checked every day in October to December** (weekly the rest of the year), so a moved open
   house is noticed the next morning.
 - **Feedback emails read the way families wrote them:** the kind is the label they chose ("A date or school detail is

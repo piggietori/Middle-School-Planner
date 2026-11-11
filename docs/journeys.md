@@ -67,7 +67,7 @@ Kept small on purpose. No names, notes text, or home location in event propertie
 
 1. Taps **Sign in** → enters email → **Email me a code**.
 2. "Check your email" → types the 6-digit code from the email, in the same browser → signed in. If the page reloads
-   while they read the email (common on phones), the code box comes back for an hour.
+   while they read the email (common on phones), the code box comes back for the 30 minutes the code works.
 3. App checks the account:
    - **No plan yet:** creates a household and uploads the local plan. Toast: "Your plan is saved to your account."
    - **Has a plan, device has nothing:** loads the account plan.

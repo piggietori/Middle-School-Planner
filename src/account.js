@@ -23,10 +23,10 @@ const OWNER="d20plan-user";        // whose account the plan on this device was 
 const EMAIL="d20plan-email";       // the account this device signed in to; forgotten only when the family signs out
 const PENDING="d20plan-pending";   // {email, at}: a sign-in email sent from here in the last hour, so its code box
                                    // survives the page reloading (phones often reload it while you read your email)
-const HOUR=36e5;
+const CODE_LIFE=30*60e3;           // as long as the code works: Supabase → Email OTP Expiration (1800 seconds)
 function setPending(email){store.set(PENDING,email?JSON.stringify({email,at:Date.now()}):"")}
 function pendingEmail(){
-  try{const p=JSON.parse(store.get(PENDING)||"null");return p&&Date.now()-p.at<HOUR?p.email:""}catch(e){return ""}
+  try{const p=JSON.parse(store.get(PENDING)||"null");return p&&Date.now()-p.at<CODE_LIFE?p.email:""}catch(e){return ""}
 }
 
 async function getBackend(){
@@ -272,7 +272,7 @@ function sheetBody(){
     <div><button class="linkbtn" data-acct="delete">Delete my account…</button></div>`;
   if(acct.status==="loading")return `<h2>Signing in…</h2><p class="muted" style="margin:0">Loading your plan.</p>`;
   if(acct.sent)return `<h2>Check your email</h2>
-    <p style="margin:0">We sent a 6-digit code to <b>${esc(acct.sent)}</b>. Type it here. It works once, within an hour.</p>
+    <p style="margin:0">We sent a 6-digit code to <b>${esc(acct.sent)}</b>. Type it here. It works once, within 30 minutes.</p>
     ${acct.error?`<div class="notice" role="alert"><div>${esc(acct.error)} Still stuck? ${feedbackButton("Tell us")}</div></div>`:""}
     <form class="stack" style="gap:8px" data-acct-code="1">
       <label for="acct-code" class="lab">Code</label>

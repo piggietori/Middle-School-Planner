@@ -9,7 +9,7 @@ const check = ({data, error}) => { if (error) throw error; return data; };
 export async function createBackend() {
   if (window.__plannerTestBackend) return window.__plannerTestBackend;
   const {createClient} = await import("../vendor/supabase-js.js");
-  // Implicit flow: the sign-in link carries the session, so it works even when opened on another device.
+  // Implicit flow, no PKCE: the code from the email works in whichever browser it's typed into.
   const sb = createClient(SUPABASE_URL, SUPABASE_KEY, {auth: {flowType: "implicit", detectSessionInUrl: true, persistSession: true, autoRefreshToken: true}});
   return {
     async session() { return check(await sb.auth.getSession()).session; },
@@ -17,7 +17,7 @@ export async function createBackend() {
     async sendLink(email) {
       check(await sb.auth.signInWithOtp({email, options: {emailRedirectTo: location.origin + location.pathname, shouldCreateUser: true}}));
     },
-    // The code in the same email. On success Supabase reports SIGNED_IN through onChange, as the link does.
+    // The code from the email. On success Supabase reports SIGNED_IN through onChange.
     async verifyCode(email, token) { check(await sb.auth.verifyOtp({email, token, type: "email"})); },
     async signOut() { check(await sb.auth.signOut({scope: "local"})); }, // this device only
     async openPlan(cycle) { return check(await sb.rpc("open_plan", {p_cycle: cycle})); },

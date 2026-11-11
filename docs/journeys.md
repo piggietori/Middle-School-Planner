@@ -65,8 +65,9 @@ Kept small on purpose. No names, notes text, or home location in event propertie
 
 **Goal:** turn the plan on this device into an account plan.
 
-1. Taps **Sign in** → chooses email link or Google.
-2. Email: enters email → "Check your email" → taps the link, **or types the code** from the same email on the device where they asked → signed in.
+1. Taps **Sign in** → enters email → **Email me a code**.
+2. "Check your email" → types the 6-digit code from the email, in the same browser → signed in. If the page reloads
+   while they read the email (common on phones), the code box comes back for an hour.
 3. App checks the account:
    - **No plan yet:** creates a household and uploads the local plan. Toast: "Your plan is saved to your account."
    - **Has a plan, device has nothing:** loads the account plan.
@@ -75,7 +76,7 @@ Kept small on purpose. No names, notes text, or home location in event propertie
 
 **Stored:** `households`, `household_members`, `plans` and child tables; `sign_in` event.
 **Failure cases:**
-- Link expired, or used up by an email app that opens links to check them → the message explains and says to type the code from a new email. The local plan is untouched.
+- A link from an email sent before v1.3.0 → "That sign-in link has expired" and how to get a code. The local plan is untouched.
 - Wrong or expired code → "That code didn't work or has expired." The box keeps what they typed.
 - Offline when signing in → no account call is made, the local plan stays, retry later.
 - Merge can't reach the server halfway → don't clear local data until the upload is confirmed.

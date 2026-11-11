@@ -21,6 +21,13 @@ const store = {
 const UNSYNCED="d20plan-unsynced"; // this device has changes the account doesn't have yet
 const OWNER="d20plan-user";        // whose account the plan on this device was last synced with
 const EMAIL="d20plan-email";       // the account this device signed in to; forgotten only when the family signs out
+const PENDING="d20plan-pending";   // {email, at}: a sign-in email sent from here in the last hour, so its code box
+                                   // survives the page reloading (phones often reload it while you read your email)
+const HOUR=36e5;
+function setPending(email){store.set(PENDING,email?JSON.stringify({email,at:Date.now()}):"")}
+function pendingEmail(){
+  try{const p=JSON.parse(store.get(PENDING)||"null");return p&&Date.now()-p.at<HOUR?p.email:""}catch(e){return ""}
+}
 
 async function getBackend(){
   if(!backend){const {createBackend}=await import("./sync/backend.js");backend=await createBackend();backend.onChange(onAuth)}
@@ -31,14 +38,18 @@ export async function initAccount(){
   addEventListener("online",()=>acct.status==="error"?retry():flush());
   document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")refresh();else{saveSession();sendLogs()}});
   const hash=new URLSearchParams(location.hash.slice(1));
-  if(hash.has("error_description")){ // an expired or already-used sign-in link
+  if(hash.has("error_description")){ // a link from an email sent before sign-in became code-only (v1.3.0)
     history.replaceState(null,"",location.pathname+location.search);
-    acct.error="That sign-in link has expired or was already used. Some email apps open links to check them, which uses them up. Send yourself a new email, and type the code from it instead.";
+    acct.error="That sign-in link has expired. The planner now signs in with a code: send yourself a new email and type the code from it.";
     acct.open=true;
   }
   const returning=hash.has("access_token");
   // Signed in here before, but the sign-in is gone and nobody chose to sign out: say so (journey J7).
-  const was=store.get(EMAIL), noSession=()=>{setLogging(false);if(was){markLost(was);render()}renderAccount()};
+  const was=store.get(EMAIL), noSession=()=>{
+    setLogging(false);if(was){markLost(was);render()}
+    if(!acct.error)acct.sent=pendingEmail(); // the page reloaded while they read the email: keep the code box
+    renderAccount();
+  };
   if(!returning&&!store.get(SESSION_KEY)&&!window.__plannerTestBackend)return noSession();
   try{
     const s=await (await getBackend()).session();
@@ -63,11 +74,11 @@ function markLost(email){acct.lost=email;acct.lastEmail=email}
 
 let lastSession=null;
 async function signedIn(session){
-  // A sign-in link can report the same session twice (from the link, then from storage); load once.
+  // A sign-in can report the same session twice (as it happens, then from storage); load once.
   if(session.user.id===acct.userId&&(acct.status==="loading"||acct.status==="in"))return;
   lastSession=session;
   acct.status="loading";acct.email=session.user.email||"";acct.userId=session.user.id;acct.error="";acct.sent="";acct.lost="";
-  store.set(EMAIL,acct.email);
+  store.set(EMAIL,acct.email);setPending("");
   renderAccount();
   try{
     planId=await backend.openPlan(CYCLE);
@@ -157,7 +168,7 @@ export async function sendLink(email){
   acct.lastEmail=email;
   try{
     await (await getBackend()).sendLink(email);
-    acct.sent=email;acct.error="";
+    acct.sent=email;acct.error="";setPending(email);
   }catch(e){
     console.error(e);
     acct.error=/rate limit|too many/i.test(e.message||"")?"Too many sign-in emails were sent. Wait a few minutes, then try again."
@@ -167,8 +178,8 @@ export async function sendLink(email){
   renderAccount();
 }
 
-// The code in the same email as the link (F-11 in docs/failure-modes.md): it works even when an email app has
-// already opened, and so used up, the link. Signing in then arrives through onAuth like the link does.
+// Signing in is by a 6-digit code typed here, not a link (F-11 in docs/failure-modes.md): email apps that check links
+// can't use it up, and it signs in the browser the family is using. Success arrives through onAuth (SIGNED_IN).
 export async function signInWithCode(code){
   if(acct.codeBusy)return;
   if(!/^\d{6,10}$/.test(code)){acct.error="Type the code from the email: it's 6 digits.";renderAccount();return}
@@ -261,24 +272,24 @@ function sheetBody(){
     <div><button class="linkbtn" data-acct="delete">Delete my account…</button></div>`;
   if(acct.status==="loading")return `<h2>Signing in…</h2><p class="muted" style="margin:0">Loading your plan.</p>`;
   if(acct.sent)return `<h2>Check your email</h2>
-    <p style="margin:0">We sent a sign-in link and a code to <b>${esc(acct.sent)}</b>. Open the link on this device or any other, or type the code here. Each works once, within an hour.</p>
+    <p style="margin:0">We sent a 6-digit code to <b>${esc(acct.sent)}</b>. Type it here. It works once, within an hour.</p>
     ${acct.error?`<div class="notice" role="alert"><div>${esc(acct.error)} Still stuck? ${feedbackButton("Tell us")}</div></div>`:""}
     <form class="stack" style="gap:8px" data-acct-code="1">
-      <label for="acct-code" class="lab">Code from the email</label>
+      <label for="acct-code" class="lab">Code</label>
       <input id="acct-code" type="text" inputmode="numeric" autocomplete="one-time-code" required maxlength="12">
-      <button class="btn primary" type="submit"${acct.codeBusy?' disabled aria-busy="true"':""}>${acct.codeBusy?"Signing in…":"Sign in with the code"}</button>
+      <button class="btn primary" type="submit"${acct.codeBusy?' disabled aria-busy="true"':""}>${acct.codeBusy?"Signing in…":"Sign in"}</button>
     </form>
     <p class="muted small" style="margin:0">No email? Check your spam folder, or <button class="linkbtn" data-acct="again">send it again</button>.</p>`;
   return `${acct.lost?`<h2>Sign in again</h2>
     <p style="margin:0">You were signed out on this device. Your plan is still here; sign in to keep it in sync with your account.</p>`
     :`<h2>Keep your plan on all your devices</h2>
-    <p style="margin:0">Sign in to save your schools, visits and notes to your account. We'll email you a link. There's no password.</p>`}
+    <p style="margin:0">Sign in to save your schools, visits and notes to your account. We'll email you a 6-digit code. There's no password.</p>`}
     ${acct.status==="error"?`<div class="notice" role="alert"><div>Couldn't reach your account. Your plan is still saved on this device. <button class="linkbtn" data-acct="retry">Try again</button></div></div>`:""}
     ${acct.error?`<div class="notice" role="alert"><div>${esc(acct.error)} Still stuck? ${feedbackButton("Tell us")}</div></div>`:""}
     <form class="stack" style="gap:8px" data-acct-form="1">
       <label for="acct-email" class="lab">Email</label>
       <input id="acct-email" type="email" autocomplete="email" required maxlength="254" value="${esc(acct.lastEmail)}" placeholder="you@example.com">
-      <button class="btn primary" type="submit">Email me a sign-in link</button>
+      <button class="btn primary" type="submit">Email me a code</button>
     </form>
     ${acct.lost?`<p class="muted small" style="margin:0">Not ${esc(acct.lost)}? <button class="linkbtn" data-acct="forget">Forget this email</button></p>`:""}
     <p class="muted small" style="margin:0">Signing in is optional. Your plan always stays on this device too. By signing in you agree to the <a href="privacy.html" target="_blank">privacy notice and terms</a>.${PILOT?" This planner is a pilot, so things may change.":""}</p>`;
@@ -315,7 +326,7 @@ document.addEventListener("click",e=>{
   if(a==="close"&&e.target!==t&&!e.target.closest("button[data-acct]"))return; // clicks inside the sheet
   if(a==="open"){acct.open=true;renderAccount();document.getElementById("acct-email")?.focus()}
   if(a==="close"){acct.open=false;acct.ask="";acct.error="";renderAccount()}
-  if(a==="again"){acct.sent="";acct.error="";renderAccount();document.getElementById("acct-email")?.focus()}
+  if(a==="again"){acct.sent="";acct.error="";setPending("");renderAccount();document.getElementById("acct-email")?.focus()}
   if(a==="retry")retry();
   if(a==="forget"){ // a shared computer
     store.set(EMAIL,"");acct.lost="";acct.lastEmail="";

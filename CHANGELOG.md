@@ -13,8 +13,9 @@ feature the middle one (1.1 → 1.2), and a change that needs families or the da
 Getting ready to share with parent groups.
 
 ### Added
-- **A sign-in code in the email, as well as the link.** Some email apps open links to check them, which uses the link
-  up before the family taps it. Now they can type the code from the same email instead, on the device where they asked.
+- **Sign in with a 6-digit code instead of a link.** Email apps that check links could use a link up before the family
+  tapped it, and on phones a link often opened in a different browser from the one with your plan. A code is typed
+  where you want to be signed in, and the box is still there if the page reloads while you read your email.
 - **Who steps in when the owner can't** ([docs/governance.md](docs/governance.md)): what the backup person can do,
   and the access they need.
 

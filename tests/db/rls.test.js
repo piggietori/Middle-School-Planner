@@ -190,3 +190,18 @@ test("anyone can send feedback, nobody can read it back, and it's saved even whe
   // No Vault or pg_net here, like a project before setup: kept, not emailed.
   assert.deepEqual(await rows("select kind, emailed from public.feedback order by id"), [{kind: "wrong_info", emailed: false}, {kind: "problem", emailed: false}]);
 });
+
+test("the feedback email uses the form's words, the tab's name and New York time", async () => {
+  await db.exec("reset role");
+  const email = async (kind, page, at) => (await rows(
+    "select public.feedback_email(row(1, $1, 'The open house moved', null, $2, false, $3::timestamptz)::public.feedback) as e", [kind, page, at]))[0].e;
+  assert.deepEqual(await email("wrong_info", "find · 20K187", "2026-11-12T01:05:00Z"), {
+    subject: "Planner feedback: A date or school detail is wrong (#1)",
+    text: "The open house moved\n\n—\nAbout: A date or school detail is wrong\nWhere: Find schools tab, with school 20K187 open\n" +
+      "Reply to: not given (anonymous)\nSent: Wed Nov 11, 2026, 8:05 PM (New York)",
+  });
+  assert.match((await email("problem", "home", "2026-11-12T15:00:00Z")).text, /About: Something isn't working\nWhere: Home tab\n/);
+  assert.match((await email("other", null, "2026-11-12T15:00:00Z")).text, /About: Something else\nWhere: not recorded\n/);
+  await as(null);
+  await denied(db.query("select public.feedback_email(f) from public.feedback f"));
+});

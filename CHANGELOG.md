@@ -8,6 +8,11 @@ feature the middle one (1.1 → 1.2), and a change that needs families or the da
 
 ## [Unreleased]
 
+### Changed
+- **Feedback emails read the way families wrote them:** the kind is the label they chose ("A date or school detail is
+  wrong"), "Where" names the tab and the open school ("Find schools tab, with school 20K187 open"), and the time is
+  New York time. Apply `20261112120000_feedback_email_labels.sql` in the SQL Editor.
+
 ## [1.2.0] - 2026-11-11
 
 Ready for other families, starting with a small pilot.

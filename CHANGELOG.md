@@ -8,10 +8,24 @@ feature the middle one (1.1 → 1.2), and a change that needs families or the da
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-11-12
+
+Getting ready to share with parent groups.
+
+### Added
+- **A sign-in code in the email, as well as the link.** Some email apps open links to check them, which uses the link
+  up before the family taps it. Now they can type the code from the same email instead, on the device where they asked.
+- **Who steps in when the owner can't** ([docs/governance.md](docs/governance.md)): what the backup person can do,
+  and the access they need.
+
 ### Changed
+- **Open house pages are checked every day in October to December** (weekly the rest of the year), so a moved open
+  house is noticed the next morning.
 - **Feedback emails read the way families wrote them:** the kind is the label they chose ("A date or school detail is
   wrong"), "Where" names the tab and the open school ("Find schools tab, with school 20K187 open"), and the time is
   New York time. Apply `20261112120000_feedback_email_labels.sql` in the SQL Editor.
+- **Updated tools:** GitHub Actions (checkout, setup-node, upload-artifact, deploy-pages, upload-pages-artifact) and
+  PGlite for the database tests. CI runs in Playwright's own image, so browser tests don't depend on Ubuntu's package servers.
 
 ## [1.2.0] - 2026-11-11
 
@@ -114,7 +128,8 @@ The MVP: one HTML file, no sign-up, choices saved in the browser.
 - **My list:** put saved schools in order, with a "Ready for MySchools" guide showing school codes.
 - **Notes and compare:** your rating, likes and concerns for each school, and a side-by-side compare view.
 
-[Unreleased]: https://github.com/piggietori/Middle-School-Planner/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/piggietori/Middle-School-Planner/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/piggietori/Middle-School-Planner/releases/tag/v1.3.0
 [1.2.0]: https://github.com/piggietori/Middle-School-Planner/releases/tag/v1.2.0
 [1.1.1]: https://github.com/piggietori/Middle-School-Planner/releases/tag/v1.1.1
 [1.1.0]: https://github.com/piggietori/Middle-School-Planner/releases/tag/v1.1.0

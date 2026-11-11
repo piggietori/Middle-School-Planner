@@ -4,7 +4,8 @@
 name: Watch sources
 on:
   schedule:
-    - cron: "0 11 * * 1" # Mondays, 7 AM New York time
+    - cron: "0 11 * 10-12 *" # every day in October to December, 6 AM New York time: open houses move (F-31)
+    - cron: "0 11 * 1-9 1" # Mondays the rest of the year
   workflow_dispatch:
 
 permissions: {contents: read, issues: write}

@@ -7,10 +7,23 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 20 # a normal run takes 2–3 minutes; a hang (say Ubuntu's package servers down) fails instead of running 6 hours
+    timeout-minutes: 20 # a normal run takes 2–3 minutes; a hang fails instead of running 6 hours
+    # Playwright's own image already has Chromium, WebKit and their system packages, so nothing is installed from
+    # Ubuntu's package servers during the run (an outage there once blocked CI for hours). Its version must match
+    # @playwright/test in package-lock.json: the first step below checks, so a Dependabot bump fails with a clear message.
+    container: {image: "mcr.microsoft.com/playwright:v1.65.0-noble"}
     steps:
       - uses: actions/checkout@v4
         with: {fetch-depth: 0}
+      - name: Playwright image matches package-lock.json
+        run: |
+          image=$(grep -oE 'mcr\.microsoft\.com/playwright:v[0-9.]+' .github/workflows/ci.yml | head -1 | sed 's/.*:v//')
+          locked=$(node -p 'require("./package-lock.json").packages["node_modules/@playwright/test"].version')
+          if [ "$image" != "$locked" ]; then
+            echo "::error file=.github/workflows/ci.yml::The Playwright image is v$image but package-lock.json has @playwright/test $locked. Change the image tag to v$locked-noble (here and in planner-ops' monitor.yml)."
+            exit 1
+          fi
+          echo "Playwright $locked"
       - uses: actions/setup-node@v4
         with: {node-version: 24, cache: npm}
       - run: npm ci
@@ -20,9 +33,6 @@ jobs:
       - name: Release notes
         run: node scripts/check-changelog.js
       - run: npm test
-      - name: Install the browsers
-        run: npx playwright install --with-deps chromium webkit
-        timeout-minutes: 10
       - run: npm run test:e2e
       - uses: actions/upload-artifact@v4
         if: failure()

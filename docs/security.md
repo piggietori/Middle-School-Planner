@@ -53,7 +53,7 @@ For the keys and passwords themselves, see [secrets.md](secrets.md). For what pe
   sign-in link has expired" and the account library isn't even downloaded; `tests/e2e/account.spec.js` checks both.
 - Supabase still asks for the site's address and allowed return addresses (URL Configuration): only the live site and
   `localhost` for development. Sign-in doesn't use them.
-- Sign-in emails go through Resend, from our own domain, limited to 30 an hour in Supabase.
+- Sign-in emails go through Resend, from our own domain, limited to 60 an hour in Supabase.
 - During the pilot, new sign-ups are off: only invited addresses can sign in.
 
 **In the database** ([supabase/migrations/](../supabase/migrations/))
@@ -84,7 +84,7 @@ For the keys and passwords themselves, see [secrets.md](secrets.md). For what pe
 | Actions pinned to versions like `@v4`, not commit SHAs | A compromised Action version could run in our workflows | Pin to SHAs. Dependabot already proposes updates weekly (`.github/dependabot.yml`) | After December 11 |
 | 2FA can't be required for the Supabase organization | Anyone added to the Supabase organization later could sign in without 2FA | Requiring it needs the Pro plan; until then keep 2FA on your own accounts | When you scale |
 | No audit log | We can't see who changed what in a shared household | Add when households can be shared | v2 |
-| No CAPTCHA on sign-in or feedback | Someone could send many sign-in emails or feedback messages. For sign-in that can use up the hourly and daily email limits, so nobody can sign in (F-62) | Supabase's limits (30 emails an hour), 20 feedback emails an hour, 200 feedback messages an hour, and the monitor's flood alert. Add a CAPTCHA if abuse appears | If needed |
+| No CAPTCHA on sign-in or feedback | Someone could send many sign-in emails or feedback messages. For sign-in that can use up the hourly and daily email limits, so nobody can sign in (F-62) | Supabase's limits (60 emails an hour), 20 feedback emails an hour, 200 feedback messages an hour, and the monitor's flood alert. Add a CAPTCHA if abuse appears | If needed |
 
 ## Content-Security-Policy
 

@@ -10,13 +10,13 @@ more widely. Fill in each step's date as you go.
 | Step | How | Done |
 |---|---|---|
 | 1. A domain | `torilam.com`, at Porkbun: auto-renew on. Add email forwarding for `help@torilam.com` to your own inbox. The root is kept for a portfolio; the planner gets its own subdomain ([security.md](security.md#controls-layer-by-layer)) | |
-| 2. Sign-in emails from the domain | Resend (free): add the domain `d20mail.torilam.com`, paste its DNS records (SPF, DKIM), create an SMTP key. Supabase → Authentication → **SMTP Settings**: host `smtp.resend.com`, port 465, user `resend`, password the key, sender `D20 Middle School Planner <signin@d20mail.torilam.com>`. Then **Rate Limits** → emails per hour: 30 | |
+| 2. Sign-in emails from the domain | Resend (free): add the domain `d20mail.torilam.com`, paste its DNS records (SPF, DKIM), create an SMTP key. Supabase → Authentication → **SMTP Settings**: host `smtp.resend.com`, port 465, user `resend`, password the key, sender `D20 Middle School Planner <signin@d20mail.torilam.com>`. Then **Rate Limits** → emails per hour: 60 (30 during the pilot) | |
 | 3. The sign-in email's words | Supabase → Authentication → Emails → **Magic Link** (sent to an address that has signed in before) and **Confirm signup** (sent to a new one), both the same: subject "Your sign-in code for the D20 Middle School Planner". The body shows the code large, `<b>{{ .Token }}</b>`, says to type it in the planner, that it works once within 30 minutes, who it's from, and to ignore the email if they didn't ask. **No link** (no `{{ .ConfirmationURL }}`): since v1.3.0 sign-in is by code only ([failure-modes.md](failure-modes.md), F-11), and the planner refuses a link that carries a sign-in (F-65). The other templates (invite, change email, reset password, reauthentication) aren't used. Authentication → Sign In / Providers → Email: **Email OTP Length** 6, **Email OTP Expiration** 1800 | |
 | 4. The site's address: `d20.torilam.com` | Porkbun DNS: delete the parking wildcard `*` CNAME, add `CNAME d20 → piggietori.github.io`. GitHub profile → Settings → Pages → **Verified domains**: add `torilam.com` with its TXT record. Repo → Settings → Pages → Custom domain `d20.torilam.com` → **Enforce HTTPS**. Supabase → URL Configuration: Site URL `https://d20.torilam.com`, Redirect URLs `https://d20.torilam.com/**` (keep `localhost`). Planner-ops variable `SITE_URL`: `https://d20.torilam.com/`. You'll need to sign in again once, because each address keeps its own copy | 2026-11-11 |
 | 5. Feedback emails | Resend → API Keys → create one with **Sending access** for the domain only. In the Supabase SQL Editor, run (with your values, never in a file or chat): `select vault.create_secret('<the key>', 'resend_api_key'); select vault.create_secret('<your email>', 'feedback_to'); select vault.create_secret('D20 Middle School Planner <feedback@d20mail.torilam.com>', 'feedback_from');` | |
 | 6. The private ops repository | Create `piggietori/planner-ops`, **private**. Add secrets `SUPABASE_DB_URL` and `BACKUP_PASSPHRASE`, and the variable `SITE_URL`. Delete both secrets from the public repo. **Watch → All activity**, so alerts email you | |
 | 7. Invite-only for the pilot | Supabase → Authentication → Sign In / Providers → turn off **Allow new users to sign up**. Invite each family from **Users → Invite user** | |
-| 8. Hear about problems | **healthchecks.io** (free): create a check with period 1 hour and grace 4 hours (GitHub runs the hourly monitor late, about every 3 hours: [operations.md](operations.md#monitoring)), and put its ping URL in the `planner-ops` secret `HEALTHCHECK_URL`. Public repo → Settings → **Code security**: turn on secret scanning and push protection. Turn on **Dependabot alerts** there too. Store the clock's GitHub token, so the monitor, backups and source watch run on time ([secrets.md](secrets.md#the-clocks-github-token)). Install **GitHub Mobile** and allow notifications for `planner-ops` | |
+| 8. Hear about problems | **healthchecks.io** (free): create a check with period 1 hour and grace 4 hours (GitHub runs the hourly monitor late, about every 3 hours: [operations.md](operations.md#monitoring)), and put its ping URL in the `planner-ops` secret `HEALTHCHECK_URL`. Public repo → Settings → **Code security**: turn on secret scanning and push protection. Turn on **Dependabot alerts** there too. Store the clock's GitHub token, so the monitor, backups and source watch run on time ([secrets.md](secrets.md#the-clocks-github-token)). So an alert isn't missed: a Gmail filter marking `ALERT:` emails from GitHub important, or **GitHub Mobile** with notifications for `planner-ops` (either is enough) | |
 | 9. The restore drill | Download the newest backup from the ops repo, decrypt it, check both files open ([backups.md](backups.md#the-restore-drill)) | |
 
 **In the code (merged before the pilot):**
@@ -51,14 +51,14 @@ All of these must be true:
 - [ ] At least 2 pilot households signed in, and at least one used 2 devices
 - [ ] Sign-in emails arrive within a minute, and not in spam (ask the pilot families)
 - [ ] All feedback answered, and anything wrong fixed or on a banner
-- [ ] The restore drill done
+- [x] The restore drill done (2026-11-12)
 - [ ] `App works for visitors` has passed for 3 days
 - [ ] The highest risks in [failure-modes.md](failure-modes.md#highest-risks) re-scored with what the pilot showed
 
-- [ ] The clock's token is set, and *Monitor* has run every hour, *Backup* and *Watch sources* every day, for 3 days
-- [ ] A brand-new address gets a sign-in email with a code (the **Confirm signup** email), within a minute
-- [ ] The sign-in email limit is raised for launch week, and you've decided how to stay under Resend's 100 a day ([operations.md](operations.md#free-plan-limits-that-matter))
-- [ ] v1.3.0 and later versions are tagged and released
+- [ ] The clock's token is set (done 2026-11-12), and *Monitor* has run every hour, *Backup* and *Watch sources* every day, for 3 days
+- [x] A brand-new address gets a sign-in email with a code (the **Confirm signup** email), within a minute (2026-11-12)
+- [ ] The sign-in email limit is raised for launch week (60 an hour since 2026-11-12), and you've decided how to stay under Resend's 100 a day ([operations.md](operations.md#free-plan-limits-that-matter))
+- [x] v1.3.0 and later versions are tagged and released (v1.3.1, 2026-11-12)
 
 ## Sharing with parent groups
 

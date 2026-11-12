@@ -10,7 +10,7 @@ feature the middle one (1.1 → 1.2), and a change that needs families or the da
 
 ### Added
 - **A flag for top matches left off the list.** If one of Find's top 3 matches (Good match or better) isn't saved,
-  My list and Finalize & apply say so, with Save and See details.
+  My list and Finalize & apply say so, with Save, See details and Dismiss.
 - **Usage reports for the owner.** Every visit to the live site now sends anonymous usage counts: tabs opened,
   schools opened and saved, open houses, notes added (never their text), steps, the list copied, feedback sent, and
   errors. Signed out, they carry no account and no ID that links one visit to the next. Owner-only views in the

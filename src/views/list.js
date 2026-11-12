@@ -18,17 +18,23 @@ const EMPTY=`<div class="empty"><p style="margin:0 0 6px"><b>No schools saved ye
 
 // Find's top 3 matches that are at least a Good match but aren't on the list: easy to leave off by mistake.
 // Only once the family has said where they live and saved something, and while applications are open.
+// Dismissing hides it on this device until a different school is missing.
+const TOP_SEEN="d20top-ok";
 export function missingTop(){
   if(!st.home||!st.saved.length||closedNow())return [];
   return ranked(st).slice(0,3).map((m,i)=>({m,n:i+1})).filter(({m})=>m.score>=62&&!isSaved(m.s.dbn));
 }
+const topKey=miss=>miss.map(({m})=>m.s.dbn).sort().join(",");
+export function dismissTop(){try{localStorage.setItem(TOP_SEEN,topKey(missingTop()))}catch(e){}}
 function missingTopNote(){
   const miss=missingTop();
   if(!miss.length)return "";
+  try{const seen=(localStorage.getItem(TOP_SEEN)||"").split(",");if(miss.every(({m})=>seen.includes(m.s.dbn)))return ""}catch(e){}
+  const head=miss.length===1?"One of your top 3 matches is not on your list.":miss.length+" of your top 3 matches are not on your list.";
   return `<div class="notice warn" role="note" id="missing-top"><span aria-hidden="true">⚠️</span><div class="stack" style="gap:8px">
-    <div><b>Not on your list:</b> ${miss.length===1?"one of your top 3 matches":miss.length+" of your top 3 matches"} on Find schools.</div>
-    ${miss.map(({m,n})=>`<div class="row" style="gap:8px"><span style="margin-right:auto">${esc(m.s.name)} <span class="muted small">(#${n} match, ${label(m.score)[0].toLowerCase()})</span></span><button class="btn" data-save="${m.s.dbn}">☆ Save</button><button class="btn" data-open="${m.s.dbn}">See details</button></div>`).join("")}
-    <div class="small muted">Leaving them off is fine if you've ruled them out.</div></div></div>`;
+    <div><b>${head}</b></div>
+    ${miss.map(({m,n})=>`<div class="row" style="gap:8px"><span style="margin-right:auto">${esc(m.s.name)} <span class="muted small">(#${n})</span></span><button class="btn" data-save="${m.s.dbn}">☆ Save</button><button class="btn" data-open="${m.s.dbn}">See details</button></div>`).join("")}
+    <div><button class="linkbtn" data-top-ok="1">Dismiss</button></div></div></div>`;
 }
 
 // On top of My list: the planner doesn't send anything, MySchools does.

@@ -4,7 +4,7 @@ import {PILOT, SESSION_KEY} from "./config.js";
 import {CYCLE} from "./data.js";
 import {feedbackButton} from "./feedback.js"; // a sign-in failure isn't logged (signed out), so let them tell us
 import {reportError, setLogging, takeLogs, track, VISIT} from "./log.js";
-import {CHILD_KEYS, toRows, fromRows, diffRows, isNoop, isEmpty, mergePlans} from "./plan-model.js";
+import {toRows, fromRows, diffRows, isNoop, isEmpty, mergePlans} from "./plan-model.js";
 import {render} from "./render.js";
 import {applyRemoteSession, forgetSession} from "./session.js";
 import {st, replacePlan} from "./state.js";
@@ -240,21 +240,6 @@ export async function signOut(keep){
 }
 function forgetDevice(){replacePlan(null);forgetSession();store.set(UNSYNCED,"");store.set(FROM,"")}
 
-// Download my data (J7): everything the account holds about this person's plan, as JSON.
-export async function exportData(){
-  try{
-    const [rows,place]=await Promise.all([backend.load(planId),backend.loadSession()]);
-    const strip=({plan_id,household_id,...r})=>r; // internal IDs mean nothing outside the app
-    const data={exported_at:new Date().toISOString(),account:{email:acct.email},cycle:CYCLE,plan:strip(rows.plan),
-      ...Object.fromEntries(Object.keys(CHILD_KEYS).map(t=>[t,rows[t].map(strip)])),last_place:place||null};
-    const a=document.createElement("a");
-    a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}));
-    a.download="middle-school-plan-"+data.exported_at.slice(0,10)+".json";
-    document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
-    toast("Downloaded your data");
-  }catch(e){reportError(e,"export");toast("Couldn't download your data. Check your connection and try again.")}
-}
-
 // Delete my account (J7). The server does it in one transaction, so either all of it happens or none of it.
 export async function deleteAccount(removeLocal){
   acct.deleting=true;acct.error="";renderAccount();
@@ -287,7 +272,6 @@ function sheetBody(){
     <div><button class="linkbtn" data-acct="cancel">Cancel</button></div>`;
   if(acct.status==="in"&&acct.ask==="delete")return `<h2>Delete your account</h2>
     <p style="margin:0">This permanently deletes your account and the plan saved in it: your schools, visits, steps and notes. It can't be undone. If someone else shares your plan, it stays for them. A copy also stays on any other device where you used the planner, until you sign out or clear it there.</p>
-    <p class="small muted" style="margin:0">Want a copy first? <button class="linkbtn" data-acct="export">Download my data</button></p>
     ${acct.error?`<div class="notice" role="alert"><div>${esc(acct.error)} Still stuck? ${feedbackButton("Tell us")}</div></div>`:""}
     <label for="acct-delete" class="lab">Type DELETE to confirm</label>
     <input id="acct-delete" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="10">
@@ -296,7 +280,7 @@ function sheetBody(){
   if(acct.status==="in")return `<h2>Your account</h2>
     <p style="margin:0">Signed in as <b>${esc(acct.email)}</b>. Your plan is saved to your account and stays the same on every device where you sign in.</p>
     <p class="small" role="status" style="margin:0;color:var(--${acct.saving==="failed"?"bad":acct.saving==="saved"?"good":"muted"})">${SAVING[acct.saving]}</p>
-    <div class="row"><button class="btn" data-acct="export">Download my data</button><button class="btn" data-acct="signout">Sign out on this device</button></div>
+    <div class="row"><button class="btn" data-acct="signout">Sign out on this device</button></div>
     <div><button class="linkbtn" data-acct="delete">Delete my account…</button></div>`;
   if(acct.status==="loading")return `<h2>Signing in…</h2><p class="muted" style="margin:0">Loading your plan.</p>`;
   if(acct.sent)return `<h2>Check your email</h2>
@@ -365,7 +349,6 @@ document.addEventListener("click",e=>{
   if(a==="signout"||a==="delete"){acct.ask=a;acct.error="";renderAccount();document.getElementById("acct-delete")?.focus()}
   if(a==="cancel"){acct.ask="";acct.error="";renderAccount()}
   if(a==="signout-keep"||a==="signout-remove")signOut(a==="signout-keep");
-  if(a==="export")exportData();
   if(a==="delete-now"&&!t.disabled)deleteAccount(document.getElementById("acct-delete-local").checked);
 });
 document.addEventListener("submit",e=>{

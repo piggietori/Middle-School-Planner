@@ -9,6 +9,16 @@ feature the middle one (1.1 → 1.2), and a change that needs families or the da
 ## [Unreleased]
 
 ### Added
+- **A flag for top matches left off the list.** If one of Find's top 3 matches (Good match or better) isn't saved,
+  My list and Finalize & apply say so, with Save and See details.
+
+### Changed
+- **The account menu no longer offers "Download my data".** A data file meant nothing to families. Signed in, it
+  offers sign out and delete; a copy of their data is on request at help@torilam.com (the privacy page says so).
+- **The first-visit note says what the planner is for:** built by a D20 parent to explore schools, coordinate open
+  houses, compare notes and decide the final order, and to submit in MySchools.
+
+### Added (earlier)
 - **Usage reports for the owner.** Every visit to the live site now sends anonymous usage counts: tabs opened,
   schools opened and saved, open houses, notes added (never their text), steps, the list copied, feedback sent, and
   errors. Signed out, they carry no account and no ID that links one visit to the next. Owner-only views in the

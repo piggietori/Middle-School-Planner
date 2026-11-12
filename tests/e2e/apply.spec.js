@@ -30,7 +30,7 @@ test("Apply in MySchools lists the codes in order, and ticking it off marks step
   await page.goto("/#list");
   await expect(page.locator(".notice", {hasText: "Your list doesn't count until you submit it in MySchools."})).toBeVisible();
   await page.locator('.seg [data-lv="apply"]').click();
-  await expect(page.locator("#myschools")).toContainText("Only MySchools submits your application.");
+  await expect(page.locator("#myschools")).toContainText("make sure you submit your application in MySchools.");
   await expect(page.locator(".ms-codes code")).toHaveText(["20K201", "20K187", "20K229"]);
   await page.locator(".ms-codes li").nth(1).getByRole("button", {name: /up$/}).click(); // finalize the order here
   await expect(page.locator(".ms-codes code")).toHaveText(["20K187", "20K201", "20K229"]);
@@ -57,12 +57,12 @@ test("with no schools saved, Apply in MySchools sends families to Find schools f
 
 test("what the planner is shows once on Home until dismissed", async ({page}) => {
   await page.goto("/");
-  const about = page.locator(".notice", {hasText: "An independent planner from a D20 parent."});
-  await expect(about).toContainText("Only MySchools submits your application.");
+  const about = page.locator(".notice", {hasText: "Built by a D20 parent to explore schools"});
+  await expect(about).toContainText("make sure you submit your application in MySchools.");
   await about.getByRole("button", {name: "Got it"}).click();
   await expect(about).toHaveCount(0);
   await page.reload();
-  await expect(page.getByText("An independent planner from a D20 parent.")).toHaveCount(0);
+  await expect(page.getByText("Built by a D20 parent to explore schools")).toHaveCount(0);
 });
 
 test("the school sheet says what to search for in MySchools", async ({page}) => {
@@ -101,4 +101,30 @@ test("on a phone, Find folds answers already given so the matches come first", a
   await expect(page.locator(".prefs")).toBeVisible();
   await page.getByRole("button", {name: "See my matches"}).click();
   await expect(page.locator(".prefs")).toBeHidden();
+});
+
+test("My list flags top matches from Find that aren't on the list, and saving one clears it", async ({page}) => {
+  await withPlan(page, {home: "dyker", saved: [], done: {s1: true}});
+  await page.goto("/#find");
+  const cards = page.locator("#app article.sc");
+  await expect(cards.nth(3)).toBeVisible();
+  const top = await cards.locator("h3").evaluateAll(hs => hs.slice(0, 4).map(h => h.textContent));
+  await cards.nth(3).getByRole("button", {name: "☆ Save"}).click();
+  await page.locator('.tab[data-tab="list"]').click();
+  const flag = page.locator("#missing-top");
+  await expect(flag).toContainText("Not on your list");
+  await expect(flag).toContainText(top[0]);
+  await expect(flag).not.toContainText(top[3]);
+  await flag.getByRole("button", {name: "☆ Save"}).first().click();
+  await expect(page.locator("#app")).toContainText(top[0]);
+  await expect(flag.getByText(top[0])).toHaveCount(0);
+  await page.locator("#app [data-lv=apply]").first().click();
+  await expect(page.locator("#myschools #missing-top")).toHaveCount((await page.locator("#app").textContent()).includes("Not on your list") ? 1 : 0);
+});
+
+test("no top-match flag before the family says where they live", async ({page}) => {
+  await withPlan(page, {saved: ["20K187"], done: {}});
+  await page.goto("/#list");
+  await expect(page.locator("#app h2").first()).toHaveText("My list");
+  await expect(page.locator("#missing-top")).toHaveCount(0);
 });

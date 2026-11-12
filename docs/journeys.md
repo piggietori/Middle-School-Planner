@@ -148,6 +148,9 @@ The owner's reports on them: [operations.md](operations.md#usage-reports).
    **Required · in MySchools**, with a button to **Finalize & apply** (My list): finalize the
    order, then the steps from logging in to the confirmation, with the codes in order. "I submitted in MySchools" marks steps 6 and 7
    done and stops the deadline reminders. The planner can't see MySchools, so this is only what the family tells it.
+   If any of Find's top 3 matches (Good match or better) isn't on the list, My order and step 1 of Finalize & apply
+   flag it, with **☆ Save** and **See details** (only once a neighborhood is set and something is saved, and until
+   applications close).
 3. After Dec 11 → My list is read-only ("This is your list as it was then", no arrows) with who to contact if they
    didn't submit, and Next up says when offers arrive.
 4. Apr 7, 2027 → Next up: "Offers are out. See your child's offer in MySchools."
@@ -155,11 +158,11 @@ The owner's reports on them: [operations.md](operations.md#usage-reports).
 
 **Failure cases:** device clock is wrong → dates come from the device today; acceptable, but the server time is used for any reminder sent by email later.
 
-## J7. Leave, delete, or take my data
+## J7. Leave, delete, or get a copy of my data
 
 1. **Sign out** → asks "Keep a copy of your plan on this device?": keep it, or remove it (for a shared computer). The account keeps the plan either way.
-2. **Download my data** → a JSON file of everything the account holds: settings, saved schools, visits, steps, notes and where they left off, without internal IDs.
-3. **Delete my account** → confirm by typing DELETE, and choose whether to remove the plan from this device too → removes the person, and the household if they were the only member. Events and errors are kept without the user ID.
+2. **Delete my account** → confirm by typing DELETE, and choose whether to remove the plan from this device too → removes the person, and the household if they were the only member. Events and errors are kept without the user ID.
+3. **A copy of my data** → there's no download button (a data file meant nothing to families): they email `help@`, and the owner sends what the account holds ([privacy.md](privacy.md)).
 
 **Failure cases:** delete fails halfway → the server does it in one transaction; the app shows the error and nothing is half-deleted.
 

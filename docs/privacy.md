@@ -58,7 +58,7 @@ child in them. The planner isn't meant to be used by children themselves.
 ## A family's choices
 
 - **Use it without an account.** Everything stays on their device.
-- **Download my data** (Account): a file of everything their account holds.
+- **A copy of their data:** they email `help@` from the account's address; the owner exports what the account holds (Supabase SQL Editor) and sends it. There's no download button: a data file meant nothing to families.
 - **Delete my account** (Account): removes their account and plan, and optionally the copy on the device. Their
   past usage events and errors stay, without anything linking them to the person.
 - **Sign out and remove:** takes the plan off a shared computer.
@@ -83,5 +83,5 @@ To change the periods, add a new migration that replaces the function (`create o
 | Backups holding other families' data | Moved to the private `planner-ops` repository ([backups.md](backups.md)) |
 | A privacy notice and terms | [privacy.html](../privacy.html), linked from the footer and the sign-in sheet ("By signing in you agree to…") |
 | Where the data is stored | The project's existing region, stated in the notice. Moving it wasn't worth a new project |
-| Requests from families | Most are self-serve (download, delete). Otherwise by email to `help@`: reply within a few days, act within 30 |
+| Requests from families | Deleting is self-serve. A copy of their data, and anything else, by email to `help@`: reply within a few days, act within 30 |
 | If data may have been seen | Email the families affected within 72 hours: what happened and what to do |

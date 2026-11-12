@@ -16,7 +16,7 @@ export function dismissPilot(){try{localStorage.setItem(SEEN,"1")}catch(e){}}
 
 // What the planner is and isn't. Once on Home until dismissed on this device (the pilot notice says it while
 // PILOT is on), and always on Apply in MySchools.
-export const DISCLAIMER="An independent planner from a D20 parent. Dates and details can change; confirm with each school. Only MySchools submits your application.";
+export const DISCLAIMER="Built by a D20 parent to explore schools, coordinate open houses, compare notes, and decide on your final choice order. Confirm dates with each school, and make sure you submit your application in MySchools.";
 const ABOUT_SEEN="d20about-ok";
 export function aboutNotice(){
   let seen=false;try{seen=localStorage.getItem(ABOUT_SEEN)==="1"}catch(e){}

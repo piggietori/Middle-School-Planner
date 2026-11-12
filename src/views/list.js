@@ -1,7 +1,7 @@
 import {BY, OH, keyDate, longDate} from "../data.js";
-import {match, label} from "../match.js";
+import {match, label, ranked} from "../match.js";
 import {DISCLAIMER} from "../notices.js";
-import {RATING_WORDS, noteOf, hasNotes, starText, testSchools} from "../plan.js";
+import {RATING_WORDS, noteOf, hasNotes, starText, testSchools, isSaved} from "../plan.js";
 import {st} from "../state.js";
 import {ui} from "../ui.js";
 import {esc, pd, daysUntil, MON, when, toast} from "../util.js";
@@ -15,6 +15,21 @@ const closedNow=()=>daysUntil(keyDate("k-close"))<0;
 const submitted=()=>!!st.done.s7;
 // Wherever the list is still empty: schools get here by saving them on Find schools.
 const EMPTY=`<div class="empty"><p style="margin:0 0 6px"><b>No schools saved yet.</b></p><p style="margin:0 0 6px">Go to Find schools and tap <b>☆ Save</b> on each school you like.</p><p style="margin:0 0 12px">Saved schools show up here, where you put them in order and get ready to apply.</p><button class="btn primary" data-tab-go="find">Find schools</button></div>`;
+
+// Find's top 3 matches that are at least a Good match but aren't on the list: easy to leave off by mistake.
+// Only once the family has said where they live and saved something, and while applications are open.
+export function missingTop(){
+  if(!st.home||!st.saved.length||closedNow())return [];
+  return ranked(st).slice(0,3).map((m,i)=>({m,n:i+1})).filter(({m})=>m.score>=62&&!isSaved(m.s.dbn));
+}
+function missingTopNote(){
+  const miss=missingTop();
+  if(!miss.length)return "";
+  return `<div class="notice warn" role="note" id="missing-top"><span aria-hidden="true">⚠️</span><div class="stack" style="gap:8px">
+    <div><b>Not on your list:</b> ${miss.length===1?"one of your top 3 matches":miss.length+" of your top 3 matches"} on Find schools.</div>
+    ${miss.map(({m,n})=>`<div class="row" style="gap:8px"><span style="margin-right:auto">${esc(m.s.name)} <span class="muted small">(#${n} match, ${label(m.score)[0].toLowerCase()})</span></span><button class="btn" data-save="${m.s.dbn}">☆ Save</button><button class="btn" data-open="${m.s.dbn}">See details</button></div>`).join("")}
+    <div class="small muted">Leaving them off is fine if you've ruled them out.</div></div></div>`;
+}
 
 // On top of My list: the planner doesn't send anything, MySchools does.
 function applyBanner(){
@@ -35,6 +50,7 @@ function vApply(saved){
     <p class="small muted" style="margin:0">${DISCLAIMER}</p>
     <ol class="stepper apply">
       ${step(1,"Finalize your order",`${p("Put your true favorite first. NYC tries your first choice first, and listing more schools never lowers your chance at it. This is the order you'll enter in MySchools.")}
+        ${missingTopNote()}
         <ol class="ms-codes">${saved.map((s,i)=>`<li>${closed?"<span></span>":`<div class="order"><button data-mv="${i}:-1" ${i===0?"disabled":""} aria-label="Move ${esc(s.short)} up">▲</button><button data-mv="${i}:1" ${i===saved.length-1?"disabled":""} aria-label="Move ${esc(s.short)} down">▼</button></div>`}<span class="ms-n" aria-hidden="true">${i+1}</span><div class="stack" style="gap:6px;min-width:0">
           <div><span class="sr">Choice ${i+1}: </span>${esc(s.name)}</div>
           <div class="row" style="gap:8px"><span class="small">Search for</span><code class="code">${esc(s.dbn)}</code><button class="btn" data-copy="${esc(s.dbn)}">Copy</button></div></div></li>`).join("")}</ol>
@@ -70,6 +86,7 @@ export function vList(){
     <div><h2>My list</h2><p class="muted" style="margin:.3rem 0 0">${closed?"Your list as it was when applications closed.":"Put your favorite first. This is the order to enter in MySchools. Use the arrows to move schools up or down."}</p></div>
     ${applyBanner()}
     ${views}
+    ${missingTopNote()}
     ${saved.length?`<div class="stack">${saved.map((s,i)=>{const m=match(s,st),ev=OH.filter(e=>e.dbn===s.dbn&&daysUntil(e.date)>=0);
       return `<article class="sc"><div class="sc-head">
         ${closed?"":`<div class="order"><button data-mv="${i}:-1" ${i===0?"disabled":""} aria-label="Move up">▲</button><button data-mv="${i}:1" ${i===saved.length-1?"disabled":""} aria-label="Move down">▼</button></div>`}

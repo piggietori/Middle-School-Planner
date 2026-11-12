@@ -1,6 +1,5 @@
 // Journeys J2 (sign in and keep what I did) and J3 (come back on another device). See docs/journeys.md.
 // Uses an in-memory fake of the account server (fake-backend.js), shared by both "devices".
-import fs from "node:fs";
 import AxeBuilder from "@axe-core/playwright";
 import {test, expect} from "@playwright/test";
 import {useFixtureData} from "./fixture-data.js";
@@ -334,19 +333,16 @@ test("signing out on a shared computer can remove the plan from it (J7)", async 
   expect(server.plans[server.byUser.a].saved_schools).toHaveLength(2); // still in the account
 });
 
-test("download my data gives a JSON file of everything in the account (J7)", async ({browser}) => {
+test("the signed-in account sheet offers sign out and delete, not a data download (J7)", async ({browser}) => {
   const server = fakeServer();
   const page = await device(browser, server, {plan: LOCAL_PLAN});
   await page.goto(signedInAs("a", "parent@example.com"));
   await synced(page);
   await page.locator("#acct button").click();
-  const [download] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", {name: "Download my data"}).click()]);
-  expect(download.suggestedFilename()).toMatch(/^middle-school-plan-\d{4}-\d{2}-\d{2}\.json$/);
-  const data = JSON.parse(fs.readFileSync(await download.path(), "utf8"));
-  expect(data.account).toEqual({email: "parent@example.com"});
-  expect(data.saved_schools.map(r => r.dbn).sort()).toEqual(["20K187", "20K201"]);
-  expect(data.plan.home).toBe("dyker");
-  expect(JSON.stringify(data)).not.toContain("plan-a"); // no internal IDs
+  await expect(page.getByRole("button", {name: "Sign out on this device"})).toBeVisible();
+  await expect(page.getByRole("button", {name: "Download my data"})).toHaveCount(0);
+  await page.getByRole("button", {name: "Delete my account…"}).click();
+  await expect(page.getByText("Download my data")).toHaveCount(0);
 });
 
 test("deleting an account needs DELETE typed, then removes the account and, if chosen, this device's copy (J7)", async ({browser}) => {

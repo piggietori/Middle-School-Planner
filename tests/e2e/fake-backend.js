@@ -1,7 +1,8 @@
 // An in-memory stand-in for Supabase, shared by every page in a test, so two browser contexts act like
 // two devices signed in to the same account. The app uses it through window.__plannerTestBackend.
 // Each sign-in email carries server.code; typing it signs in as the part of the address before the @
-// (parent@example.com → uid "parent"). As a shortcut, tests sign in with /#access_token=fake&uid=<id>&email=<email>.
+// (parent@example.com → uid "parent"). As a shortcut, tests start signed in with
+// /#test_signin=1&uid=<id>&email=<email>. Only this fake reads it: the real app never accepts a sign-in from the address.
 
 const KEYS = {saved_schools: "dbn", visits: "event_id", step_progress: "step_id", school_notes: "dbn"};
 const DEFAULT_PLAN = {home: "", max_miles: 1.5, need_subway: false, skip_competitive: false,
@@ -10,7 +11,7 @@ const DEFAULT_PLAN = {home: "", max_miles: 1.5, need_subway: false, skip_competi
 export function fakeServer() {
   const server = {outbox: [], plans: {}, byUser: {}, sessions: {}, events: [], errors: [], deleted: [], failSaves: false, saves: 0, invited: null, code: "246810", codes: {}};
   server.handle = (op, ...args) => {
-    if (op === "sendLink") {
+    if (op === "sendCode") {
       // With sign-ups off (the pilot), Supabase refuses addresses nobody invited.
       if (server.invited && !server.invited.includes(args[0])) throw new Error("Signups not allowed for otp");
       server.outbox.push(args[0]); server.codes[args[0]] = server.code; return null;
@@ -69,14 +70,14 @@ export async function useFakeBackend(context, server) {
     window.__plannerTestBackend = {
       async session() {
         const h = new URLSearchParams(location.hash.slice(1));
-        if (h.get("access_token") === "fake") { // the test shortcut for a completed sign-in
+        if (h.get("test_signin") === "1") { // the test shortcut for a completed sign-in
           localStorage.setItem("fake-session", JSON.stringify({user: {id: h.get("uid"), email: h.get("email")}}));
           history.replaceState(null, "", location.pathname);
         }
         const s = read(); uid = s?.user.id ?? null; return s;
       },
       onChange(cb) { listener = cb; },
-      sendLink: email => call("sendLink", email),
+      sendCode: email => call("sendCode", email),
       async verifyCode(email, code) {
         const s = {user: await call("verifyCode", email, code)};
         localStorage.setItem("fake-session", JSON.stringify(s)); uid = s.user.id;

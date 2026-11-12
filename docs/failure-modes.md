@@ -106,11 +106,12 @@ Status: **Covered**, **Partial** (works, with a known gap), **Gap → fix**, **A
 
 | ID | Failure | Harm | How we'd know | Response | S | O | D | RPN now | After | Status |
 |---|---|---|---|---|---|---|---|---|---|---|
-| F-60 | A secret is committed | Data exposed | Push protection blocks it; secret scanning alerts | [secrets.md](secrets.md#if-a-secret-may-have-leaked) | 9 | 2 | 7 | 126 | 36 | Gap → turn on secret scanning and push protection |
+| F-60 | A secret is committed | Data exposed | Push protection blocks it; secret scanning alerts | [secrets.md](secrets.md#if-a-secret-may-have-leaked) | 9 | 2 | 2 | 36 | 36 | Covered: secret scanning and push protection are on (checked 2026-11-11) |
 | F-61 | A GitHub Action we use is compromised | Our workflows run someone else's code | Unlikely to notice | Pin Actions to commit SHAs | 9 | 1 | 8 | 72 | 72 | Accepted until after December 11 ([security.md](security.md#known-gaps-and-what-to-do-about-them)) |
 | F-62 | Someone sends sign-in emails to others' addresses | Unwanted emails | Supabase's rate limit; Resend's logs | Lower the limit; add a CAPTCHA | 3 | 2 | 6 | 36 | 36 | Covered |
 | F-63 | The owner's GitHub, Supabase or email account is taken over | Everything | Login alerts from each service | 2FA; [secrets.md](secrets.md#if-a-secret-may-have-leaked) | 10 | 1 | 6 | 60 | 60 | Covered: 2FA on all |
 | F-64 | A script is injected into the page | Sessions stolen | Tests; CSP; signed-in reports "CSP blocked …" | [security.md](security.md) | 10 | 1 | 2 | 20 | 20 | Covered |
+| F-65 | Someone shares a link that signs a family in to the sender's account | The plan on that device is added to a stranger's account | Browser tests on every change | The planner never accepts a sign-in from the address (v1.3.1); sign-in is by typed code only ([security.md](security.md#controls-layer-by-layer)) | 10 | 1 | 2 | 20 | 20 | Covered |
 
 ### People
 

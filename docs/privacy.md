@@ -17,7 +17,7 @@ is a change there, with its "Last updated" date.
 | Feedback: what it's about, the message, a reply address if they give one, and which tab or school they were on | Supabase `feedback` (anyone, signed in or not; never linked to an account); emailed to the owner | Answering problems and fixing wrong dates | The project owner; Resend while sending it | 1 year, then deleted automatically (backups: 90 days more). The email stays in the owner's inbox until deleted |
 
 **What we don't keep:**
-- passwords (sign-in is by emailed link)
+- passwords (sign-in is by emailed code)
 - the child's name, age or school
 - the family's exact address (only a neighborhood)
 - location

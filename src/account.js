@@ -11,7 +11,7 @@ import {st, replacePlan} from "./state.js";
 import {ui} from "./ui.js";
 import {$, esc, toast} from "./util.js";
 
-export const acct = {status:"out", email:"", userId:"", sent:"", lastEmail:"", saving:"saved", open:false, error:"", ask:"", deleting:false, lost:"", codeBusy:false, via:""};
+export const acct = {status:"out", email:"", userId:"", sent:"", lastEmail:"", saving:"saved", open:false, error:"", ask:"", deleting:false, lost:"", codeBusy:false};
 let backend=null, planId=null, synced=null, timer=null, busy=null, warned=false, sessionTimer=null, sessionNext=null, logTimer=null, opened=false, leaving=false;
 
 const store = {
@@ -38,19 +38,20 @@ export async function initAccount(){
   addEventListener("online",()=>acct.status==="error"?retry():flush());
   document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")refresh();else{saveSession();sendLogs()}});
   const hash=new URLSearchParams(location.hash.slice(1));
-  if(hash.has("error_description")){ // a link from an email sent before sign-in became code-only (v1.3.0)
+  // Sign-in is by code only (v1.3.0). A link that arrives with a sign-in or an error in the address is never
+  // accepted: an old email's link, or one made to sign this device in to somebody else's account.
+  if(hash.has("error_description")||hash.has("access_token")){
     history.replaceState(null,"",location.pathname+location.search);
     acct.error="That sign-in link has expired. The planner now signs in with a code: send yourself a new email and type the code from it.";
     acct.open=true;
   }
-  const returning=hash.has("access_token");
   // Signed in here before, but the sign-in is gone and nobody chose to sign out: say so (journey J7).
   const was=store.get(EMAIL), noSession=()=>{
     setLogging(false);if(was){markLost(was);render()}
     if(!acct.error)acct.sent=pendingEmail(); // the page reloaded while they read the email: keep the code box
     renderAccount();
   };
-  if(!returning&&!store.get(SESSION_KEY)&&!window.__plannerTestBackend)return noSession();
+  if(!store.get(SESSION_KEY)&&!window.__plannerTestBackend)return noSession();
   try{
     const s=await (await getBackend()).session();
     if(s)await signedIn(s);else noSession();
@@ -92,8 +93,7 @@ async function signedIn(session){
     acct.status="in";
     setLogging(true,queueLogs);
     if(!opened){opened=true;track("app_open",{tab:ui.tab})}
-    if(firstHere)track("sign_in",{method:acct.via==="code"?"code":"email",claimed_local:combine&&!isEmpty(local)});
-    acct.via="";
+    if(firstHere)track("sign_in",{method:"code",claimed_local:combine&&!isEmpty(local)});
     render();renderAccount();
     await flush();
     if(firstHere)toast(isEmpty(local)?"Signed in. Your plan is loaded.":isEmpty(remote)?"Signed in. Your plan is saved to your account.":"Signed in. We added this device's plan to your account.");
@@ -164,10 +164,10 @@ async function refresh(){
   }catch(e){console.error(e)}
 }
 
-export async function sendLink(email){
+export async function sendCode(email){
   acct.lastEmail=email;
   try{
-    await (await getBackend()).sendLink(email);
+    await (await getBackend()).sendCode(email);
     acct.sent=email;acct.error="";setPending(email);
   }catch(e){
     console.error(e);
@@ -183,11 +183,11 @@ export async function sendLink(email){
 export async function signInWithCode(code){
   if(acct.codeBusy)return;
   if(!/^\d{6,10}$/.test(code)){acct.error="Type the code from the email: it's 6 digits.";renderAccount();return}
-  acct.codeBusy=true;acct.error="";acct.via="code";renderAccount();
+  acct.codeBusy=true;acct.error="";renderAccount();
   try{
     await (await getBackend()).verifyCode(acct.sent,code);
   }catch(e){
-    console.error(e);acct.via="";
+    console.error(e);
     acct.error=/rate limit|too many/i.test(e.message||"")?"Too many tries. Wait a few minutes, then try again."
       :"That code didn't work or has expired. Check it, or send yourself a new email.";
   }
@@ -348,7 +348,7 @@ document.addEventListener("submit",e=>{
   if(!e.target.dataset.acctForm)return;
   e.preventDefault();
   const email=document.getElementById("acct-email").value.trim();
-  if(email)sendLink(email);
+  if(email)sendCode(email);
 });
 document.addEventListener("input",e=>{if(e.target.id==="acct-delete")canDelete()});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&acct.open){acct.open=false;acct.ask="";acct.error="";renderAccount()}});

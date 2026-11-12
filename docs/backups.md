@@ -22,7 +22,7 @@ The Home screen suggests signing in ("Keep your plan safe") as soon as they've s
 | Workflow | `.github/workflows/backup.yml` in the private `planner-ops` repository (*Backup* in its Actions). Private, so only you can download the files |
 | When | Every day in October to December, Sundays and Wednesdays the rest of the year, at about 4 AM New York time; or by hand |
 | What | `users.csv` (account ID, email, created date) and `public-data.sql` (every household, plan, saved school, visit, step, note, session, event and error) |
-| Not included | Source data (in git), passwords (there are none: sign-in is by emailed link), plans that exist only on a device |
+| Not included | Source data (in git), passwords (there are none: sign-in is by emailed code), plans that exist only on a device |
 | Encryption | gpg, AES-256, with the passphrase in the `BACKUP_PASSPHRASE` secret, before the file leaves GitHub's runner |
 | Kept | 90 days as a workflow artifact, then deleted by GitHub automatically |
 | Size | About 2 KB per household |

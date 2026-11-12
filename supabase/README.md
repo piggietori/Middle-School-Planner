@@ -21,7 +21,7 @@ Signed-out visitors never talk to it. School data is not here; it lives in `data
 3. **The site's address.** (Sign-in is by code, but Supabase still needs it.) Dashboard → Authentication → URL Configuration:
    - Site URL: `https://d20.torilam.com/` (before the custom domain: `https://piggietori.github.io/Middle-School-Planner/`)
    - Redirect URLs: add `https://d20.torilam.com/**` and `http://localhost:5173/**`
-4. **Sign-in emails.** Authentication → Sign In / Providers → Email stays on. Supabase's built-in sender allows only a few emails an hour, so sign-in emails go through Resend instead: Authentication → Emails → **SMTP Settings**. The steps, and the email's wording, are in [docs/launch.md](../docs/launch.md#before-the-pilot). The Magic Link email must show `{{ .Token }}`, the code the planner asks for, and no link.
+4. **Sign-in emails.** Authentication → Sign In / Providers → Email stays on. Supabase's built-in sender allows only a few emails an hour, so sign-in emails go through Resend instead: Authentication → Emails → **SMTP Settings**. The steps, and the email's wording, are in [docs/launch.md](../docs/launch.md#before-the-pilot). The Magic Link and Confirm signup emails (a returning address gets the first, a new one the second) must both show `{{ .Token }}`, the code the planner asks for, and no link: the planner doesn't accept links.
 
 5. **Backups.** The free plan has no backups of its own (the Pro plan adds daily backups kept 7 days). The
    *Backup* workflow makes an encrypted one instead: daily in October to December (application season), twice a week otherwise.

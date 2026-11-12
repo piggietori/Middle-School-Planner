@@ -8,6 +8,17 @@ feature the middle one (1.1 → 1.2), and a change that needs families or the da
 
 ## [Unreleased]
 
+### Security
+- **A link can no longer sign anyone in.** Sign-in has been by typed code since 1.3.0, but the planner still accepted
+  a sign-in carried in a link's address. Someone could have shared a link that signed a family in to the sender's
+  account, and the plan on that device would have been added to it. Such a link now gets "That sign-in link has
+  expired" and nothing is contacted (F-65 in [docs/failure-modes.md](docs/failure-modes.md)).
+
+### Changed
+- **Code-only sign-in, tidied up:** the sign-in email is no longer asked for a return address, the `sign_in` event
+  always records `code`, and the docs name both emails that must show the code and no link (Magic Link and Confirm
+  signup).
+
 ## [1.3.0] - 2026-11-12
 
 Getting ready to share with parent groups.

@@ -42,8 +42,15 @@ For the keys and passwords themselves, see [secrets.md](secrets.md). For what pe
   `torilam.com`: browser storage and sign-in belong to the exact address, so nothing else can read them.
 
 **Sign-in**
-- Emailed links only, so no passwords are stored anywhere.
-- Allowed return addresses are set in Supabase (URL Configuration): only the live site and `localhost` for development.
+- Emailed 6-digit codes only, so no passwords are stored anywhere, and no links: the two emails Supabase sends
+  (**Magic Link** for a returning address, **Confirm signup** for a new one) show the code and no link. The other
+  templates (invite, change email, reset password, reauthentication) aren't used.
+- The planner never accepts a sign-in carried in the address (`detectSessionInUrl: false` in
+  `src/sync/backend.js`). Otherwise someone could post a link that signs a family in to *their* account, and the
+  plan on that device would be added to it (F-65 in [failure-modes.md](failure-modes.md)). Such a link gets "That
+  sign-in link has expired" and the account library isn't even downloaded; `tests/e2e/account.spec.js` checks both.
+- Supabase still asks for the site's address and allowed return addresses (URL Configuration): only the live site and
+  `localhost` for development. Sign-in doesn't use them.
 - Sign-in emails go through Resend, from our own domain, limited to 30 an hour in Supabase.
 - During the pilot, new sign-ups are off: only invited addresses can sign in.
 

@@ -42,7 +42,8 @@ export function renderSheet(){
         <div>${s.subway.length?bullets(s.subway):`<span class="muted">No subway nearby.</span>`}</div>
         <div><span class="muted small">Buses: </span>${s.bus.map(b=>`<span class="bus">${b}</span>`).join("")}</div></div>
       <div class="card stack"><h3>How to get in</h3><p style="margin:0">${esc(s.admitText)}</p>
-        ${s.admit.includes("zoned")?`<p class="muted small" style="margin:0">Zoned programs give first priority to students who live in the school's zone. <a href="https://www.schools.nyc.gov/find-a-school" target="_blank" rel="noopener">Find your zoned school</a>.</p>`:""}</div>
+        ${s.admit.includes("zoned")?`<p class="muted small" style="margin:0">Zoned programs give first priority to students who live in the school's zone. <a href="https://www.schools.nyc.gov/find-a-school" target="_blank" rel="noopener">Find your zoned school</a>.</p>`:""}
+        <p class="small" style="margin:0"><b>In MySchools:</b> search for <code class="code">${esc(s.dbn)}</code> to find this school's programs.${s.admit.some(a=>a==="audition"||a==="screened")?" Auditions and screens have their own steps and dates. Check them in MySchools and on the school's website.":""}</p></div>
       <div class="card stack"><h3>By the numbers</h3><div class="stats">
         ${stat("Math: students passing",s.math,CITY.math)}${stat("Reading: students passing",s.ela,CITY.ela)}
         ${stat("Students who feel safe",s.safe,CITY.safe)}${stat("Students who say bullying happens often",s.bully,CITY.bully,true)}

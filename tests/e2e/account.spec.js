@@ -140,6 +140,8 @@ test("if saving fails, say so, keep the change on the device, and send it when b
   await synced(page);
   server.failSaves = true;
   await page.locator('.tab[data-tab="find"]').click();
+  const answers = page.locator(".prefs-sum");
+  if (await answers.isVisible()) await answers.getByRole("button", {name: "Edit answers"}).click(); // phones fold the answers
   await page.selectOption("#home", "boro");
   await expect(page.locator("#toast")).toContainText("Couldn't save to your account. We'll keep trying.");
   await page.locator("#acct button").click();
@@ -328,7 +330,7 @@ test("signing out on a shared computer can remove the plan from it (J7)", async 
   await page.getByRole("button", {name: "Remove it and sign out"}).click();
   await expect(page.locator("#toast")).toHaveText("Signed out. Your plan was removed from this device.");
   await page.locator('.tab[data-tab="list"]').click();
-  await expect(page.getByText("Your list is empty.")).toBeVisible();
+  await expect(page.getByText("No schools saved yet.")).toBeVisible();
   expect(server.plans[server.byUser.a].saved_schools).toHaveLength(2); // still in the account
 });
 
@@ -444,7 +446,7 @@ test("someone else signing in on a device with a plan is asked first; No keeps t
   await synced(page);
   await expect(page.locator("#toast")).toHaveText("Signed in. Your plan is loaded.");
   await page.locator('.tab[data-tab="list"]').click();
-  await expect(page.getByText("Your list is empty.")).toBeVisible();
+  await expect(page.getByText("No schools saved yet.")).toBeVisible();
   expect(server.plans["plan-b"].saved_schools).toEqual([]);
   expect(server.plans["plan-a"].saved_schools).toHaveLength(2); // a's plan is still in a's account
   // The device's plan is now b's: b signing in here again isn't asked.
@@ -466,6 +468,8 @@ test("a failed save is tried again by itself, without waiting for another change
   await synced(page);
   server.failSaves = true;
   await page.locator('.tab[data-tab="find"]').click();
+  const answers = page.locator(".prefs-sum");
+  if (await answers.isVisible()) await answers.getByRole("button", {name: "Edit answers"}).click(); // phones fold the answers
   await page.selectOption("#home", "boro");
   await expect(page.locator("#toast")).toContainText("Couldn't save to your account. We'll keep trying.");
   server.failSaves = false; // the server recovers; the family does nothing more

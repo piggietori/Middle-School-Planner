@@ -8,6 +8,26 @@ feature the middle one (1.1 → 1.2), and a change that needs families or the da
 
 ## [Unreleased]
 
+Making it clear that the application only counts once it's submitted in MySchools.
+
+### Added
+- **Finalize & apply** on My list: finalize your order, then a checklist from logging in to MySchools to the
+  confirmation, with your schools' codes in order, and an "I submitted in MySchools" button that marks steps 6 and 7 done and stops the deadline reminders.
+- A note at the top of My list that the list doesn't count until it's submitted in MySchools.
+- A short note on Home about what the planner is (an independent planner from a D20 parent), until you dismiss it.
+- Each school's details say what to search for in MySchools.
+
+### Changed
+- Home: the countdown says "days left to apply in MySchools". Steps 6 and 7 are marked **Required · in MySchools**.
+- Home: the Next up box is now **Reminders**, only for things with a date (deadline, visits, notes, offers). It no
+  longer repeats the next step, which the steps already show.
+- After the deadline, My list says "your list as it was then" (the planner can't see MySchools) and who to contact
+  if you didn't submit.
+- **Compare notes** shows your schools in your order, with ◀ ▶ to move them; it stays in step with My order.
+- Empty My list says how schools get there: tap Save on Find schools.
+- My list cards keep "See details" and "Remove"; notes and the calendar are in the school's details.
+- Find schools on a phone: answers you've already given fold into one line, so your matches come first.
+
 ## [1.3.1] - 2026-11-12
 
 Fixes from a security and robustness review, before sharing with parent groups.

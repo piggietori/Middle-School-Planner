@@ -1,4 +1,4 @@
-/* Messages for everyone: the pilot notice and the announcement banner (data/notice.json). See docs/launch.md. */
+/* Messages for everyone: the pilot notice, what the planner is, and the announcement banner (data/notice.json). See docs/launch.md. */
 import {PILOT} from "./config.js";
 import {NOTICE} from "./data.js";
 import {feedbackButton} from "./feedback.js";
@@ -13,6 +13,17 @@ export function pilotNotice(){
   return `<div class="notice warn" role="note"><span aria-hidden="true">🧪</span><div><b>This planner is a pilot.</b> It's made by a District 20 parent, not by NYC Public Schools, and it may have mistakes. Confirm dates with each school, and remember that your application only counts when you submit it in MySchools. ${feedbackButton("Tell us about a problem")} · <button class="linkbtn" data-pilot-ok="1">Got it</button></div></div>`;
 }
 export function dismissPilot(){try{localStorage.setItem(SEEN,"1")}catch(e){}}
+
+// What the planner is and isn't. Once on Home until dismissed on this device (the pilot notice says it while
+// PILOT is on), and always on Apply in MySchools.
+export const DISCLAIMER="An independent planner from a D20 parent. Dates and details can change; confirm with each school. Only MySchools submits your application.";
+const ABOUT_SEEN="d20about-ok";
+export function aboutNotice(){
+  let seen=false;try{seen=localStorage.getItem(ABOUT_SEEN)==="1"}catch(e){}
+  if(PILOT||seen)return "";
+  return `<div class="notice" role="note"><span aria-hidden="true">ℹ️</span><div>${DISCLAIMER} <button class="linkbtn" data-about-ok="1">Got it</button></div></div>`;
+}
+export function dismissAbout(){try{localStorage.setItem(ABOUT_SEEN,"1")}catch(e){}}
 
 // The announcement banner, on every tab, until its "until" date has passed.
 export function banner(){

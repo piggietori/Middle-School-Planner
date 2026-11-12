@@ -133,8 +133,12 @@ Kept small on purpose. No names, notes text, or home location in event propertie
 **Goal:** submit on time, then know what's next.
 
 1. 21 days before Dec 11 → "Deadline soon" notice (MVP already does this).
-2. Marks "Log in to MySchools and add your programs" done → Ready for MySchools guide stays available.
-3. After Dec 11 → **submitted** mode: My list is read-only ("This is your list as you submitted it", no arrows), and Next up says when offers arrive.
+2. Long before that, My list says the list doesn't count until it's submitted in MySchools, Home marks steps 6 and 7
+   **Required · in MySchools**, with a button to **Finalize & apply** (My list): finalize the
+   order, then the steps from logging in to the confirmation, with the codes in order. "I submitted in MySchools" marks steps 6 and 7
+   done and stops the deadline reminders. The planner can't see MySchools, so this is only what the family tells it.
+3. After Dec 11 → My list is read-only ("This is your list as it was then", no arrows) with who to contact if they
+   didn't submit, and Next up says when offers arrive.
 4. Apr 7, 2027 → Next up: "Offers are out. See your child's offer in MySchools."
 5. Next cycle (fall 2028) → a new `cycle`; last year's plan is archived, not mixed in.
 

@@ -4,7 +4,7 @@ import {STEPS} from "./data.js";
 import {toggleSave, toggleGoing, toggleWent, setNote, stepDone} from "./plan.js";
 import {render, go} from "./render.js";
 import {toast} from "./util.js";
-import {st, persist} from "./state.js";
+import {st, persist, reloadPlan} from "./state.js";
 import {ui} from "./ui.js";
 import {CAL_RANGE} from "./views/dates.js";
 import {msText, copyText} from "./views/list.js";
@@ -73,6 +73,9 @@ addEventListener("unhandledrejection",e=>reportError(e.reason,"promise"));
 // The address loses its query, which could hold someone's details.
 addEventListener("securitypolicyviolation",e=>{const u=e.blockedURI||"";
   reportError(`CSP blocked ${e.effectiveDirective}: ${/^https?:/.test(u)?u.split(/[?#]/)[0]:u}`,"csp")});
+// The plan changed in another tab of the planner (or was removed there by signing out): show that, and build on it.
+// Without this each tab keeps its own copy, and whichever saves last undoes the other's changes (F-18).
+addEventListener("storage",e=>{if(e.key==="d20plan"||e.key===null){reloadPlan();render()}});
 restoreSession();
 render();
 initAccount();

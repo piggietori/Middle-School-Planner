@@ -25,6 +25,8 @@ For the keys and passwords themselves, see [secrets.md](secrets.md). For what pe
 | A compromised workflow | Each workflow asks only for the permissions it needs (most only read). Secrets aren't available to pull requests from forks | Workflow files |
 | Someone signs in as you | Sign-in is by a 6-digit code sent to your email, so it's as safe as your email. A code works once, expires after 30 minutes, and Supabase limits how fast codes can be tried. Anonymous sign-ins are off | Supabase settings, `check-supabase.js` |
 | A lost or shared device | Signing out asks whether to remove the plan from the device. Delete my account removes it everywhere | `tests/e2e/account.spec.js` |
+| A different person signs in on a device that still has someone's plan | The planner asks "Whose plan is on this device?" before adding it to the new account (F-19) | `tests/e2e/account.spec.js` |
+| Someone fills the database so nobody can save | Size limits on notes and weights; hourly limits on feedback, events and error reports (`supabase/migrations/20261113120000_limits.sql`) | `tests/db/rls.test.js` |
 | A wrong date or fact is published | Every data change is a reviewed pull request. Data checks catch removed IDs, impossible dates and stale text. The app shows where each number came from and when | [data-sources.md](data-sources.md) |
 | Data is lost | [backups.md](backups.md) | Restore drill |
 
@@ -42,8 +44,15 @@ For the keys and passwords themselves, see [secrets.md](secrets.md). For what pe
   `torilam.com`: browser storage and sign-in belong to the exact address, so nothing else can read them.
 
 **Sign-in**
-- Emailed links only, so no passwords are stored anywhere.
-- Allowed return addresses are set in Supabase (URL Configuration): only the live site and `localhost` for development.
+- Emailed 6-digit codes only, so no passwords are stored anywhere, and no links: the two emails Supabase sends
+  (**Magic Link** for a returning address, **Confirm signup** for a new one) show the code and no link. The other
+  templates (invite, change email, reset password, reauthentication) aren't used.
+- The planner never accepts a sign-in carried in the address (`detectSessionInUrl: false` in
+  `src/sync/backend.js`). Otherwise someone could post a link that signs a family in to *their* account, and the
+  plan on that device would be added to it (F-65 in [failure-modes.md](failure-modes.md)). Such a link gets "That
+  sign-in link has expired" and the account library isn't even downloaded; `tests/e2e/account.spec.js` checks both.
+- Supabase still asks for the site's address and allowed return addresses (URL Configuration): only the live site and
+  `localhost` for development. Sign-in doesn't use them.
 - Sign-in emails go through Resend, from our own domain, limited to 30 an hour in Supabase.
 - During the pilot, new sign-ups are off: only invited addresses can sign in.
 
@@ -75,7 +84,7 @@ For the keys and passwords themselves, see [secrets.md](secrets.md). For what pe
 | Actions pinned to versions like `@v4`, not commit SHAs | A compromised Action version could run in our workflows | Pin to SHAs. Dependabot already proposes updates weekly (`.github/dependabot.yml`) | After December 11 |
 | 2FA can't be required for the Supabase organization | Anyone added to the Supabase organization later could sign in without 2FA | Requiring it needs the Pro plan; until then keep 2FA on your own accounts | When you scale |
 | No audit log | We can't see who changed what in a shared household | Add when households can be shared | v2 |
-| No CAPTCHA on sign-in or feedback | Someone could send many sign-in emails or feedback messages | Supabase's limits (30 emails an hour), 20 feedback emails an hour, and the monitor's flood alert. Add a CAPTCHA if abuse appears | If needed |
+| No CAPTCHA on sign-in or feedback | Someone could send many sign-in emails or feedback messages. For sign-in that can use up the hourly and daily email limits, so nobody can sign in (F-62) | Supabase's limits (30 emails an hour), 20 feedback emails an hour, 200 feedback messages an hour, and the monitor's flood alert. Add a CAPTCHA if abuse appears | If needed |
 
 ## Content-Security-Policy
 

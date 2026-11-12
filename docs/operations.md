@@ -70,7 +70,7 @@ If families will notice, post a [banner](#the-banner).
 doesn't exist. `ALERT: Site up` opens and emails you; the next hourly run closes it.
 
 **The daily report** posts at 13:00 UTC (8 AM in New York in winter) as a comment on the pinned *Daily report* issue:
-households, people, new sign-ups, how many signed in with an emailed link (a quiet day can mean sign-in emails
+households, people, new sign-ups, how many signed in with an emailed code (a quiet day can mean sign-in emails
 aren't arriving), how many opened the planner, schools saved, visits, steps, failed saves, feedback
 received, and the top errors. To post one now: Run workflow with **report** ticked.
 
@@ -102,7 +102,8 @@ its `until` date has passed.
 ## Invite-only
 
 During the pilot, Supabase → Authentication → Sign In / Providers → **Allow new users to sign up** is off. Invite a
-family from Authentication → Users → **Invite user**. Anyone else who asks for a sign-in code sees "The planner is
+family from Authentication → Users → **Invite user**. (The invite email's own link doesn't sign anyone in: the
+planner accepts only a typed code, so tell the family to open the planner and ask for one.) Anyone else who asks for a sign-in code sees "The planner is
 invite-only for now". Turn it back on to open to everyone ([launch.md](launch.md#sharing-with-parent-groups)).
 
 ## When something breaks
@@ -117,8 +118,10 @@ invite-only for now". Turn it back on to open to everyone ([launch.md](launch.md
 | "The planner is invite-only for now" | Sign-ups are off and that address wasn't invited | Invite it ([invite-only](#invite-only)), or check they typed the address you invited |
 | Feedback doesn't arrive by email | A Vault secret is missing, the Resend key was revoked, or the hourly limit was reached | Read it in the SQL Editor ([feedback](#feedback)). Check Resend → Logs; [rotate the key](secrets.md#rotate-a-resend-key) if needed |
 | "That code didn't work or has expired" | Codes work once and expire after 30 minutes; a newer email cancels older codes | Send a new email and type the newest code |
-| "That sign-in link has expired" | A link from an email sent before v1.3.0 | Send a new email; it has a code |
-| "Couldn't save. We'll try again when you're back online." | Offline, or the server refused the save | Changes are kept on the device and sent when back online. If it persists online, look in `client_errors` |
+| "That sign-in link has expired" | A link that carries a sign-in: from an email sent before v1.3.0, or made by someone else. The planner never accepts one ([security.md](security.md#controls-layer-by-layer)) | Send a new email; it has a code |
+| "Whose plan is on this device?" | Someone signed in on a device that still has a plan from a different account | It's working as intended: **No** keeps that plan out of their account, **Yes** adds it |
+| "The planner couldn't load. This browser is too old for it." | A browser from before about 2022 | Update the phone or browser, or use another device |
+| "Couldn't save. We'll try again when you're back online." | Offline, or the server refused the save | Changes are kept on the device and sent again by themselves: after 5 seconds, then up to every 5 minutes, and when back online. If it persists online, look in `client_errors` |
 | The site looks unstyled or a feature stopped working after a change, with "Refused to…" in the Console | The Content-Security-Policy blocked something new | Add the new server to the policy ([security.md](security.md#content-security-policy)), or revert |
 | A wrong date or fact is live | A data mistake that got through review | Fix it in a pull request (keep the event's `id`, add `was` if the time moved), or revert the pull request that caused it |
 | *Backup* failed, or `ALERT: Database reachable` | The project is paused, the database password was reset, or a secret is missing | If paused, resume it. Otherwise update `SUPABASE_DB_URL` in `planner-ops` ([secrets.md](secrets.md#reset-the-database-password)), then run Backup by hand |

@@ -112,14 +112,19 @@ test("My list flags top matches from Find that aren't on the list, and saving on
   await cards.nth(3).getByRole("button", {name: "☆ Save"}).click();
   await page.locator('.tab[data-tab="list"]').click();
   const flag = page.locator("#missing-top");
-  await expect(flag).toContainText("Not on your list");
+  await expect(flag).toContainText(/of your top 3 matches (is|are) not on your list/);
   await expect(flag).toContainText(top[0]);
   await expect(flag).not.toContainText(top[3]);
   await flag.getByRole("button", {name: "☆ Save"}).first().click();
   await expect(page.locator("#app")).toContainText(top[0]);
   await expect(flag.getByText(top[0])).toHaveCount(0);
-  await page.locator("#app [data-lv=apply]").first().click();
-  await expect(page.locator("#myschools #missing-top")).toHaveCount((await page.locator("#app").textContent()).includes("Not on your list") ? 1 : 0);
+  if (await flag.count()) { // dismissed, it stays hidden, also after a reload
+    await flag.getByRole("button", {name: "Dismiss"}).click();
+    await expect(flag).toHaveCount(0);
+    await page.reload();
+    await expect(page.locator("#app h2").first()).toHaveText("My list");
+    await expect(flag).toHaveCount(0);
+  }
 });
 
 test("no top-match flag before the family says where they live", async ({page}) => {
@@ -127,4 +132,16 @@ test("no top-match flag before the family says where they live", async ({page}) 
   await page.goto("/#list");
   await expect(page.locator("#app h2").first()).toHaveText("My list");
   await expect(page.locator("#missing-top")).toHaveCount(0);
+});
+
+test("the top-match flag can be dismissed, and stays hidden after a reload", async ({page}) => {
+  await withPlan(page, {home: "dyker", saved: ["20K229"], done: {s1: true, s2: true}});
+  await page.goto("/#list");
+  const flag = page.locator("#missing-top");
+  await expect(flag).toContainText(/of your top 3 matches (is|are) not on your list\./);
+  await flag.getByRole("button", {name: "Dismiss"}).click();
+  await expect(flag).toHaveCount(0);
+  await page.reload();
+  await expect(page.locator("#app h2").first()).toHaveText("My list");
+  await expect(flag).toHaveCount(0);
 });

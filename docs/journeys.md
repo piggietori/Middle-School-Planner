@@ -149,7 +149,8 @@ The owner's reports on them: [operations.md](operations.md#usage-reports).
    order, then the steps from logging in to the confirmation, with the codes in order. "I submitted in MySchools" marks steps 6 and 7
    done and stops the deadline reminders. The planner can't see MySchools, so this is only what the family tells it.
    If any of Find's top 3 matches (Good match or better) isn't on the list, My order and step 1 of Finalize & apply
-   flag it, with **☆ Save** and **See details** (only once a neighborhood is set and something is saved, and until
+   flag it ("One of your top 3 matches is not on your list"), with **☆ Save**, **See details** and **Dismiss** (hidden
+   on this device until a different school is missing) (only once a neighborhood is set and something is saved, and until
    applications close).
 3. After Dec 11 → My list is read-only ("This is your list as it was then", no arrows) with who to contact if they
    didn't submit, and Next up says when offers arrive.

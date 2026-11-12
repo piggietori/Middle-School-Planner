@@ -7,7 +7,7 @@ import {toast} from "./util.js";
 import {st, persist, reloadPlan} from "./state.js";
 import {ui} from "./ui.js";
 import {CAL_RANGE} from "./views/dates.js";
-import {msText, copyText} from "./views/list.js";
+import {msText, copyText, dismissTop} from "./views/list.js";
 import {renderNotes, addNote, commitDrafts, openNotes, closeSheet} from "./views/notes.js";
 import "./feedback.js";
 import {dismissPilot, dismissAbout} from "./notices.js";
@@ -16,12 +16,13 @@ import {renderSheet} from "./views/sheet.js";
 
 /* ---------------- EVENTS ---------------- */
 document.addEventListener("click",e=>{
-  const t=e.target.closest("[data-pilot-ok],[data-about-ok],[data-apply],[data-submitted],[data-prefs],[data-tab],[data-tab-go],[data-open],[data-close],[data-save],[data-going],[data-step],[data-df],[data-w],[data-prog],[data-mv],[data-went],[data-dv],[data-cm],[data-day],[data-ostep],[data-copy],[data-copyall],[data-star],[data-addnote],[data-delnote],[data-notes],[data-lv],[data-compare]");
+  const t=e.target.closest("[data-pilot-ok],[data-about-ok],[data-top-ok],[data-apply],[data-submitted],[data-prefs],[data-tab],[data-tab-go],[data-open],[data-close],[data-save],[data-going],[data-step],[data-df],[data-w],[data-prog],[data-mv],[data-went],[data-dv],[data-cm],[data-day],[data-ostep],[data-copy],[data-copyall],[data-star],[data-addnote],[data-delnote],[data-notes],[data-lv],[data-compare]");
   if(!t)return;
   const d=t.dataset;
   if(d.close&&e.target!==t&&!e.target.closest("button[data-close]"))return; // clicks inside the sheet
   if(d.pilotOk){dismissPilot();return render()}
   if(d.aboutOk){dismissAbout();return render()}
+  if(d.topOk){dismissTop();return render()}
   if(d.apply){track("list_view",{view:"apply"});commitDrafts();ui.listView="apply";return go("list")}
   // Step 7 is only what the family tells us: they can't submit without adding programs, so step 6 is done too.
   if(d.submitted){st.done.s7=!st.done.s7;if(st.done.s7){st.done.s6=true;track("step_done",{step_id:"s7"});toast("Marked as submitted. Offers arrive in the spring.")}persist();return render()}

@@ -8,15 +8,6 @@ feature the middle one (1.1 → 1.2), and a change that needs families or the da
 
 ## [Unreleased]
 
-Making it clear that the application only counts once it's submitted in MySchools.
-
-### Added
-- **Finalize & apply** on My list: finalize your order, then a checklist from logging in to MySchools to the
-  confirmation, with your schools' codes in order, and an "I submitted in MySchools" button that marks steps 6 and 7 done and stops the deadline reminders.
-- A note at the top of My list that the list doesn't count until it's submitted in MySchools.
-- A short note on Home about what the planner is (an independent planner from a D20 parent), until you dismiss it.
-- Each school's details say what to search for in MySchools.
-
 ### Changed
 - Home on a new device: the first tip says what to do first (Find schools, then Save) and that the plan is kept on this
   device, and separately that signing in saves it or brings it from another device.

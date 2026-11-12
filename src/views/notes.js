@@ -1,4 +1,5 @@
 import {RATING_WORDS, noteOf, setNote} from "../plan.js";
+import {track} from "../log.js";
 import {render} from "../render.js";
 import {ui} from "../ui.js";
 import {esc, MON} from "../util.js";
@@ -23,8 +24,8 @@ export function renderNotes(d){const box=document.getElementById("notesbox");if(
   const drafts={};["pros","cons"].forEach(k=>{const el=document.getElementById(k+"-input");if(el)drafts[k]=el.value}); // keep unsaved typing
   box.innerHTML=notesCard(d);["pros","cons"].forEach(k=>{const el=document.getElementById(k+"-input");if(el&&drafts[k])el.value=drafts[k]})}
 export function addNote(d,kind){const el=document.getElementById(kind+"-input");if(!el)return;const v=el.value.trim();
-  if(!v){el.focus();return}el.value="";setNote(d,n=>n[kind].push(v));renderNotes(d);document.getElementById(kind+"-input")?.focus()}
+  if(!v){el.focus();return}el.value="";setNote(d,n=>n[kind].push(v));track("note_added",{part:kind});renderNotes(d);document.getElementById(kind+"-input")?.focus()}
 export function commitDrafts(){["pros","cons"].forEach(k=>{const el=document.getElementById(k+"-input");
-  if(el&&el.value.trim()){const d=el.dataset.noteinput.split(":")[0],v=el.value.trim();el.value="";setNote(d,n=>n[k].push(v))}})}
+  if(el&&el.value.trim()){const d=el.dataset.noteinput.split(":")[0],v=el.value.trim();el.value="";setNote(d,n=>n[k].push(v));track("note_added",{part:k})}})}
 export function openNotes(d){ui.openDbn=d;renderSheet();const b=document.getElementById("notesbox");if(b&&b.scrollIntoView)b.scrollIntoView({block:"start"})}
 export function closeSheet(){commitDrafts();ui.openDbn=null;render()}

@@ -28,7 +28,7 @@ Running the planner day to day: what happens when, how to tell it's healthy, and
 | What families tell you | Feedback emails ([feedback](#feedback)) | As they arrive. During the pilot, answer within a day |
 | Workflows are passing | GitHub emails you when a scheduled run fails; or look at the Actions tab | When an email arrives |
 | Errors families hit | Supabase → SQL Editor: `select at, message, context from client_errors order by at desc limit 20;` | When an alert or the report points to them |
-| What's being used | `select name, count(*) from events where at > now() - interval '7 days' group by name order by 2 desc;` | When curious |
+| What's being used, and where families get stuck | The usage reports ([below](#usage-reports)) | Weekly in season |
 | Database is locked down | `node scripts/check-supabase.js` → "All checks passed" (the monitor also runs it hourly) | After every database change |
 | Supabase project | Emails from Supabase (pausing, usage limits); keep supabase.com out of spam | When an email arrives |
 | Scheduled workflows still on | Actions → *Watch sources*: no "disabled" banner | February and March |
@@ -89,6 +89,33 @@ doesn't exist. `ALERT: Site up` opens and emails you; the next hourly run closes
 households, people, new sign-ups, how many signed in with an emailed code (a quiet day can mean sign-in emails
 aren't arriving), how many opened the planner, schools saved, visits, steps, failed saves, feedback
 received, and the top errors. To post one now: Run workflow with **report** ticked.
+
+## Usage reports
+
+Owner-only views in the `reports` schema (`supabase/migrations/20261114120000_usage.sql`). The API doesn't serve
+them: open Supabase → **SQL Editor** and run one. Save each as a snippet (the ⋯ menu → *Save*), and use the result's
+**Chart** button to graph it. "Visits" are page loads, signed in or not; "people" are signed-in accounts. Days are
+New York days.
+
+| Question | Run |
+|---|---|
+| How's this week compared with last? | `select metric, last_7_days, previous_7_days from reports.summary order by n;` |
+| Activity and engagement by day | `select * from reports.daily order by day desc;` (chart `day` against `visits`, `schools_saved`…) |
+| Which tabs and views are used | `select page, sum(views) views, sum(visits) visits from reports.pages where day > current_date - 7 group by 1 order by 2 desc;` |
+| How far families get (last 30 days) | `select stage, signed_out_visits, signed_in_people from reports.funnel order by n;` |
+| Which steps get checked off | `select * from reports.steps order by step_id;` |
+| Which schools draw interest | `select * from reports.schools order by saved desc, opened desc limit 20;` |
+| What's going wrong (last 7 days) | `select * from reports.failures order by times desc;` |
+
+**Reading them.**
+- **Signed-out visits can't be linked**, by design, so their funnel counts what happened within one visit. A family
+  who saves on Monday and copies the list on Thursday shows up as two partial visits. Signed-in people are followed
+  across visits.
+- **A big drop between two funnel stages** is where families get stuck: for example many open schools but few
+  save, or many reach Finalize & apply but few copy the list.
+- **Failures** groups errors by message and browser: one message on one browser (often iPhone) is usually a bug
+  to fix. Failed saves by `error_code`: `network` is a family's connection; anything else is ours.
+- Counts start when `20261114120000_usage.sql` is applied and this version is live. Visits from `localhost` aren't counted.
 
 ## Feedback
 

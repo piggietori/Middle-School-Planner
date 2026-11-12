@@ -17,7 +17,7 @@ For the keys and passwords themselves, see [secrets.md](secrets.md). For what pe
 |---|---|---|
 | Another family reads or changes your plan | Row-level security on every table: you reach only rows of households you belong to | `tests/db/rls.test.js` (in CI) |
 | Someone joins your household, or creates a plan for it | No insert policy on `household_members` or `plans`; only `open_plan()` creates them, and only for yourself | `tests/db/rls.test.js` |
-| A signed-out visitor probes the database API | Every table refuses the `anon` role; functions can't be called signed out | `scripts/check-supabase.js` against the live project |
+| A signed-out visitor probes the database API | Every table refuses the `anon` role, except adding usage counts and errors with no user (capped at 20,000 events and 500 errors an hour for all visitors together); nothing can be read back; functions can't be called signed out | `scripts/check-supabase.js` against the live project |
 | The key in the website is misused | It's the publishable key, made to be public: it can do only what row-level security allows a signed-out visitor, which is nothing | Same |
 | The secret key or database password leaks | Neither is in the code or the site. The secret key isn't used anywhere; the database password is only in a GitHub secret | [secrets.md](secrets.md) |
 | A script injected into the page steals a session | Everything families type is escaped before it's shown. No third-party scripts run. The [Content-Security-Policy](#content-security-policy) blocks any script that isn't one of the site's own files, and stops scripts sending data anywhere but Supabase | `tests/e2e/security.spec.js` |

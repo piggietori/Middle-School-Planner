@@ -8,6 +8,15 @@ feature the middle one (1.1 → 1.2), and a change that needs families or the da
 
 ## [Unreleased]
 
+### Added
+- **Usage reports for the owner.** Every visit to the live site now sends anonymous usage counts: tabs opened,
+  schools opened and saved, open houses, notes added (never their text), steps, the list copied, feedback sent, and
+  errors. Signed out, they carry no account and no ID that links one visit to the next. Owner-only views in the
+  `reports` schema show activity, engagement, the funnel and failures in the Supabase SQL Editor
+  ([docs/operations.md](docs/operations.md#usage-reports)). The privacy page says so. Apply
+  `20261114120000_usage.sql` right **after** merging (before it, the old hourly security check would fail; until it,
+  usage counts are dropped).
+
 ### Changed
 - **The monitor, backups and source watch run on time.** GitHub was starting them hours late or not at all (the
   source watch had never run), so the database now starts them itself, with GitHub's schedule as the fallback.

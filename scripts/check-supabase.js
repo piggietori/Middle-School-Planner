@@ -20,8 +20,9 @@ const del = await fetch(`${SUPABASE_URL}/rest/v1/rpc/delete_my_account`, {method
 report(del.status === 401 || del.status === 403, "call delete_my_account", del.status === 404 ? "404, function missing: apply the migration" : `${del.status} ${(await del.text()).slice(0, 80)}`);
 const prune = await fetch(`${SUPABASE_URL}/rest/v1/rpc/prune_logs`, {method: "POST", headers, body: "{}"});
 report(prune.status === 401 || prune.status === 403, "call prune_logs", prune.status === 404 ? "404, function missing: apply the migration" : `${prune.status} ${(await prune.text()).slice(0, 80)}`);
-const ev = await fetch(`${SUPABASE_URL}/rest/v1/events`, {method: "POST", headers, body: JSON.stringify({name: "app_open"})});
-report(ev.status === 401 || ev.status === 403, "add an event signed out", `${ev.status} ${(await ev.text()).slice(0, 80)}`);
+// Signed-out visitors may add usage counts, but never as a person.
+const ev = await fetch(`${SUPABASE_URL}/rest/v1/events`, {method: "POST", headers, body: JSON.stringify({name: "app_open", user_id: crypto.randomUUID()})});
+report(ev.status === 401 || ev.status === 403, "add an event as someone, signed out", `${ev.status} ${(await ev.text()).slice(0, 80)}`);
 const auth = await fetch(`${SUPABASE_URL}/auth/v1/settings`, {headers});
 const s = await auth.json();
 report(s.external?.email === true, "email sign-in enabled", String(s.external?.email));

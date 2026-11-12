@@ -29,15 +29,26 @@ Every reference from user data to source data uses a stable ID: school DBN (`20K
 event ID (`oh-20K187-2026-11-10-1730`, `k-close`), step ID (`s3`). Source data can change
 without breaking a saved plan.
 
-## Events we log (v1)
+## Events we log (v2)
 
-Kept small on purpose. No names, notes text, or home location in event properties. Sent only while signed in
-(signed-out visitors send nothing), a few seconds after they happen. Errors nobody caught go to `client_errors`
-(message, stack, where, browser), at most 10 per visit.
+Kept small on purpose. No names, notes text, or home location in event properties. Sent a few seconds after they
+happen, from every visit to the live site (`src/log.js`): signed in, with the person's ID; signed out, with no user.
+Every event carries `visit`, a random ID made on each page load and never stored, so a signed-out visit can't be
+linked to the next. Not sent from `localhost` (turn on with `localStorage["d20-usage-test"]="1"`). Errors nobody
+caught go to `client_errors` (message, stack, where, browser), at most 10 per visit. At most 300 events per visit.
+The owner's reports on them: [operations.md](operations.md#usage-reports).
 
 | Event | When | Properties |
 |---|---|---|
-| `app_open` | Page load, once signed in | `tab` |
+| `app_open` | Page load, once we know whether they're signed in | `tab`, `signed_in` |
+| `tab_view` | A tab opened | `tab` |
+| `school_opened` | A school's details opened | `dbn`, `from` (tab) |
+| `preference_set` | A Find answer changed | `what` (neighborhood, distance, priority, program, subway, competitive), never the value |
+| `going_marked` | "I'm going" | `event_id` |
+| `note_added` | A rating, like or concern added | `part` (rating, pros, cons), never the text |
+| `list_view` | My list's Compare or Finalize & apply opened | `view` |
+| `list_copied` | A code or the whole list copied for MySchools | `what` (code, all) |
+| `feedback_sent` | Feedback sent | `kind` |
 | `sign_in` | First sign-in on a device | `method` (code), `claimed_local` (true/false) |
 | `school_saved` / `school_removed` | Save toggled | `dbn` |
 | `visit_marked` | "Yes, I went" | `event_id` |

@@ -1,7 +1,7 @@
 import {initAccount} from "./account.js";
 import {reportError, track} from "./log.js";
 import {STEPS} from "./data.js";
-import {toggleSave, toggleGoing, toggleWent, setNote, stepDone} from "./plan.js";
+import {toggleSave, toggleGoing, toggleWent, setNote, stepDone, noteOf} from "./plan.js";
 import {render, go} from "./render.js";
 import {toast} from "./util.js";
 import {st, persist, reloadPlan} from "./state.js";
@@ -22,33 +22,35 @@ document.addEventListener("click",e=>{
   if(d.close&&e.target!==t&&!e.target.closest("button[data-close]"))return; // clicks inside the sheet
   if(d.pilotOk){dismissPilot();return render()}
   if(d.aboutOk){dismissAbout();return render()}
-  if(d.apply){commitDrafts();ui.listView="apply";return go("list")}
+  if(d.apply){track("list_view",{view:"apply"});commitDrafts();ui.listView="apply";return go("list")}
   // Step 7 is only what the family tells us: they can't submit without adding programs, so step 6 is done too.
   if(d.submitted){st.done.s7=!st.done.s7;if(st.done.s7){st.done.s6=true;track("step_done",{step_id:"s7"});toast("Marked as submitted. Offers arrive in the spring.")}persist();return render()}
   if(d.prefs){ui.prefsOpen=!ui.prefsOpen;return render()}
   if(d.tab)return go(d.tab);
   if(d.tabGo)return go(d.tabGo);
-  if(d.open){ui.openDbn=d.open;renderSheet();return}
+  if(d.open){track("school_opened",{dbn:d.open,from:ui.tab});ui.openDbn=d.open;renderSheet();return}
   if(d.close)return closeSheet();
   if(d.notes)return openNotes(d.notes);
-  if(d.star){const [s,r]=d.star.split(":");setNote(s,n=>{n.rating=n.rating===+r?0:+r});return renderNotes(s)} // tap the same star again to clear
+  if(d.star){const [s,r]=d.star.split(":");setNote(s,n=>{n.rating=n.rating===+r?0:+r});if(noteOf(s).rating)track("note_added",{part:"rating"});return renderNotes(s)} // tap the same star again to clear
   if(d.addnote){const [s,k]=d.addnote.split(":");return addNote(s,k)}
   if(d.delnote){const [s,k,i]=d.delnote.split(":");setNote(s,n=>n[k].splice(+i,1));return renderNotes(s)}
   if(d.save)return toggleSave(d.save);
   if(d.going)return toggleGoing(d.going);
   if(d.went)return toggleWent(d.went);
+  if(d.copy)track("list_copied",{what:"code"});
   if(d.copy)return copyText(d.copy,"Copied "+d.copy+". Paste it into the MySchools search box.");
+  if(d.copyall)track("list_copied",{what:"all"});
   if(d.copyall)return copyText(msText(),"Copied your list");
   if(d.dv){ui.dateView=d.dv;return render()}
-  if(d.lv){ui.listView=d.lv;return render()}
-  if(d.compare){commitDrafts();ui.listView="compare";return go("list")}
+  if(d.lv){if(d.lv!==ui.listView)track("list_view",{view:d.lv});ui.listView=d.lv;return render()}
+  if(d.compare){track("list_view",{view:"compare"});commitDrafts();ui.listView="compare";return go("list")}
   if(d.cm){ui.calMonth=Math.max(0,Math.min(CAL_RANGE.length-1,ui.calMonth+(+d.cm)));ui.selDay=null;return render()}
   if(d.day){ui.selDay=d.day;return render()}
   if(d.step){st.done[d.step]=!st.done[d.step];if(st.done[d.step])track("step_done",{step_id:d.step});ui.openStep=null;persist();return render()}
   if(d.ostep){const cur=STEPS.find(s=>!stepDone(s)),openId=ui.openStep??cur?.id;ui.openStep=openId===d.ostep?"":d.ostep;return render()}
   if(d.df){ui.dateFilter=d.df;return render()}
-  if(d.w){const [k,v]=d.w.split(":");st.w[k]=+v;ui.prefsOpen=true;st.done.s1=true;persist();return render()}
-  if(d.prog){const p=d.prog;ui.prefsOpen=true;st.programs=st.programs.includes(p)?st.programs.filter(x=>x!==p):[...st.programs,p];persist();return render()}
+  if(d.w){const [k,v]=d.w.split(":");track("preference_set",{what:"priority"});st.w[k]=+v;ui.prefsOpen=true;st.done.s1=true;persist();return render()}
+  if(d.prog){const p=d.prog;track("preference_set",{what:"program"});ui.prefsOpen=true;st.programs=st.programs.includes(p)?st.programs.filter(x=>x!==p):[...st.programs,p];persist();return render()}
   if(d.mv){const [i,dir]=d.mv.split(":").map(Number),a=st.saved,j=i+dir;[a[i],a[j]]=[a[j],a[i]];persist();return render()}
 });
 document.addEventListener("change",e=>{
@@ -58,6 +60,7 @@ document.addEventListener("change",e=>{
   else if(id==="subway")st.needSubway=e.target.checked;
   else if(id==="skipc")st.skipCompetitive=e.target.checked;
   else return;
+  track("preference_set",{what:{home:"neighborhood",maxm:"distance",subway:"subway",skipc:"competitive"}[id]});
   ui.prefsOpen=true; // keep Find's answers open while they're being changed
   persist();render();
 });

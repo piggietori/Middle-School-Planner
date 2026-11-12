@@ -13,7 +13,7 @@ Each failure gets three scores from 1 to 10, as in an FMEA. Multiplied, they giv
 | 9–10 | Data seen by others (10); a plan lost for good, or a missed deadline because of us (9) | Expected every week | We wouldn't know |
 | 7–8 | Wrong information acted on (a wrong date); nobody can sign in or save | Likely at least once | Only if a family tells us |
 | 5–6 | A feature broken for many, with a way around it | Possible | The daily report or the browser check, within hours |
-| 3–4 | One family affected, or an annoyance | Unlikely: something guards against it | An alert within the hour |
+| 3–4 | One family affected, or an annoyance | Unlikely: something guards against it | An alert at the monitor's next run (scheduled hourly; see F-55) |
 | 1–2 | Cosmetic, or only the owner notices | Practically never | Caught before release (CI, review) |
 
 **Rules:**
@@ -33,6 +33,7 @@ Sorted by RPN after the planned fixes: what's still worth watching.
 | F-12 | Signed out without choosing it (Safari, cleared data) | 147 → 147 | Accepted: common, but the planner explains it and signing in restores the plan |
 | F-10 | The sign-in email doesn't arrive | 336 → 140 | Check delivery with the pilot families (the gate in [launch.md](launch.md)) |
 | F-09 | The browser is too old to run the planner | 126 → 126 | Accepted: works back to about 2022 since v1.3.1; older browsers are told why |
+| F-55 | GitHub runs the hourly monitor late, or skips runs | 144 → 144 | Accepted for now; start the monitor from outside GitHub if alerts need to be prompt in season |
 | F-05 | The app breaks only for signed-out visitors | 192 → 120 | Accepted after the browser check: signed-out visitors send nothing, by design |
 | F-30 | We publish a wrong date | 144 → 120 | Accepted: review and checks catch most; the pilot notice says to confirm with schools |
 | F-52 | An alert arrives and nobody sees it | 224 → 112 | Turn on GitHub Mobile notifications for `planner-ops` |
@@ -45,7 +46,7 @@ Status: **Covered**, **Partial** (works, with a known gap), **Gap → fix**, **A
 
 | ID | Failure | Harm | How we'd know | Response | S | O | D | RPN now | After | Status |
 |---|---|---|---|---|---|---|---|---|---|---|
-| F-01 | The site is down (GitHub Pages, DNS) | Nobody can open it; saved plans are safe | `ALERT: Site up`, within the hour | githubstatus.com; check DNS ([operations.md](operations.md#when-something-breaks)) | 7 | 3 | 3 | 63 | 63 | Covered |
+| F-01 | The site is down (GitHub Pages, DNS) | Nobody can open it; saved plans are safe | `ALERT: Site up`, at the monitor's next run (F-55) | githubstatus.com; check DNS ([operations.md](operations.md#when-something-breaks)) | 7 | 3 | 3 | 63 | 63 | Covered |
 | F-02 | A merge breaks the app | Everyone sees a broken page | CI blocks most; `ALERT: App works for visitors` within 3 hours | Revert the pull request | 7 | 3 | 7 | 147 | 63 | Covered by the browser check |
 | F-03 | "The planner couldn't load" (a file fails to load) | Nothing works; nothing is reported, because logging hasn't started | `ALERT: App works for visitors` | Check the last deploy; revert | 6 | 3 | 7 | 126 | 72 | Covered by the browser check |
 | F-04 | A JavaScript error, signed in | One feature fails for some | `client_errors`; `ALERT: Errors from families` | Fix; post a banner if many are affected | 5 | 5 | 3 | 75 | 75 | Covered |
@@ -102,7 +103,8 @@ Status: **Covered**, **Partial** (works, with a known gap), **Gap → fix**, **A
 
 | ID | Failure | Harm | How we'd know | Response | S | O | D | RPN now | After | Status |
 |---|---|---|---|---|---|---|---|---|---|---|
-| F-50 | The monitor stops running | Every other alert goes quiet | healthchecks.io emails when the hourly ping stops | Check `planner-ops` → Actions | 6 | 3 | 9 | 162 | 54 | Covered once `HEALTHCHECK_URL` is set |
+| F-50 | The monitor stops running | Every other alert goes quiet | healthchecks.io emails when no ping has arrived for 4 hours after one was due | Check `planner-ops` → Actions | 6 | 3 | 9 | 162 | 54 | Covered: `HEALTHCHECK_URL` is set, with a 4-hour grace (F-55) |
+| F-55 | GitHub runs the hourly monitor late, or skips runs | Every alert can be hours late: on 2026-11-12 the monitor ran 4 times in 10 hours, with one gap of 7½ hours | healthchecks.io, when a gap passes its grace; `planner-ops` → Actions shows the real times | Nothing to fix on our side: GitHub doesn't promise scheduled times. If it matters in season, start the monitor from outside GitHub (a scheduler that calls the workflow) | 6 | 6 | 4 | 144 | 144 | Accepted for now: read "hourly" in these pages as "every 1 to 3 hours, sometimes longer" |
 | F-51 | GitHub turns off the public repo's scheduled workflows | The watch stops | The February–March check | Enable the workflow | 5 | 2 | 7 | 70 | 70 | Covered |
 | F-52 | An alert arrives and nobody sees it | Any of the above lasts longer | Nothing | GitHub Mobile notifications; a Gmail filter marking alerts important | 7 | 4 | 8 | 224 | 112 | Gap → turn on GitHub Mobile notifications |
 | F-53 | A dependency has a known vulnerability | Mostly the tests and workflows | Dependabot pull requests and alerts | Merge after CI passes | 3 | 3 | 3 | 27 | 27 | Covered |
@@ -135,7 +137,7 @@ Status: **Covered**, **Partial** (works, with a known gap), **Gap → fix**, **A
 | Feedback | Anyone who sends it | `feedback` (1 year), emailed to the owner | The owner; `Feedback flood`, `Feedback not emailed` |
 | The live site in Chromium and Safari | A robot visitor, every 3 hours | `ALERT: App works for visitors` | F-02, F-03, F-05 |
 | Site, data, Supabase, certificate, security, database, backups | The monitor, hourly | `ALERT:` issues | [operations.md](operations.md#monitoring) |
-| "The monitor ran" | The monitor, hourly | healthchecks.io | F-50 |
+| "The monitor ran" | The monitor, after each run (scheduled hourly; about every 3 hours in practice) | healthchecks.io, which emails after 4 hours without one | F-50, F-55 |
 
 **Deliberately not collected:**
 - **Anything from signed-out visitors.** No analytics and no error reports, as promised in the privacy notice. The

@@ -14,7 +14,7 @@ Running the planner day to day: what happens when, how to tell it's healthy, and
 | October 1 – December 31 | Backups run daily; the busiest season | Watch for issues and error reports |
 | December 11 | Application deadline; My list becomes read-only the next day | Nothing |
 | Sundays and Wednesdays the rest of the year | *Backup* (in `planner-ops`) | Nothing, unless an alert says it failed |
-| Every hour | *Monitor* (in `planner-ops`) checks the site, Supabase, security, errors, saves, backups and capacity | Nothing, unless an `ALERT:` issue emails you ([monitoring](#monitoring)) |
+| Every hour on the schedule (about every 3 hours in practice) | *Monitor* (in `planner-ops`) checks the site, Supabase, security, errors, saves, backups and capacity | Nothing, unless an `ALERT:` issue emails you ([monitoring](#monitoring)) |
 | Every morning | The daily report: a comment on the pinned *Daily report* issue in `planner-ops` | Read it during the pilot and in season |
 | February and March | The quietest stretch: GitHub may turn off scheduled workflows in the public repository after 60 days without a commit | Open Actions → *Watch sources*; if it says disabled, click **Enable workflow** |
 | Every night | The database deletes errors over 90 days old and events over a year old | Nothing ([privacy.md](privacy.md#how-long-its-kept)) |
@@ -58,8 +58,15 @@ closes it when it passes. GitHub emails you about each, as long as you watch `pl
 | Backups | No successful backup in 30 hours (October to December) or 5 days (otherwise) |
 
 The monitor reads counts only, never emails or notes. Its database password is `planner-ops`'s `SUPABASE_DB_URL`.
-After each hourly run it pings healthchecks.io (`HEALTHCHECK_URL`), which emails you if the pings stop: that's how
+After each run it pings healthchecks.io (`HEALTHCHECK_URL`), which emails you if the pings stop: that's how
 you'd hear that the monitor itself stopped.
+
+**"Every hour" is the schedule, not a promise.** GitHub starts scheduled workflows late and sometimes skips them: in
+practice a run, and its ping, arrives about every 3 hours, and a gap of 7½ hours has happened (F-55 in
+[failure-modes.md](failure-modes.md)). So the healthchecks.io check has period 1 hour and **grace 4 hours**: with a
+shorter grace it emailed "down" several times a day while the monitor was fine. If it still emails during a long gap,
+look at `planner-ops` → Actions: recent successful runs mean GitHub was slow, not that the monitor broke. Alerts from
+the monitor are late by the same amount.
 
 To check the site in real browsers yourself: `node scripts/smoke-live.js <site address>`.
 

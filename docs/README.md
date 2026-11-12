@@ -5,6 +5,7 @@ Start with architecture, then read whichever doc answers your question. Each fac
 | Doc | Answers |
 |---|---|
 | [architecture.md](architecture.md) | How the pieces fit, what data lives where, how a plan syncs between devices |
+| [ecosystem.md](ecosystem.md) | In plain words: the online services (Porkbun, GitHub, Supabase, Resend, healthchecks.io) and how they connect |
 | [data-sources.md](data-sources.md) | Where school and date data comes from, how often it's refreshed, how a change reaches the site, what the checks catch |
 | [backups.md](backups.md) | How a family's plan is backed up, and how to restore it |
 | [security.md](security.md) | How data is protected, layer by layer, and the known gaps |

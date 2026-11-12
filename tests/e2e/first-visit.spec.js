@@ -66,19 +66,16 @@ test("reminders are grouped in one box, and there's no missed-open-house notice"
   await expect(box).toContainText("tomorrow");
   await expect(box).toContainText("today");
   await expect(box).toContainText("Did you go?");
-  await expect(page.locator("#app .notice")).toHaveCount(2); // reminders + Keep your plan safe (no pilot notice: PILOT is off)
+  await expect(page.locator("#app .notice")).toHaveCount(3); // reminders + Keep your plan safe + what the planner is (no pilot notice: PILOT is off)
   await expect(page.getByText("Start here:")).toHaveCount(0);
   await expect(page.getByText("Missed an open house")).toHaveCount(0);
 });
 
-test("with nothing urgent, Next up shows the next step and how to do it", async ({page}) => {
+test("with nothing urgent, Home has no reminders box: the steps say what's next", async ({page}) => {
   await page.addInitScript(p => { if (!localStorage.getItem("d20plan")) localStorage.setItem("d20plan", p); }, JSON.stringify({home: "dyker", done: {s1: true}}));
   await page.goto("/");
-  const next = page.locator(".notice-list");
-  await expect(next.locator("h2")).toHaveText("Next up");
-  await expect(next).toContainText("Next step:");
-  await next.getByRole("button").click();
-  await expect(page.locator(".tab[aria-current=page]")).toHaveAttribute("data-tab", /find|dates|list/);
+  await expect(page.locator(".notice-list")).toHaveCount(0);
+  await expect(page.locator(".st-item.current")).toContainText("You are here");
 });
 
 test("after the deadline the list is read-only and Next up says when offers arrive (J6)", async ({page}) => {
@@ -87,6 +84,7 @@ test("after the deadline the list is read-only and Next up says when offers arri
   await page.goto("/");
   await expect(page.locator(".notice-list")).toContainText("Applications are closed. Offers arrive April 7, 2027.");
   await page.locator('.tab[data-tab="list"]').click();
-  await expect(page.getByText("This is your list as you submitted it.")).toBeVisible();
+  await expect(page.getByText("This is your list as it was then.")).toBeVisible();
+  await expect(page.locator("#app")).toContainText("Didn't submit?"); // the planner can't know whether they did
   await expect(page.locator("[data-mv]")).toHaveCount(0);
 });

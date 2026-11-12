@@ -20,4 +20,4 @@ export function render(){
   catch(e){reportError(e,"render");$("#app").innerHTML=`<section class="view"><div class="notice" role="alert"><div><b>This page couldn't load.</b> Your saved choices are safe. Try another tab, or reload the page.</div></div></section>`}
   renderSheet();
 }
-export function go(t){ui.tab=t;ui.openDbn=null;try{history.replaceState(null,"","#"+t)}catch(e){}render();window.scrollTo(0,0)}
+export function go(t){ui.tab=t;ui.openDbn=null;ui.prefsOpen=false;try{history.replaceState(null,"","#"+t)}catch(e){}render();window.scrollTo(0,0)}

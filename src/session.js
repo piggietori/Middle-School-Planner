@@ -4,7 +4,7 @@ import {queueSessionSync} from "./account.js";
 import {BY} from "./data.js";
 import {ui} from "./ui.js";
 
-const KEY="d20session", TABS=["home","dates","find","list"], VIEWS={dates:["cal","list"],list:["order","compare"]};
+const KEY="d20session", TABS=["home","dates","find","list"], VIEWS={dates:["cal","list"],list:["order","compare","apply"]};
 let last=null, touched=false, fromAddress=false;
 
 const read=()=>{try{return JSON.parse(localStorage.getItem(KEY))}catch(e){return null}};

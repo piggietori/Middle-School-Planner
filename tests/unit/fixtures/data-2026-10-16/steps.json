@@ -36,14 +36,15 @@
     {
       "id": "s6",
       "t": "Log in to MySchools and add your programs",
-      "d": "Log in at myschools.nyc, then follow the Ready for MySchools guide on My list. It shows each school's code to search for, in your order. Add the program you want at each school, then mark this step done. New to MySchools? Ask your child's current school for an account creation code. It can take a few days, so ask early.",
-      "tab": "list",
-      "link": "https://www.myschools.nyc/"
+      "d": "Log in at myschools.nyc and add the program you want at each school, in your order. The Apply in MySchools guide on My list shows each school's code to search for. New to MySchools? Ask your child's current school for an account creation code. It can take a few days, so ask early.",
+      "link": "https://www.myschools.nyc/",
+      "myschools": true
     },
     {
       "id": "s7",
-      "t": "Submit by December 11, 2026",
-      "d": "The application closes at the end of the day."
+      "t": "Submit in MySchools by December 11, 2026",
+      "d": "In MySchools, check the order, click Next, then Submit. MySchools shows a confirmation when it's submitted. Your application counts only once you submit it. The application closes at the end of the day.",
+      "myschools": true
     },
     {"id": "s8", "t": "Get your offer on April 7, 2027", "d": "Offers appear in MySchools."}
   ]

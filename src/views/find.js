@@ -2,6 +2,7 @@ import {PROG, HOMES} from "../data.js";
 import {ranked} from "../match.js";
 import {isSaved} from "../plan.js";
 import {st} from "../state.js";
+import {ui} from "../ui.js";
 import {esc, bullets} from "../util.js";
 import {meter, noteSummary} from "./common.js";
 
@@ -24,13 +25,23 @@ function schoolCard(m,i){
     <div class="row"><button class="btn${isSaved(s.dbn)?" saved":" primary"}" data-save="${s.dbn}">${isSaved(s.dbn)?"★ Saved":"☆ Save"}</button><button class="btn" data-open="${s.dbn}">See details</button></div>
   </article>`;
 }
+const MILES={.75:"up to ¾ mi",1:"up to 1 mi",1.5:"up to 1½ mi",2:"up to 2 mi",3:"up to 3 mi"};
+function summary(){
+  const h=HOMES.find(x=>x.id===st.home), pr=Object.values(st.w).filter(v=>v>0).length, pg=st.programs.length;
+  const bits=[h?h.label.split(" (")[0]:"",MILES[st.maxMiles]||"",pr+" priorit"+(pr===1?"y":"ies"),pg?pg+" program"+(pg>1?"s":""):""].filter(Boolean);
+  return `<div class="card prefs-sum row"><span style="margin-right:auto"><span class="sr">Your answers: </span>${esc(bits.join(" · "))}</span><button class="btn" data-prefs="1">Edit answers</button></div>`;
+}
 export function vFind(){
   const r=ranked(st);
+  // On a phone, answers already given fold into one line, so the matches come first. Wide screens show both.
+  const fold=!!st.home&&!ui.prefsOpen;
   const progs=Object.entries(PROG).map(([k,l])=>`<button class="chip" aria-pressed="${st.programs.includes(k)}" data-prog="${k}">${l}</button>`).join("");
   return `<section class="view">
-    <div><h2>Find the right schools</h2><p class="muted" style="margin:.3rem 0 0">Answer a few questions. The list on the right updates as you go.</p></div>
+    <div><h2>Find the right schools</h2><p class="muted" style="margin:.3rem 0 0">Answer a few questions. Your matches update as you go.</p>
+      <p class="small" style="margin:.4rem 0 0"><b>Build your list:</b> tap <b>☆ Save</b> on each school you like. Saved schools go to <b>My list</b>, where you put them in order and get ready to apply in MySchools.${st.saved.length?` You have saved ${st.saved.length}.`:""}</p></div>
+    ${fold?summary():""}
     <div class="grid2">
-      <div class="card" style="align-self:start">
+      <div class="card prefs${fold?" folded":""}" style="align-self:start">
         <div class="q"><label for="home">Where do you live?</label>
           <select id="home"><option value="">Choose your neighborhood</option>${HOMES.map(h=>`<option value="${h.id}"${st.home===h.id?" selected":""}>${h.label}</option>`).join("")}</select>
           <span class="muted small">Pick the closest one. Distances are straight-line estimates.</span></div>
@@ -44,6 +55,7 @@ export function vFind(){
         ${seg("bullying","Less bullying","Students reporting bullying")}
         ${seg("teachers","Happy teachers","Teachers who would recommend the school")}
         <div class="q"><span class="lab">Programs your child wants</span><div class="chips">${progs}</div></div>
+        ${st.home?`<button class="btn primary prefs-done" data-prefs="1">See my matches</button>`:""}
       </div>
       <div class="stack" style="min-width:0">
         <div class="row"><h2 style="margin-right:auto">Best matches</h2><span class="muted small">${r.length} schools</span></div>

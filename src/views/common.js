@@ -23,15 +23,16 @@ export function evRow(e,opts={}){
       <div class="muted small">${when(e)}${sc?" · "+esc(sc.addr):""}${e.text?" · "+esc(e.text):""}</div>${e.was?`
       <div class="small" style="color:var(--warn)">Moved. It was ${when({...e.was,start:e.was.start??e.start,end:e.was.end??e.end})}.</div>`:""}
       ${wentBtn}
-      ${past||opts.compact?"":`<div class="row" style="gap:8px">
-        ${e.kind==="open"||e.start?`<button class="btn${going?" on":""}" data-going="${e.id}">${going?"✓ I'm going":"I'm going"}</button>`:""}
-        <a class="btn" href="${gcal(e)}" target="_blank" rel="noopener">Add to my calendar</a>
-        ${sc&&sc.flyer?`<a class="btn" href="${sc.flyer}" target="_blank" rel="noopener">Flyer</a>`:""}
-        ${e.flyer?`<a class="btn" href="${e.flyer}" target="_blank" rel="noopener">Flyer</a>`:""}
-        ${sc&&sc.signup?`<a class="btn" href="${sc.signup}" target="_blank" rel="noopener">Register</a>`:""}
-        ${e.link&&!e.flyer?`<a class="btn" href="${e.link}" target="_blank" rel="noopener">Open MySchools</a>`:""}
-      </div>`}
+      ${past||opts.compact?"":evButtons(e,sc,going)}
     </div></div>`;
+}
+// An open house's actions, all visible: I'm going, calendar, flyer, sign-up.
+function evButtons(e,sc,going){
+  const a=(href,t)=>`<a class="btn" href="${href}" target="_blank" rel="noopener">${t}</a>`;
+  const main=e.kind==="open"||e.start?`<button class="btn${going?" on":""}" data-going="${e.id}">${going?"✓ I'm going":"I'm going"}</button>`:"";
+  const extra=[a(gcal(e),"Add to my calendar"),sc&&sc.flyer&&a(sc.flyer,"Flyer"),e.flyer&&a(e.flyer,"Flyer"),
+    sc&&sc.signup&&a(sc.signup,"Register"),e.link&&!e.flyer&&a(e.link,"Open MySchools")].filter(Boolean);
+  return `<div class="row" style="gap:8px">${main}${extra.join("")}</div>`;
 }
 export function noteSummary(d){if(!hasNotes(d))return "";const n=noteOf(d),bits=[];
   if(n.rating)bits.push(`<span class="s" aria-label="${n.rating} out of 5 stars">${starText(n.rating)}</span> ${RATING_WORDS[n.rating]}`);

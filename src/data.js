@@ -1,11 +1,16 @@
 /* ---------------- DATA ---------------- */
 // Source data lives in data/*.json (see the "sources" and "provenance" fields there). This module
 // shapes it for the views. Distances are straight-line estimates.
-import schoolsFile from "../data/schools.json" with {type: "json"};
-import eventsFile from "../data/events.json" with {type: "json"};
-import neighborhoodsFile from "../data/neighborhoods.json" with {type: "json"};
-import stepsFile from "../data/steps.json" with {type: "json"};
-import noticeFile from "../data/notice.json" with {type: "json"};
+// The files are fetched, not imported as JSON modules: phones a few years old (iPhones that stop at iOS 16, for
+// example) can't import JSON, and for them the whole planner would fail to load (F-09 in docs/failure-modes.md).
+async function read(name){
+  const url=new URL(`../data/${name}.json`,import.meta.url);
+  if(url.protocol==="file:")return JSON.parse((await import("node:fs")).readFileSync(url,"utf8")); // unit tests, in Node
+  const res=await fetch(url);
+  if(!res.ok)throw new Error(`${res.status} loading ${name}.json`);
+  return res.json();
+}
+const [schoolsFile,eventsFile,neighborhoodsFile,stepsFile,noticeFile]=await Promise.all(["schools","events","neighborhoods","steps","notice"].map(read));
 
 const {provenance, ...city} = schoolsFile.city_averages;
 export const CITY = city;

@@ -205,3 +205,32 @@ test("the feedback email uses the form's words, the tab's name and New York time
   await as(null);
   await denied(db.query("select public.feedback_email(f) from public.feedback f"));
 });
+
+test("notes and weights have size limits, so one person can't fill the database (F-22)", async () => {
+  await as(A);
+  await db.query("insert into public.school_notes (plan_id, dbn, pros) values ($1, '20K229', $2)", [planA, ["x".repeat(200), "short"]]);
+  await denied(db.query("insert into public.school_notes (plan_id, dbn, pros) values ($1, '20K030', $2)", [planA, ["x".repeat(201)]]), "23514");
+  await denied(db.query("update public.school_notes set cons = $2 where plan_id = $1 and dbn = '20K229'", [planA, ["x".repeat(5000)]]), "23514");
+  await db.query("update public.plans set weights = $2 where id = $1", [planA, {distance: 2, scores: 0, safety: 1, bullying: 1, teachers: 2}]);
+  await denied(db.query("update public.plans set weights = $2 where id = $1", [planA, {junk: "x".repeat(5000)}]), "23514");
+  await denied(db.query("update public.plans set weights = '[1, 2]' where id = $1", [planA]), "23514");
+});
+
+test("feedback, events and errors stop being accepted past an hourly limit (F-22, F-41)", async () => {
+  await db.exec("reset role");
+  await db.exec(`insert into public.feedback (kind, message) select 'other', 'flood' from generate_series(1, 200 - (select count(*) from public.feedback where at > now() - interval '1 hour')::int)`);
+  await db.exec(`insert into public.events (user_id, name) select '${A}', 'app_open' from generate_series(1, 1000 - (select count(*) from public.events where user_id = '${A}' and at > now() - interval '1 hour')::int)`);
+  await db.exec(`insert into public.client_errors (user_id, message) select '${A}', 'boom' from generate_series(1, 100 - (select count(*) from public.client_errors where user_id = '${A}' and at > now() - interval '1 hour')::int)`);
+  await as(null);
+  await denied(db.query("insert into public.feedback (kind, message) values ('idea', 'one too many')"), "54000");
+  await as(A);
+  await denied(db.query("insert into public.events (user_id, name) values ($1, 'app_open')", [A]), "54000");
+  await denied(db.query("insert into public.client_errors (user_id, message) values ($1, 'boom')", [A]), "54000");
+  await as(B); // one person's flood doesn't stop another's reports
+  await db.query("insert into public.events (user_id, name) values ($1, 'app_open')", [B]);
+  await db.query("insert into public.client_errors (user_id, message) values ($1, 'boom')", [B]);
+  await db.exec("reset role");
+  await db.exec("update public.feedback set at = now() - interval '2 hours'"); // an hour later the form works again
+  await as(null);
+  await db.query("insert into public.feedback (kind, message) values ('idea', 'back again')");
+});

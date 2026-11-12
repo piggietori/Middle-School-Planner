@@ -416,3 +416,70 @@ test("a link that carries a sign-in doesn't download the account library or cont
   expect(new URL(page.url()).hash).toBe("");
   expect(requests.filter(u => u.includes("/vendor/") || u.includes("supabase.co"))).toEqual([]);
 });
+
+// A shared computer, or a parent whose sign-in lapsed: the plan still on the device belongs to someone else (F-19).
+async function signInAsSomeoneElse(browser, server) {
+  const page = await device(browser, server, {plan: LOCAL_PLAN});
+  await page.goto(signedInAs("a"));
+  await synced(page);
+  await page.evaluate(() => localStorage.removeItem("fake-session")); // a's sign-in ends on its own; the plan stays
+  await page.reload();
+  await page.locator("#acct").getByRole("button", {name: "Sign in"}).click();
+  await page.fill("#acct-email", "b@example.com");
+  await page.getByRole("button", {name: "Email me a code"}).click();
+  await page.fill("#acct-code", server.code);
+  await page.locator("#acctsheet").getByRole("button", {name: "Sign in", exact: true}).click();
+  await expect(page.locator("#acctsheet h2")).toHaveText("Whose plan is on this device?");
+  await expect(page.locator("#acctsheet")).toContainText("This device has a plan from a@example.com, and you're signing in as b@example.com.");
+  await page.keyboard.press("Escape"); // it needs an answer
+  await expect(page.locator("#acctsheet h2")).toHaveText("Whose plan is on this device?");
+  expect(server.plans["plan-b"].saved_schools).toEqual([]); // nothing is added while the question is up
+  return page;
+}
+
+test("someone else signing in on a device with a plan is asked first; No keeps that plan out of their account (F-19)", async ({browser}) => {
+  const server = fakeServer();
+  const page = await signInAsSomeoneElse(browser, server);
+  await page.getByRole("button", {name: "No, use my account's plan"}).click();
+  await synced(page);
+  await expect(page.locator("#toast")).toHaveText("Signed in. Your plan is loaded.");
+  await page.locator('.tab[data-tab="list"]').click();
+  await expect(page.getByText("Your list is empty.")).toBeVisible();
+  expect(server.plans["plan-b"].saved_schools).toEqual([]);
+  expect(server.plans["plan-a"].saved_schools).toHaveLength(2); // a's plan is still in a's account
+  // The device's plan is now b's: b signing in here again isn't asked.
+  expect(await page.evaluate(() => localStorage.getItem("d20plan-from"))).toBe("b@example.com");
+});
+
+test("someone else signing in on a device with a plan can choose to add it to their account (F-19)", async ({browser}) => {
+  const server = fakeServer();
+  const page = await signInAsSomeoneElse(browser, server);
+  await page.getByRole("button", {name: "Yes, add it to my account"}).click();
+  await synced(page);
+  await expect.poll(() => server.plans["plan-b"].saved_schools.map(r => r.dbn)).toEqual(["20K201", "20K187"]);
+});
+
+test("a failed save is tried again by itself, without waiting for another change (F-13)", async ({browser}) => {
+  const server = fakeServer();
+  const page = await device(browser, server, {plan: LOCAL_PLAN});
+  await page.goto(signedInAs("a"));
+  await synced(page);
+  server.failSaves = true;
+  await page.locator('.tab[data-tab="find"]').click();
+  await page.selectOption("#home", "boro");
+  await expect(page.locator("#toast")).toContainText("Couldn't save to your account. We'll keep trying.");
+  server.failSaves = false; // the server recovers; the family does nothing more
+  await expect.poll(() => server.plans["plan-a"].plan.home, {timeout: 15000}).toBe("boro");
+});
+
+test("two tabs of the planner share one plan: a change in one shows in the other, and neither undoes the other's (F-18)", async ({browser}) => {
+  const context = await browser.newContext();
+  contexts.push(context);
+  const open = async () => { const p = await context.newPage(); await useFixtureData(p); await p.goto("/#find"); return p; };
+  const one = await open(), two = await open();
+  await one.locator("#app").getByRole("button", {name: "☆ Save"}).first().click();
+  await expect(two.locator("#app").getByRole("button", {name: "★ Saved"})).toHaveCount(1); // the other tab shows it
+  await two.locator("#app").getByRole("button", {name: "☆ Save"}).first().click();
+  await expect(one.locator("#app").getByRole("button", {name: "★ Saved"})).toHaveCount(2);
+  expect(await one.evaluate(() => JSON.parse(localStorage.getItem("d20plan")).saved.length)).toBe(2); // both kept
+});

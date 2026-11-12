@@ -78,6 +78,7 @@ Kept small on purpose. No names, notes text, or home location in event propertie
 **Failure cases:**
 - A link that carries a sign-in or an error (from an email sent before v1.3.0, or made by someone else) → never accepted: "That sign-in link has expired" and how to get a code. The local plan is untouched and no account is contacted.
 - Wrong or expired code → "That code didn't work or has expired." The box keeps what they typed.
+- The plan on the device was last synced with a different account (a shared computer, or someone else's sign-in lapsed) → ask "Whose plan is on this device?" before merging. **No** shows the account's plan and adds nothing; **Yes** merges as above.
 - Offline when signing in → no account call is made, the local plan stays, retry later.
 - Merge can't reach the server halfway → don't clear local data until the upload is confirmed.
 

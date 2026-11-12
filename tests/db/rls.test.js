@@ -234,3 +234,14 @@ test("feedback, events and errors stop being accepted past an hourly limit (F-22
   await as(null);
   await db.query("insert into public.feedback (kind, message) values ('idea', 'back again')");
 });
+
+test("only the database owner can start a workflow, and without its token the clock does nothing (F-55)", async () => {
+  await as(A);
+  await denied(db.query("select public.run_workflow('planner-ops', 'monitor.yml')"));
+  await as(null);
+  await denied(db.query("select public.run_workflow('planner-ops', 'monitor.yml')"));
+  await db.exec("reset role");
+  // No Vault or pg_net here, like a project before setup: it warns and carries on, so the cron job never fails.
+  await db.query("select public.run_workflow('planner-ops', 'monitor.yml', '{\"clock\": \"true\"}')");
+  await db.query("select public.run_workflow('someone-elses-repo', 'x.yml')"); // refused inside, also only a warning
+});

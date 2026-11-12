@@ -54,6 +54,7 @@ closes it when it passes. GitHub emails you about each, as long as you watch `pl
 | Retention job | `prune-logs` hasn't succeeded in 36 hours |
 | Feedback flood | 20 or more feedback messages in an hour (only 20 an hour are emailed) |
 | Feedback not emailed | A message from the last day still wasn't emailed an hour later |
+| Emails and clock calls | A request the database sent (a feedback email to Resend, a clock call to GitHub) was refused or failed in the last 6 hours |
 | Capacity | The database is over 400 MB (the free limit is 500) |
 | Backups | No successful backup in 30 hours (October to December) or 5 days (otherwise) |
 
@@ -67,6 +68,14 @@ practice a run, and its ping, arrives about every 3 hours, and a gap of 7½ hour
 shorter grace it emailed "down" several times a day while the monitor was fine. If it still emails during a long gap,
 look at `planner-ops` → Actions: recent successful runs mean GitHub was slow, not that the monitor broke. Alerts from
 the monitor are late by the same amount.
+
+**The clock.** Because of that, the database starts the jobs itself (`supabase/migrations/20261113130000_clock.sql`,
+using pg_cron): *Monitor* at 47 minutes past every hour, with the real-browser check every third hour; *Backup* at
+08:20 UTC and *Watch sources* at 11:20 UTC, on the same days as their own schedules. GitHub's schedules still run as
+the fallback, so some jobs run twice: that's harmless. The clock needs a GitHub token in the Vault
+([secrets.md](secrets.md#the-clocks-github-token)); without it, it does nothing. To see it working:
+`select jobname, schedule from cron.job;` and `select created, status_code from net._http_response order by created desc limit 5;`
+(204 means GitHub accepted the request).
 
 To check the site in real browsers yourself: `node scripts/smoke-live.js <site address>`.
 
@@ -159,8 +168,8 @@ invite-only for now". Turn it back on to open to everyone ([launch.md](launch.md
 |---|---|---|
 | Supabase | Pauses after about a week without database activity | The hourly monitor keeps it active ([backups.md](backups.md#supabase-project-pausing)) |
 | GitHub Actions | Scheduled workflows turn off after 60 days without a commit (public repos) | Only *Watch sources* is affected. Check in February and March (calendar above) |
-| Resend | 100 emails a day, 3,000 a month | Enough for hundreds of families. If sign-ups pass about 80 a day, consider the paid plan |
-| Supabase | 30 sign-in emails an hour (our setting) | Raise it in Authentication → Rate Limits if families are refused at busy times |
+| Resend | 100 emails a day, 3,000 a month | Each sign-in is one email, so 100 sign-ins a day. The day the link goes to a large parent group can pass that: share with one group at a time, or take the paid plan for that month |
+| Supabase | 30 sign-in emails an hour (our setting) | Raise it (for example to 100) in Authentication → Rate Limits before sharing with a group, and lower it again afterwards: past it, families see "Too many sign-in emails were sent" |
 | Supabase | 500 MB database, no backups of its own | Thousands of households would still fit; we make our own backups |
 | GitHub Actions | Free for public repositories; 2,000 minutes a month for private ones | The monitor and backups in `planner-ops` use about 800 |
 | GitHub Pages | Public site, 1 GB, about 100 GB of traffic a month | Far more than needed |

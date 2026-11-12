@@ -16,7 +16,7 @@ more widely. Fill in each step's date as you go.
 | 5. Feedback emails | Resend → API Keys → create one with **Sending access** for the domain only. In the Supabase SQL Editor, run (with your values, never in a file or chat): `select vault.create_secret('<the key>', 'resend_api_key'); select vault.create_secret('<your email>', 'feedback_to'); select vault.create_secret('D20 Planner <feedback@d20mail.torilam.com>', 'feedback_from');` | |
 | 6. The private ops repository | Create `piggietori/planner-ops`, **private**. Add secrets `SUPABASE_DB_URL` and `BACKUP_PASSPHRASE`, and the variable `SITE_URL`. Delete both secrets from the public repo. **Watch → All activity**, so alerts email you | |
 | 7. Invite-only for the pilot | Supabase → Authentication → Sign In / Providers → turn off **Allow new users to sign up**. Invite each family from **Users → Invite user** | |
-| 8. Hear about problems | **healthchecks.io** (free): create a check with period 1 hour and grace 4 hours (GitHub runs the hourly monitor late, about every 3 hours: [operations.md](operations.md#monitoring)), and put its ping URL in the `planner-ops` secret `HEALTHCHECK_URL`. Public repo → Settings → **Code security**: turn on secret scanning and push protection. Install **GitHub Mobile** and allow notifications for `planner-ops` | |
+| 8. Hear about problems | **healthchecks.io** (free): create a check with period 1 hour and grace 4 hours (GitHub runs the hourly monitor late, about every 3 hours: [operations.md](operations.md#monitoring)), and put its ping URL in the `planner-ops` secret `HEALTHCHECK_URL`. Public repo → Settings → **Code security**: turn on secret scanning and push protection. Turn on **Dependabot alerts** there too. Store the clock's GitHub token, so the monitor, backups and source watch run on time ([secrets.md](secrets.md#the-clocks-github-token)). Install **GitHub Mobile** and allow notifications for `planner-ops` | |
 | 9. The restore drill | Download the newest backup from the ops repo, decrypt it, check both files open ([backups.md](backups.md#the-restore-drill)) | |
 
 **In the code (merged before the pilot):**
@@ -54,6 +54,11 @@ All of these must be true:
 - [ ] The restore drill done
 - [ ] `App works for visitors` has passed for 3 days
 - [ ] The highest risks in [failure-modes.md](failure-modes.md#highest-risks) re-scored with what the pilot showed
+
+- [ ] The clock's token is set, and *Monitor* has run every hour, *Backup* and *Watch sources* every day, for 3 days
+- [ ] A brand-new address gets a sign-in email with a code (the **Confirm signup** email), within a minute
+- [ ] The sign-in email limit is raised for launch week, and you've decided how to stay under Resend's 100 a day ([operations.md](operations.md#free-plan-limits-that-matter))
+- [ ] v1.3.0 and later versions are tagged and released
 
 ## Sharing with parent groups
 

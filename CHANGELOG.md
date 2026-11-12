@@ -9,6 +9,11 @@ feature the middle one (1.1 → 1.2), and a change that needs families or the da
 ## [Unreleased]
 
 ### Changed
+- **The monitor, backups and source watch run on time.** GitHub was starting them hours late or not at all (the
+  source watch had never run), so the database now starts them itself, with GitHub's schedule as the fallback.
+  Apply `20261113130000_clock.sql` and store the clock's token ([docs/secrets.md](docs/secrets.md#the-clocks-github-token)).
+- **Docs: what to do before sharing with a parent group,** including raising the sign-in email limit for launch
+  week ([docs/launch.md](docs/launch.md)).
 - Home on a new device: the first tip says what to do first (Find schools, then Save) and that the plan is kept on this
   device, and separately that signing in saves it or brings it from another device.
 - Home: the countdown says "days left to apply in MySchools". Steps 6 and 7 are marked **Required · in MySchools**.

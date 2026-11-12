@@ -33,7 +33,7 @@ Sorted by RPN after the planned fixes: what's still worth watching.
 | F-12 | Signed out without choosing it (Safari, cleared data) | 147 → 147 | Accepted: common, but the planner explains it and signing in restores the plan |
 | F-10 | The sign-in email doesn't arrive | 336 → 140 | Check delivery with the pilot families (the gate in [launch.md](launch.md)) |
 | F-09 | The browser is too old to run the planner | 126 → 126 | Accepted: works back to about 2022 since v1.3.1; older browsers are told why |
-| F-55 | GitHub runs the hourly monitor late, or skips runs | 144 → 144 | Accepted for now; start the monitor from outside GitHub if alerts need to be prompt in season |
+| F-55 | GitHub runs scheduled jobs late, or skips them | 144 → 36 | Set the clock's token, so the database starts them on time ([secrets.md](secrets.md#the-clocks-github-token)) |
 | F-05 | The app breaks only for signed-out visitors | 192 → 120 | Accepted after the browser check: signed-out visitors send nothing, by design |
 | F-30 | We publish a wrong date | 144 → 120 | Accepted: review and checks catch most; the pilot notice says to confirm with schools |
 | F-52 | An alert arrives and nobody sees it | 224 → 112 | Turn on GitHub Mobile notifications for `planner-ops` |
@@ -79,7 +79,7 @@ Status: **Covered**, **Partial** (works, with a known gap), **Gap → fix**, **A
 | F-21 | The retention job stops | Logs kept longer than we promise | `ALERT: Retention job` | Check `cron.job_run_details` | 2 | 3 | 3 | 18 | 18 | Covered |
 | F-22 | The database fills up (500 MB), by growth or by someone flooding it | Saves fail | `ALERT: Capacity` at 400 MB | Limits in the database (`20261113120000_limits.sql`): note lines 200 characters, 200 feedback messages an hour, 1,000 events and 100 errors an hour per person. Prune, or Supabase Pro | 6 | 1 | 3 | 18 | 18 | Covered |
 | F-23 | The Supabase project is lost | Accounts gone until restored | Everything alerts | Restore the whole project ([backups.md](backups.md#restoring)) | 9 | 1 | 3 | 27 | 27 | Covered |
-| F-24 | Backups stop | Nothing to restore from if something else goes wrong | `ALERT: Backups` after 30 hours | [operations.md](operations.md#when-something-breaks) | 8 | 3 | 3 | 72 | 72 | Covered |
+| F-24 | Backups stop | Nothing to restore from if something else goes wrong | `ALERT: Backups` after 30 hours. GitHub skipped the scheduled backup on 2026-11-12 (F-55) | [operations.md](operations.md#when-something-breaks) | 8 | 3 | 3 | 72 | 72 | Covered |
 | F-25 | A backup can't be opened (wrong or lost passphrase) | No restore possible | Only when we need it | The restore drill | 9 | 2 | 9 | 162 | 36 | Gap → the restore drill, before the pilot |
 
 ### Getting the information right
@@ -87,7 +87,7 @@ Status: **Covered**, **Partial** (works, with a known gap), **Gap → fix**, **A
 | ID | Failure | Harm | How we'd know | Response | S | O | D | RPN now | After | Status |
 |---|---|---|---|---|---|---|---|---|---|---|
 | F-30 | We publish a wrong date or fact | A family goes at the wrong time | Review; data checks; feedback "A date or school detail is wrong" | Fix it, keep the `id`, add `was`; banner ([data-sources.md](data-sources.md)) | 8 | 3 | 6 | 144 | 120 | Accepted: the pilot notice says to confirm dates with the school |
-| F-31 | A school changes an open house and we miss it | As F-30 | *Watch sources* daily October–December, weekly otherwise; feedback | As F-30 | 8 | 5 | 4 | 160 | 160 | Covered: daily in season. Pages it can't watch rely on feedback |
+| F-31 | A school changes an open house and we miss it | As F-30 | *Watch sources* (it had never run until it was started by hand on 2026-11-12: F-55) daily October–December, weekly otherwise; feedback | As F-30 | 8 | 5 | 4 | 160 | 160 | Covered: daily in season. Pages it can't watch rely on feedback |
 | F-32 | School facts go stale | Out-of-date details | Data checks warn after 400 days | The August checklist | 4 | 3 | 2 | 24 | 24 | Covered |
 
 ### Email
@@ -96,18 +96,19 @@ Status: **Covered**, **Partial** (works, with a known gap), **Gap → fix**, **A
 |---|---|---|---|---|---|---|---|---|---|---|
 | F-40 | Feedback isn't emailed (Vault secret, Resend key, hourly limit) | A family waits for an answer | `ALERT: Feedback not emailed` after an hour | Read it in the SQL Editor; [rotate the key](secrets.md#rotate-a-resend-key) | 4 | 3 | 6 | 72 | 36 | Covered, except F-43 |
 | F-41 | Feedback is flooded with spam | Real messages are buried | `ALERT: Feedback flood` | Banner and turn the form off; add a CAPTCHA | 2 | 3 | 3 | 18 | 18 | Covered |
-| F-42 | Resend's daily limit (100) is reached | Sign-in emails stop for the day | Daily report: sign-ins drop; Resend's dashboard | Resend's paid plan | 7 | 2 | 8 | 112 | 84 | Partial: watch sign-ins after sharing widely |
-| F-43 | Resend refuses a feedback email (a revoked key, an address it won't accept) | As F-40, but the message is marked emailed, because the database only hands it over | Nothing: `Feedback not emailed` reads that mark | Read feedback in the SQL Editor; Resend → Logs | 4 | 3 | 9 | 108 | 36 | Gap → have the monitor alert on failed rows in `net._http_response` |
+| F-42 | Resend's daily limit (100) or Supabase's hourly limit (30) is reached, most likely the day the link is posted in a large group | Sign-in emails stop for the day | Daily report: sign-ins drop; Resend's dashboard | Raise the hourly limit for launch week; share with one group at a time, or Resend's paid plan ([operations.md](operations.md#free-plan-limits-that-matter)) | 7 | 2 | 8 | 112 | 84 | Partial: watch sign-ins after sharing widely |
+| F-43 | Resend refuses a feedback email (a revoked key, an address it won't accept) | As F-40, but the message is marked emailed, because the database only hands it over | `ALERT: Emails and clock calls`: a request the database sent was refused in the last 6 hours | Read feedback in the SQL Editor; Resend → Logs | 4 | 3 | 9 | 108 | 36 | Covered once `planner-ops` has the `Emails and clock calls` check |
 
 ### Monitoring and operations
 
 | ID | Failure | Harm | How we'd know | Response | S | O | D | RPN now | After | Status |
 |---|---|---|---|---|---|---|---|---|---|---|
 | F-50 | The monitor stops running | Every other alert goes quiet | healthchecks.io emails when no ping has arrived for 4 hours after one was due | Check `planner-ops` → Actions | 6 | 3 | 9 | 162 | 54 | Covered: `HEALTHCHECK_URL` is set, with a 4-hour grace (F-55) |
-| F-55 | GitHub runs the hourly monitor late, or skips runs | Every alert can be hours late: on 2026-11-12 the monitor ran 4 times in 10 hours, with one gap of 7½ hours | healthchecks.io, when a gap passes its grace; `planner-ops` → Actions shows the real times | Nothing to fix on our side: GitHub doesn't promise scheduled times. If it matters in season, start the monitor from outside GitHub (a scheduler that calls the workflow) | 6 | 6 | 4 | 144 | 144 | Accepted for now: read "hourly" in these pages as "every 1 to 3 hours, sometimes longer" |
+| F-55 | GitHub runs scheduled jobs late, or skips them | Alerts hours late; a day without a backup, a source check or the daily report. On 2026-11-12 the hourly monitor ran 4 times in 14 hours, and the daily Backup and Watch sources didn't run | healthchecks.io, when a gap passes its grace; each repository's Actions tab shows the real times | The database's clock starts Monitor every hour, and Backup and Watch sources each day (`20261113130000_clock.sql`); GitHub's schedules are the fallback; the daily report posts on the first run after 13:00 UTC | 6 | 6 | 4 | 144 | 36 | Gap → set the clock's token ([secrets.md](secrets.md#the-clocks-github-token)) |
+| F-56 | The clock's GitHub token expires or is revoked | The clock stops; GitHub's own late schedule is all that's left (F-55) | `ALERT: Emails and clock calls` shows GitHub answering 401; healthchecks.io if gaps grow | Make a new token and update the Vault secret ([secrets.md](secrets.md#the-clocks-github-token)). Put its expiry date in your calendar | 5 | 3 | 3 | 45 | 45 | Covered |
 | F-51 | GitHub turns off the public repo's scheduled workflows | The watch stops | The February–March check | Enable the workflow | 5 | 2 | 7 | 70 | 70 | Covered |
 | F-52 | An alert arrives and nobody sees it | Any of the above lasts longer | Nothing | GitHub Mobile notifications; a Gmail filter marking alerts important | 7 | 4 | 8 | 224 | 112 | Gap → turn on GitHub Mobile notifications |
-| F-53 | A dependency has a known vulnerability | Mostly the tests and workflows | Dependabot pull requests and alerts | Merge after CI passes | 3 | 3 | 3 | 27 | 27 | Covered |
+| F-53 | A dependency has a known vulnerability | Mostly the tests and workflows | Dependabot pull requests and alerts | Merge after CI passes | 3 | 3 | 3 | 27 | 27 | Gap → turn on Dependabot alerts (Settings → Code security): they were off on 2026-11-12. The weekly update pull requests do run |
 | F-54 | A change is published while a family has the planner open | For up to 10 minutes their browser can mix old and new files: "The planner couldn't load" | `ALERT: App works for visitors`, if the check runs in that window | It clears by itself; Try again works once the old files expire | 4 | 3 | 7 | 84 | 84 | Accepted: brief, and publishing at quiet times avoids most of it |
 
 ### Security

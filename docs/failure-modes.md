@@ -32,6 +32,7 @@ Sorted by RPN after the planned fixes: what's still worth watching.
 | F-31 | A school changes an open house and we miss it | 160 → 160 | Watched daily in season since v1.3.0. Left: changes only posted where the watch can't look (social media, school emails); feedback "wrong date" |
 | F-12 | Signed out without choosing it (Safari, cleared data) | 147 → 147 | Accepted: common, but the planner explains it and signing in restores the plan |
 | F-10 | The sign-in email doesn't arrive | 336 → 140 | Check delivery with the pilot families (the gate in [launch.md](launch.md)) |
+| F-09 | The browser is too old to run the planner | 126 → 126 | Accepted: works back to about 2022 since v1.3.1; older browsers are told why |
 | F-05 | The app breaks only for signed-out visitors | 192 → 120 | Accepted after the browser check: signed-out visitors send nothing, by design |
 | F-30 | We publish a wrong date | 144 → 120 | Accepted: review and checks catch most; the pilot notice says to confirm with schools |
 | F-52 | An alert arrives and nobody sees it | 224 → 112 | Turn on GitHub Mobile notifications for `planner-ops` |
@@ -52,6 +53,7 @@ Status: **Covered**, **Partial** (works, with a known gap), **Gap → fix**, **A
 | F-06 | The CSP blocks something a change needs | A feature or style breaks | CI (the tests run under the CSP); signed-in reports "CSP blocked …" | Add it to the policy ([security.md](security.md#content-security-policy)) | 5 | 3 | 2 | 30 | 30 | Covered |
 | F-07 | The domain lapses | The site and sign-in emails stop | The registrar's renewal emails; then `ALERT: Site up` | Renew at the registrar | 8 | 2 | 3 | 48 | 48 | Covered: auto-renew on |
 | F-08 | The HTTPS certificate fails or expires | Browsers warn or refuse | `ALERT: HTTPS certificate`, 14 days ahead | GitHub → Pages: custom domain, Enforce HTTPS | 7 | 2 | 3 | 42 | 28 | Covered |
+| F-09 | The browser is too old to run the planner | That family can't use it at all | Not reported (signed out); feedback from another device | The data files are fetched instead of imported as JSON (v1.3.1), so browsers back to about 2022 work (Safari 15.4, Chrome 98). Older ones are told the browser is too old, not to check their connection | 7 | 2 | 9 | 126 | 126 | Accepted: the browser check can only run current browsers |
 
 ### Sign-in and saving
 
@@ -60,11 +62,13 @@ Status: **Covered**, **Partial** (works, with a known gap), **Gap → fix**, **A
 | F-10 | The sign-in email doesn't arrive (spam, Resend, rate limit) | Can't sign in on a new device | Daily report: sign-ins per day; "Tell us" on sign-in errors; Resend → Logs | [operations.md](operations.md#when-something-breaks) | 7 | 6 | 8 | 336 | 140 | Partial → confirm delivery with pilot families |
 | F-11 | The code doesn't work (mistyped, expired, or the email is slow) | Can't sign in until they try again | Only if they tell us ("Tell us") | The planner says what went wrong; send a new email. Sign-in is by code only since v1.3.0, so link checkers and links opening in the wrong browser can't get in the way | 4 | 3 | 7 | 84 | 84 | Covered |
 | F-12 | Signed out without choosing it (Safari's 7 days, cleared site data) | Worry that the plan is lost | Not reported | The planner says so and offers to sign in again (v1.1.1) | 3 | 7 | 7 | 147 | 147 | Accepted: handled in the app |
-| F-13 | Saves fail | Changes stay on one device | `ALERT: Saves failing` | Supabase status; recent database changes | 7 | 3 | 3 | 63 | 63 | Covered |
+| F-13 | Saves fail | Changes stay on one device | `ALERT: Saves failing` | A failed save is tried again by itself (after 5 seconds, then up to every 5 minutes), when back online, and when the tab is shown again; a change is also sent as the tab is hidden. Supabase status; recent database changes | 7 | 3 | 3 | 63 | 63 | Covered |
 | F-14 | Combining plans goes wrong at sign-in | Schools missing or doubled | Unit tests on every change; otherwise only if a family tells us | Restore their plan ([backups.md](backups.md#restoring)) | 8 | 2 | 6 | 96 | 96 | Covered by tests |
 | F-15 | Supabase paused or down | Can't sign in or sync; device copies keep working | `ALERT: Supabase up`, `Database reachable` | Resume the project ([backups.md](backups.md#supabase-project-pausing)) | 7 | 2 | 3 | 42 | 42 | Covered |
 | F-16 | The browser won't store anything (private mode, storage full) | The plan isn't kept between visits | Not reported | The planner keeps working for the visit | 4 | 2 | 9 | 72 | 72 | Accepted: rare, and signing in keeps the plan |
 | F-17 | A pilot family wasn't invited | "Invite-only" message | "Tell us" on the message; they'll ask you | Invite them ([operations.md](operations.md#invite-only)) | 4 | 5 | 8 | 160 | 80 | Covered |
+| F-18 | Two tabs of the planner are open on one device | The tab that saves last undoes the other's changes; a plan removed by signing out comes back | Browser test on every change | Each tab picks up the other's changes as they happen (v1.3.1) | 6 | 3 | 2 | 36 | 36 | Covered |
+| F-19 | A different person signs in on a device that still has someone's plan (a shared computer; a sign-in that lapsed) | The first person's schools and notes are added to the second person's account | Browser tests on every change | The planner asks first: "Whose plan is on this device?" (v1.3.1). No keeps it out | 9 | 2 | 2 | 36 | 36 | Covered |
 
 ### The database and backups
 
@@ -72,7 +76,7 @@ Status: **Covered**, **Partial** (works, with a known gap), **Gap → fix**, **A
 |---|---|---|---|---|---|---|---|---|---|---|
 | F-20 | Row-level security opened by mistake | Families' plans readable by others | Database tests in CI; `ALERT: Security unchanged` hourly | Revert the migration; [secrets.md](secrets.md#if-a-secret-may-have-leaked) | 10 | 2 | 2 | 40 | 40 | Covered |
 | F-21 | The retention job stops | Logs kept longer than we promise | `ALERT: Retention job` | Check `cron.job_run_details` | 2 | 3 | 3 | 18 | 18 | Covered |
-| F-22 | The database fills up (500 MB) | Saves fail | `ALERT: Capacity` at 400 MB | Prune, or Supabase Pro | 6 | 1 | 3 | 18 | 18 | Covered |
+| F-22 | The database fills up (500 MB), by growth or by someone flooding it | Saves fail | `ALERT: Capacity` at 400 MB | Limits in the database (`20261113120000_limits.sql`): note lines 200 characters, 200 feedback messages an hour, 1,000 events and 100 errors an hour per person. Prune, or Supabase Pro | 6 | 1 | 3 | 18 | 18 | Covered |
 | F-23 | The Supabase project is lost | Accounts gone until restored | Everything alerts | Restore the whole project ([backups.md](backups.md#restoring)) | 9 | 1 | 3 | 27 | 27 | Covered |
 | F-24 | Backups stop | Nothing to restore from if something else goes wrong | `ALERT: Backups` after 30 hours | [operations.md](operations.md#when-something-breaks) | 8 | 3 | 3 | 72 | 72 | Covered |
 | F-25 | A backup can't be opened (wrong or lost passphrase) | No restore possible | Only when we need it | The restore drill | 9 | 2 | 9 | 162 | 36 | Gap → the restore drill, before the pilot |
@@ -89,9 +93,10 @@ Status: **Covered**, **Partial** (works, with a known gap), **Gap → fix**, **A
 
 | ID | Failure | Harm | How we'd know | Response | S | O | D | RPN now | After | Status |
 |---|---|---|---|---|---|---|---|---|---|---|
-| F-40 | Feedback isn't emailed (Vault secret, Resend key, hourly limit) | A family waits for an answer | `ALERT: Feedback not emailed` after an hour | Read it in the SQL Editor; [rotate the key](secrets.md#rotate-a-resend-key) | 4 | 3 | 6 | 72 | 36 | Covered |
+| F-40 | Feedback isn't emailed (Vault secret, Resend key, hourly limit) | A family waits for an answer | `ALERT: Feedback not emailed` after an hour | Read it in the SQL Editor; [rotate the key](secrets.md#rotate-a-resend-key) | 4 | 3 | 6 | 72 | 36 | Covered, except F-43 |
 | F-41 | Feedback is flooded with spam | Real messages are buried | `ALERT: Feedback flood` | Banner and turn the form off; add a CAPTCHA | 2 | 3 | 3 | 18 | 18 | Covered |
 | F-42 | Resend's daily limit (100) is reached | Sign-in emails stop for the day | Daily report: sign-ins drop; Resend's dashboard | Resend's paid plan | 7 | 2 | 8 | 112 | 84 | Partial: watch sign-ins after sharing widely |
+| F-43 | Resend refuses a feedback email (a revoked key, an address it won't accept) | As F-40, but the message is marked emailed, because the database only hands it over | Nothing: `Feedback not emailed` reads that mark | Read feedback in the SQL Editor; Resend → Logs | 4 | 3 | 9 | 108 | 36 | Gap → have the monitor alert on failed rows in `net._http_response` |
 
 ### Monitoring and operations
 
@@ -101,6 +106,7 @@ Status: **Covered**, **Partial** (works, with a known gap), **Gap → fix**, **A
 | F-51 | GitHub turns off the public repo's scheduled workflows | The watch stops | The February–March check | Enable the workflow | 5 | 2 | 7 | 70 | 70 | Covered |
 | F-52 | An alert arrives and nobody sees it | Any of the above lasts longer | Nothing | GitHub Mobile notifications; a Gmail filter marking alerts important | 7 | 4 | 8 | 224 | 112 | Gap → turn on GitHub Mobile notifications |
 | F-53 | A dependency has a known vulnerability | Mostly the tests and workflows | Dependabot pull requests and alerts | Merge after CI passes | 3 | 3 | 3 | 27 | 27 | Covered |
+| F-54 | A change is published while a family has the planner open | For up to 10 minutes their browser can mix old and new files: "The planner couldn't load" | `ALERT: App works for visitors`, if the check runs in that window | It clears by itself; Try again works once the old files expire | 4 | 3 | 7 | 84 | 84 | Accepted: brief, and publishing at quiet times avoids most of it |
 
 ### Security
 
@@ -108,10 +114,11 @@ Status: **Covered**, **Partial** (works, with a known gap), **Gap → fix**, **A
 |---|---|---|---|---|---|---|---|---|---|---|
 | F-60 | A secret is committed | Data exposed | Push protection blocks it; secret scanning alerts | [secrets.md](secrets.md#if-a-secret-may-have-leaked) | 9 | 2 | 2 | 36 | 36 | Covered: secret scanning and push protection are on (checked 2026-11-11) |
 | F-61 | A GitHub Action we use is compromised | Our workflows run someone else's code | Unlikely to notice | Pin Actions to commit SHAs | 9 | 1 | 8 | 72 | 72 | Accepted until after December 11 ([security.md](security.md#known-gaps-and-what-to-do-about-them)) |
-| F-62 | Someone sends sign-in emails to others' addresses | Unwanted emails | Supabase's rate limit; Resend's logs | Lower the limit; add a CAPTCHA | 3 | 2 | 6 | 36 | 36 | Covered |
+| F-62 | Someone sends sign-in emails on purpose, to others' addresses or made-up ones | Unwanted emails; the hourly (30) and daily (100) limits run out, so no family can sign in; bounces can get the sender suspended | Supabase's rate limit; Resend's logs | Lower the limit; add a CAPTCHA | 7 | 2 | 6 | 84 | 42 | Partial → decide on a CAPTCHA before sharing widely; alert when sign-in emails near the hourly limit |
 | F-63 | The owner's GitHub, Supabase or email account is taken over | Everything | Login alerts from each service | 2FA; [secrets.md](secrets.md#if-a-secret-may-have-leaked) | 10 | 1 | 6 | 60 | 60 | Covered: 2FA on all |
 | F-64 | A script is injected into the page | Sessions stolen | Tests; CSP; signed-in reports "CSP blocked …" | [security.md](security.md) | 10 | 1 | 2 | 20 | 20 | Covered |
 | F-65 | Someone shares a link that signs a family in to the sender's account | The plan on that device is added to a stranger's account | Browser tests on every change | The planner never accepts a sign-in from the address (v1.3.1); sign-in is by typed code only ([security.md](security.md#controls-layer-by-layer)) | 10 | 1 | 2 | 20 | 20 | Covered |
+| F-66 | An account is deleted, but another device still has the plan | The copy stays there, and signing in on that device makes a new account with it | — | The delete screen says so (v1.3.1); sign out and remove the plan on each device | 5 | 2 | 8 | 80 | 80 | Accepted: a device's own copy belongs to whoever holds the device |
 
 ### People
 

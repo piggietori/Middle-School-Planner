@@ -11,7 +11,7 @@ import {st, replacePlan} from "./state.js";
 import {ui} from "./ui.js";
 import {$, esc, toast} from "./util.js";
 
-export const acct = {status:"out", email:"", userId:"", sent:"", lastEmail:"", saving:"saved", open:false, error:"", ask:"", deleting:false, lost:"", codeBusy:false};
+export const acct = {status:"out", email:"", userId:"", sent:"", lastEmail:"", saving:"saved", open:false, error:"", ask:"", deleting:false, lost:"", codeBusy:false, whose:""};
 let backend=null, planId=null, synced=null, timer=null, busy=null, warned=false, sessionTimer=null, sessionNext=null, logTimer=null, opened=false, leaving=false;
 
 const store = {
@@ -21,6 +21,9 @@ const store = {
 const UNSYNCED="d20plan-unsynced"; // this device has changes the account doesn't have yet
 const OWNER="d20plan-user";        // whose account the plan on this device was last synced with
 const EMAIL="d20plan-email";       // the account this device signed in to; forgotten only when the family signs out
+const FROM="d20plan-from";         // the email of the account the plan on this device was last synced with. Kept
+                                   // through signing out, so a different person signing in here is asked before
+                                   // that plan is added to their account (F-19); forgotten when the plan is removed
 const PENDING="d20plan-pending";   // {email, at}: a sign-in email sent from here in the last hour, so its code box
                                    // survives the page reloading (phones often reload it while you read your email)
 const CODE_LIFE=30*60e3;           // as long as the code works: Supabase → Email OTP Expiration (1800 seconds)
@@ -36,7 +39,8 @@ async function getBackend(){
 
 export async function initAccount(){
   addEventListener("online",()=>acct.status==="error"?retry():flush());
-  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")refresh();else{saveSession();sendLogs()}});
+  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")refresh();
+    else{clearTimeout(timer);flush();saveSession();sendLogs()}}); // leaving: send a change made a moment ago now, not in 700 ms
   const hash=new URLSearchParams(location.hash.slice(1));
   // Sign-in is by code only (v1.3.0). A link that arrives with a sign-in or an error in the address is never
   // accepted: an old email's link, or one made to sign this device in to somebody else's account.
@@ -85,10 +89,18 @@ async function signedIn(session){
     planId=await backend.openPlan(CYCLE);
     const remote=fromRows(await backend.load(planId)), local=st;
     // New to this device, or changed here while offline: combine. Otherwise the account has the latest plan.
-    const firstHere=store.get(OWNER)!==session.user.id, combine=firstHere||store.get(UNSYNCED)==="1";
+    const firstHere=store.get(OWNER)!==session.user.id;
+    let combine=firstHere||store.get(UNSYNCED)==="1";
+    // The plan on this device came from someone else's account (a shared computer, or a sign-in that lapsed):
+    // ask before adding their schools and notes to this account.
+    const from=store.get(FROM);
+    if(combine&&from&&from.toLowerCase()!==acct.email.toLowerCase()&&!isEmpty(local)){
+      combine=await askWhose(from);
+      if(acct.status!=="loading"||acct.userId!==session.user.id)return; // the sign-in ended while the question was up
+    }
     synced=toRows(remote);
     replacePlan(combine?mergePlans(remote,local):remote);
-    store.set(OWNER,session.user.id);
+    store.set(OWNER,session.user.id);store.set(FROM,acct.email);
     await resumeSession();
     acct.status="in";
     setLogging(true,queueLogs);
@@ -96,7 +108,7 @@ async function signedIn(session){
     if(firstHere)track("sign_in",{method:"code",claimed_local:combine&&!isEmpty(local)});
     render();renderAccount();
     await flush();
-    if(firstHere)toast(isEmpty(local)?"Signed in. Your plan is loaded.":isEmpty(remote)?"Signed in. Your plan is saved to your account.":"Signed in. We added this device's plan to your account.");
+    if(firstHere)toast(isEmpty(local)||!combine?"Signed in. Your plan is loaded.":isEmpty(remote)?"Signed in. Your plan is saved to your account.":"Signed in. We added this device's plan to your account.");
   }catch(e){
     reportError(e,"sign-in");acct.status="error";renderAccount();
     toast("Couldn't reach your account. Your plan is still saved on this device.");
@@ -104,8 +116,17 @@ async function signedIn(session){
 }
 const retry=()=>lastSession&&signedIn(lastSession);
 
+// Whose plan is this? Shows the question in the account sheet and waits for the answer: true to add the plan on
+// this device to the account, false to leave it out (the device then shows the account's plan).
+let answerWhose=null;
+function askWhose(from){
+  acct.ask="whose";acct.whose=from;acct.open=true;renderAccount();
+  return new Promise(resolve=>{answerWhose=add=>{answerWhose=null;acct.ask="";acct.whose="";acct.open=false;renderAccount();resolve(add)}});
+}
+
 function signedOut(){
   setLogging(false);
+  answerWhose?.(false); // a question that was waiting for an answer no longer applies
   acct.status="out";acct.email="";acct.userId="";planId=null;synced=null;
   store.set(UNSYNCED,"");store.set(OWNER,"");
   renderAccount();render();
@@ -118,6 +139,8 @@ export function queueSync(){
   clearTimeout(timer);timer=setTimeout(flush,700);
 }
 
+const RETRY_FIRST=5e3, RETRY_MAX=5*60e3;
+let retryIn=0; // how long until the next try after a failed save; 0 when the last save worked
 async function flush(){
   if(acct.status!=="in")return;
   while(busy)await busy; // one save at a time
@@ -125,12 +148,15 @@ async function flush(){
   if(isNoop(d)){store.set(UNSYNCED,"");return setSaving("saved")}
   setSaving("saving");
   busy=backend.save(planId,d).then(()=>{
-    synced=next;warned=false;
+    synced=next;warned=false;retryIn=0;
     if(isNoop(diffRows(synced,toRows(st)))){store.set(UNSYNCED,"");setSaving("saved")}
   },e=>{
     console.error(e);setSaving("failed");
     track("sync_failed",{error_code:String(e?.code||e?.status||"network").slice(0,40)});
     if(!warned){warned=true;toast("Couldn't save to your account. We'll keep trying. Your plan is safe on this device.")}
+    // Keep trying by ourselves: after 5 seconds, then twice as long each time, up to every 5 minutes (F-13).
+    retryIn=retryIn?Math.min(retryIn*2,RETRY_MAX):RETRY_FIRST;
+    clearTimeout(timer);timer=setTimeout(flush,retryIn);
   });
   await busy;busy=null;
 }
@@ -214,7 +240,7 @@ export async function signOut(keep){
   store.set(EMAIL,"");signedOut();leaving=false;acct.open=false;acct.ask="";renderAccount();
   toast(keep?"Signed out. Your plan is still on this device.":"Signed out. Your plan was removed from this device.");
 }
-function forgetDevice(){replacePlan(null);forgetSession();store.set(UNSYNCED,"")}
+function forgetDevice(){replacePlan(null);forgetSession();store.set(UNSYNCED,"");store.set(FROM,"")}
 
 // Download my data (J7): everything the account holds about this person's plan, as JSON.
 export async function exportData(){
@@ -253,12 +279,16 @@ const SAVING={saving:"Saving…",saved:"✓ All changes saved to your account",f
 function setSaving(s){acct.saving=s;if(acct.open)renderAccount()}
 
 function sheetBody(){
+  if(acct.ask==="whose")return `<h2>Whose plan is on this device?</h2>
+    <p style="margin:0">This device has a plan from <b>${esc(acct.whose)}</b>, and you're signing in as <b>${esc(acct.email)}</b>. Add that plan's schools, visits and notes to your account?</p>
+    <div class="row"><button class="btn primary" data-acct="whose-skip">No, use my account's plan</button><button class="btn" data-acct="whose-add">Yes, add it to my account</button></div>
+    <p class="muted small" style="margin:0">If you choose No, this device shows your account's plan. The other plan stays in the account of ${esc(acct.whose)}.</p>`;
   if(acct.status==="in"&&acct.ask==="signout")return `<h2>Sign out on this device</h2>
     <p style="margin:0">Keep a copy of your plan on this device? Choose <b>Remove</b> on a shared or borrowed computer. Your account keeps your plan either way.</p>
     <div class="row"><button class="btn primary" data-acct="signout-keep">Keep a copy and sign out</button><button class="btn" data-acct="signout-remove">Remove it and sign out</button></div>
     <div><button class="linkbtn" data-acct="cancel">Cancel</button></div>`;
   if(acct.status==="in"&&acct.ask==="delete")return `<h2>Delete your account</h2>
-    <p style="margin:0">This permanently deletes your account and the plan saved in it: your schools, visits, steps and notes. It can't be undone. If someone else shares your plan, it stays for them.</p>
+    <p style="margin:0">This permanently deletes your account and the plan saved in it: your schools, visits, steps and notes. It can't be undone. If someone else shares your plan, it stays for them. A copy also stays on any other device where you used the planner, until you sign out or clear it there.</p>
     <p class="small muted" style="margin:0">Want a copy first? <button class="linkbtn" data-acct="export">Download my data</button></p>
     ${acct.error?`<div class="notice" role="alert"><div>${esc(acct.error)} Still stuck? ${feedbackButton("Tell us")}</div></div>`:""}
     <label for="acct-delete" class="lab">Type DELETE to confirm</label>
@@ -323,6 +353,7 @@ document.addEventListener("click",e=>{
   const t=e.target.closest("[data-acct]");
   if(!t)return;
   const a=t.dataset.acct;
+  if(answerWhose){if(a==="whose-add"||a==="whose-skip")answerWhose(a==="whose-add");return} // that question needs an answer first
   if(a==="close"&&e.target!==t&&!e.target.closest("button[data-acct]"))return; // clicks inside the sheet
   if(a==="open"){acct.open=true;renderAccount();document.getElementById("acct-email")?.focus()}
   if(a==="close"){acct.open=false;acct.ask="";acct.error="";renderAccount()}
@@ -351,4 +382,4 @@ document.addEventListener("submit",e=>{
   if(email)sendCode(email);
 });
 document.addEventListener("input",e=>{if(e.target.id==="acct-delete")canDelete()});
-document.addEventListener("keydown",e=>{if(e.key==="Escape"&&acct.open){acct.open=false;acct.ask="";acct.error="";renderAccount()}});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&acct.open&&!answerWhose){acct.open=false;acct.ask="";acct.error="";renderAccount()}});

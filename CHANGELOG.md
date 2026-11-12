@@ -14,6 +14,23 @@ feature the middle one (1.1 → 1.2), and a change that needs families or the da
   account, and the plan on that device would have been added to it. Such a link now gets "That sign-in link has
   expired" and nothing is contacted (F-65 in [docs/failure-modes.md](docs/failure-modes.md)).
 
+- **Signing in on a device that has someone else's plan asks first.** On a shared computer, or after another
+  person's sign-in lapsed, their schools and notes were added to the account of whoever signed in next. The planner
+  now asks "Whose plan is on this device?" and adds it only if you say yes.
+- **Limits in the database,** so one person or one script can't fill it and stop everyone's saves: note lines up to
+  200 characters, 200 feedback messages an hour, and 1,000 usage events and 100 error reports an hour per person.
+  Apply `20261113120000_limits.sql` in the SQL Editor.
+
+### Fixed
+- **Older phones can open the planner.** The planner needed a browser from 2024 or later (an iPhone 8 or X, which
+  stop at iOS 16, got "The planner couldn't load"). It now works back to about 2022, and a browser that's still too
+  old is told so, not to check its connection.
+- **Two tabs no longer undo each other.** With the planner open in two tabs, the one that saved last wiped the
+  other's changes. Each tab now picks up the other's changes as they happen.
+- **A failed save is tried again by itself:** after 5 seconds, then less often, up to every 5 minutes. Before, it
+  waited for your next change or for the device to come back online. A change is also sent as you leave the tab.
+- **Deleting your account says that other devices keep their copy** until you sign out or clear it there.
+
 ### Changed
 - **Code-only sign-in, tidied up:** the sign-in email is no longer asked for a return address, the `sign_in` event
   always records `code`, and the docs name both emails that must show the code and no link (Magic Link and Confirm

@@ -50,7 +50,7 @@ Kept small on purpose. No names, notes text, or home location in event propertie
 
 **Goal:** see which schools fit, without creating an account.
 
-1. Opens the site → **Home**: countdown, steps (step 1 is "You are here"), "Start here" tip (only while the plan is still empty; it goes away for good after the first choice). Reminders (deadline, upcoming visits, "Did you go?", notes nudges) share one box on Home.
+1. Opens the site → **Home**: countdown, steps (step 1 is "You are here"), "New here?" tip (Find schools first, the plan stays on this device; Sign in to save or open it from another device; only while the plan is still empty; it goes away for good after the first choice). Reminders (deadline, upcoming visits, "Did you go?", notes nudges) share one box on Home.
 2. Goes to **Find schools** → picks neighborhood, travel distance, priorities, programs. The list re-ranks as they go.
 3. Opens a school → detail sheet → **Save**. Step 1 and step 2 check off.
 4. Goes to **Dates** → "I'm going" on an open house → "Add to my calendar".
@@ -154,7 +154,7 @@ Kept small on purpose. No names, notes text, or home location in event propertie
 
 **Signed out without choosing it:**
 - The sign-in ends on its own (Supabase ended the session, or it's gone at the next visit) → the plan stays on the device; a toast and Home say "Signed out on this device: your plan is still here", and the sign-in sheet says "Sign in again" with the email filled in. Signing in merges anything changed meanwhile. "Not you? Forget this email" clears it on a shared computer.
-- The browser lost everything (site data cleared, a cleaner app, a new device, a different address) → the device can't know there was an account, so the blank start's "Start here" tip adds "Already made a plan? Sign in to get it back."
+- The browser lost everything (site data cleared, a cleaner app, a new device, a different address) → the device can't know there was an account, so the blank start's "New here?" tip says "Sign in if you want to save or access your plan from another device"
 
 ---
 

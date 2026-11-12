@@ -365,7 +365,7 @@ test("deleting an account needs DELETE typed, then removes the account and, if c
   await expect(page.locator("#acct")).toHaveText("Sign in");
   expect(server.deleted).toEqual(["a"]);
   expect(server.byUser.a).toBeUndefined();
-  await expect(page.getByText("Start here:")).toBeVisible();
+  await expect(page.getByText("New here?")).toBeVisible();
 });
 
 test("signed in, usage events and errors are sent, with IDs only (logging)", async ({browser}) => {

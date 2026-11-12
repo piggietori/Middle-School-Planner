@@ -18,6 +18,8 @@ Making it clear that the application only counts once it's submitted in MySchool
 - Each school's details say what to search for in MySchools.
 
 ### Changed
+- Home on a new device: the first tip says what to do first (Find schools, then Save) and that the plan is kept on this
+  device, and separately that signing in saves it or brings it from another device.
 - Home: the countdown says "days left to apply in MySchools". Steps 6 and 7 are marked **Required · in MySchools**.
 - Home: the Next up box is now **Reminders**, only for things with a date (deadline, visits, notes, offers). It no
   longer repeats the next step, which the steps already show.

@@ -10,15 +10,21 @@ test.beforeEach(async ({page}) => {
 
 test("a blank start points families who already made a plan to sign in and get it back", async ({page}) => {
   await page.goto("/");
-  await expect(page.getByText("Already made a plan?")).toBeVisible();
+  await expect(page.getByText("if you want to save or access your plan from another device")).toBeVisible();
   await page.locator(".notice").getByRole("button", {name: "Sign in"}).click();
   await expect(page.locator("#acctsheet h2")).toHaveText("Keep your plan on all your devices");
+});
+
+test("the New here tip's Find schools button opens Find schools", async ({page}) => {
+  await page.goto("/");
+  await page.locator(".notice").getByRole("button", {name: "Find schools"}).click();
+  await expect(page.locator(".tab[aria-current=page]")).toHaveAttribute("data-tab", "find");
 });
 
 test("first visit: pick a neighborhood, save a school, plan a visit, and keep it after reload", async ({page}) => {
   await page.goto("/");
   await expect(page.locator(".hero .big")).toHaveText("32");
-  await expect(page.getByText("Start here:")).toBeVisible();
+  await expect(page.getByText("New here?")).toBeVisible();
 
   await page.locator('.tab[data-tab="find"]').click();
   await page.selectOption("#home", "dyker");
@@ -29,7 +35,7 @@ test("first visit: pick a neighborhood, save a school, plan a visit, and keep it
   await first.getByRole("button", {name: "☆ Save"}).click();
   await expect(page.locator("#toast")).toHaveText("Saved to My list");
   await page.locator('.tab[data-tab="home"]').click();
-  await expect(page.getByText("Start here:")).toHaveCount(0); // only on the very first visit
+  await expect(page.getByText("New here?")).toHaveCount(0); // only on the very first visit
   await expect(page.getByText("Keep your plan safe:")).toBeVisible();
 
   await page.locator('.tab[data-tab="dates"]').click();
@@ -67,7 +73,7 @@ test("reminders are grouped in one box, and there's no missed-open-house notice"
   await expect(box).toContainText("today");
   await expect(box).toContainText("Did you go?");
   await expect(page.locator("#app .notice")).toHaveCount(3); // reminders + Keep your plan safe + what the planner is (no pilot notice: PILOT is off)
-  await expect(page.getByText("Start here:")).toHaveCount(0);
+  await expect(page.getByText("New here?")).toHaveCount(0);
   await expect(page.getByText("Missed an open house")).toHaveCount(0);
 });
 

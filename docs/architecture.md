@@ -1,7 +1,8 @@
 # Architecture
 
 How the planner is put together, what data lives where, and how a family's plan moves between their devices.
-For the journeys this supports, see [journeys.md](journeys.md).
+For the journeys this supports, see [journeys.md](journeys.md). For the outside services in plain words, see
+[ecosystem.md](ecosystem.md).
 
 ## The picture
 

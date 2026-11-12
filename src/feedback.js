@@ -3,6 +3,7 @@
    the family chooses whether to leave a reply address. Nothing is sent until they press Send. */
 import {acct} from "./account.js";
 import {SUPABASE_KEY, SUPABASE_URL} from "./config.js";
+import {track} from "./log.js";
 import {ui} from "./ui.js";
 import {$, esc, toast} from "./util.js";
 
@@ -50,6 +51,7 @@ async function send(){
       headers:{apikey:SUPABASE_KEY,"Content-Type":"application/json",Prefer:"return=minimal"},
       body:JSON.stringify({kind:fb.kind,message,reply_to:reply||null,page:[ui.tab,ui.openDbn].filter(Boolean).join(" · ")})});
     if(!r.ok)throw new Error(`${r.status} ${(await r.text()).slice(0,200)}`);
+    track("feedback_sent",{kind:fb.kind});
     fb.sending=false;$("#fb-message").value="";closeFeedback();
     toast("Thanks! Your feedback was sent.");
   }catch(e){

@@ -12,8 +12,8 @@ is a change there, with its "Last updated" date.
 | The plan: home neighborhood, priorities, saved schools, visits, steps | The device; the account if signed in; backups | It's the planner | The household; the project owner | Deleted by the family (device: sign out and remove, or clear the browser) |
 | Notes about schools (rating, likes, concerns) | Same as the plan | Comparing schools | Same as the plan | Same as the plan |
 | Where they left off (tab, open school) | The device; the account if signed in | Resume on any device | The person; the project owner | The account is deleted |
-| Usage events: app opened, signed in, school saved or removed, visit marked, step done, save failed. IDs only | Supabase `events` (signed in only) | Knowing which features are used and where people get stuck | The project owner only | 1 year, then deleted automatically (backups keep copies 90 days more). Unlinked from the person if they delete their account |
-| Errors: message, where in the app, browser type | Supabase `client_errors` (signed in only) | Fixing problems | The project owner only | 90 days, then deleted automatically (backups: 90 days more). Unlinked on account deletion |
+| Usage events ([the list](journeys.md#events-we-log-v2)): tabs opened, schools opened, saved or removed, open houses planned or visited, a note added (never its text), steps done, preferences changed (not their values), list copied, feedback sent, save failed. IDs only | Supabase `events`, from every visit on the live site. Signed out: no user, and a `visit` ID made fresh on each page load and never stored, so visits can't be linked | Knowing which features are used and where people get stuck | The project owner only | 1 year, then deleted automatically (backups keep copies 90 days more). Unlinked from the person if they delete their account |
+| Errors: message, where in the app, browser type | Supabase `client_errors` (signed in or not; signed out, with no user) | Fixing problems | The project owner only | 90 days, then deleted automatically (backups: 90 days more). Unlinked on account deletion |
 | Feedback: what it's about, the message, a reply address if they give one, and which tab or school they were on | Supabase `feedback` (anyone, signed in or not; never linked to an account); emailed to the owner | Answering problems and fixing wrong dates | The project owner; Resend while sending it | 1 year, then deleted automatically (backups: 90 days more). The email stays in the owner's inbox until deleted |
 
 **What we don't keep:**
@@ -42,11 +42,11 @@ We also don't record anything about visitors who aren't signed in, unless they s
 | Service | When | What it learns |
 |---|---|---|
 | GitHub Pages | Every visit | IP address and browser, like any website |
-| Supabase | Signed in, or when sending feedback | The account and plan, as above; or the feedback, without the account |
+| Supabase | Every visit to the live site (usage counts); signed in; or when sending feedback | Usage counts and errors; the account and plan, as above; or the feedback, without the account |
 | Google Calendar, MySchools, school websites, InsideSchools, Google Maps | Only when the family clicks a link | Whatever that site normally collects |
 
-The fonts are served from the site itself, so visiting doesn't contact Google. The planner has no ads, analytics
-scripts or trackers, and its [Content-Security-Policy](security.md#content-security-policy) stops the page contacting
+The fonts are served from the site itself, so visiting doesn't contact Google. The planner has no ads, cookies, third-party analytics
+scripts or trackers (its own usage counts go to its own database, above), and its [Content-Security-Policy](security.md#content-security-policy) stops the page contacting
 any other server.
 
 ## Children

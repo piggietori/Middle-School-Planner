@@ -37,7 +37,7 @@ For the journeys this supports, see [journeys.md](journeys.md).
  │ match score (pure functions)       │   │  user_session (where you left off)      │
  │ plan in localStorage (always)      │◄─►│  events, client_errors (insert only)    │
  │ sync with the account (signed in)  │   │  feedback (insert only, anyone)         │
- │ errors + usage events (signed in)  │──►│                                         │
+ │ errors + usage counts (every visit)│──►│                                         │
  │ feedback (only when sent)          │──►│                                         │
  └────────────────────────────────────┘   └───────────────┬─────────────────────────┘
                                                           │ pg_dump, encrypted

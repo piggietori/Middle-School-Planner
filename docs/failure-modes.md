@@ -34,7 +34,7 @@ Sorted by RPN after the planned fixes: what's still worth watching.
 | F-10 | The sign-in email doesn't arrive | 336 → 140 | Check delivery with the pilot families (the gate in [launch.md](launch.md)) |
 | F-09 | The browser is too old to run the planner | 126 → 126 | Accepted: works back to about 2022 since v1.3.1; older browsers are told why |
 | F-55 | GitHub runs scheduled jobs late, or skips them | 144 → 36 | The clock's token was set 2026-11-12: watch for 3 days that the jobs arrive on time |
-| F-05 | The app breaks only for signed-out visitors | 192 → 120 | Accepted after the browser check: signed-out visitors send nothing, by design |
+| F-05 | The app breaks only for signed-out visitors | 192 → 120 | Accepted after the browser check. Since usage reports, signed-out visitors send anonymous errors too ([operations.md](operations.md#usage-reports)) |
 | F-30 | We publish a wrong date | 144 → 120 | Accepted: review and checks catch most; the pilot notice says to confirm with schools |
 | F-52 | An alert arrives and nobody sees it | 224 → 112 | Either a Gmail filter marking `ALERT:` emails important, or GitHub Mobile notifications for `planner-ops` |
 

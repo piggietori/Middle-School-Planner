@@ -100,8 +100,41 @@ test("signed-out visitors can't read anything or open a plan", async () => {
   for (const t of ["households", "household_members", "plans", "saved_schools", "visits", "step_progress", "school_notes", "user_session", "events", "client_errors", "feedback"])
     await denied(db.query(`select * from public.${t}`));
   await denied(db.query("select public.open_plan('2027')"));
-  await denied(db.query("insert into public.events (name) values ('app_open')"));
   await denied(db.query("select public.delete_my_account()"));
+});
+
+test("signed-out visitors add usage counts with no user, and can't read them or the reports", async () => {
+  await as(null);
+  await db.query("insert into public.events (name, props, visit) values ('tab_view', '{\"tab\": \"find\"}', '00000000-0000-4000-8000-0000000000f0')");
+  await db.query("insert into public.client_errors (message, context) values ('boom', 'render')");
+  await denied(db.query("insert into public.events (user_id, name) values ($1, 'app_open')", [A]));
+  await denied(db.query("insert into public.client_errors (user_id, message) values ($1, 'x')", [A]));
+  await denied(db.query("insert into public.events (name) values ('anything')"), "23514");
+  await denied(db.query("select * from public.events"));
+  for (const v of ["daily", "pages", "funnel", "steps", "schools", "failures", "summary"])
+    await denied(db.query(`select * from reports.${v}`));
+  await as(A);
+  await denied(db.query("select * from reports.summary"));
+});
+
+test("the reports count visits, engagement and failures", async () => {
+  await db.exec("reset role");
+  const v1 = "00000000-0000-4000-8000-0000000000f1", v2 = "00000000-0000-4000-8000-0000000000f2";
+  await db.query(`insert into public.events (user_id, visit, name, props) values
+    (null, $1, 'app_open', '{"tab": "home", "signed_in": false}'), (null, $1, 'tab_view', '{"tab": "find"}'),
+    (null, $1, 'school_opened', '{"dbn": "20K187"}'), (null, $1, 'school_saved', '{"dbn": "20K187"}'),
+    ($3, $2, 'app_open', '{"tab": "list", "signed_in": true}'), ($3, $2, 'note_added', '{"part": "pros"}'),
+    ($3, $2, 'step_done', '{"step_id": "s7"}'), ($3, $2, 'sync_failed', '{"error_code": "network"}')`, [v1, v2, B]);
+  await db.query("insert into public.client_errors (message, user_agent) values ('oops', 'Mozilla/5.0 (iPhone)')");
+  const sum = Object.fromEntries((await rows("select metric, last_7_days::int as n from reports.summary")).map(r => [r.metric, r.n]));
+  assert.ok(sum.Visits >= 2 && sum["Signed-in visits"] >= 1 && sum["Schools saved"] >= 1 && sum["Notes added"] >= 1, JSON.stringify(sum));
+  assert.ok(sum["Marked submitted"] >= 1 && sum["Failed saves"] >= 1 && sum.Errors >= 1, JSON.stringify(sum));
+  const funnel = await rows("select stage, signed_out_visits::int as o, signed_in_people::int as i from reports.funnel order by n");
+  assert.equal(funnel.length, 9);
+  assert.ok(funnel.find(f => f.stage === "Saved a school").o >= 1 && funnel.find(f => f.stage === "Marked submitted").i >= 1);
+  assert.ok((await rows("select * from reports.failures where kind = 'error' and browser = 'iPhone/iPad'")).length);
+  assert.ok((await rows("select * from reports.pages where page = 'find'")).length);
+  await db.query("delete from public.events where visit in ($1, $2)", [v1, v2]); // leave the other tests' counts as they were
 });
 
 test("each person reads and writes only their own session", async () => {

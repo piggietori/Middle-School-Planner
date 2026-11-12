@@ -3,16 +3,15 @@
 import {PILOT, SESSION_KEY} from "./config.js";
 import {CYCLE} from "./data.js";
 import {feedbackButton} from "./feedback.js"; // a sign-in failure isn't logged (signed out), so let them tell us
-import {reportError, setLogging, takeLogs, track} from "./log.js";
+import {reportError, setLogging, takeLogs, track, VISIT} from "./log.js";
 import {CHILD_KEYS, toRows, fromRows, diffRows, isNoop, isEmpty, mergePlans} from "./plan-model.js";
 import {render} from "./render.js";
 import {applyRemoteSession, forgetSession} from "./session.js";
 import {st, replacePlan} from "./state.js";
-import {ui} from "./ui.js";
 import {$, esc, toast} from "./util.js";
 
 export const acct = {status:"out", email:"", userId:"", sent:"", lastEmail:"", saving:"saved", open:false, error:"", ask:"", deleting:false, lost:"", codeBusy:false, whose:""};
-let backend=null, planId=null, synced=null, timer=null, busy=null, warned=false, sessionTimer=null, sessionNext=null, logTimer=null, opened=false, leaving=false;
+let backend=null, planId=null, synced=null, timer=null, busy=null, warned=false, sessionTimer=null, sessionNext=null, logTimer=null, leaving=false;
 
 const store = {
   get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},
@@ -104,7 +103,6 @@ async function signedIn(session){
     await resumeSession();
     acct.status="in";
     setLogging(true,queueLogs);
-    if(!opened){opened=true;track("app_open",{tab:ui.tab})}
     if(firstHere)track("sign_in",{method:"code",claimed_local:combine&&!isEmpty(local)});
     render();renderAccount();
     await flush();
@@ -227,7 +225,7 @@ async function sendLogs(){
   if(acct.status!=="in")return;
   const {events,errors}=takeLogs();
   if(!events.length&&!errors.length)return;
-  try{await backend.log(events.map(e=>({user_id:acct.userId,name:e.name,props:e.props})),errors.map(e=>({user_id:acct.userId,...e})))}
+  try{await backend.log(events.map(e=>({user_id:acct.userId,name:e.name,props:e.props,visit:VISIT})),errors.map(e=>({user_id:acct.userId,...e})))}
   catch(e){console.error(e)} // dropped, not retried: these are only for us
 }
 

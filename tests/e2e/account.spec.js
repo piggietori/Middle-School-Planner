@@ -379,9 +379,10 @@ test("signed in, usage events and errors are sent, with IDs only (logging)", asy
   await page.locator("#app [data-save]").first().click();
   await page.locator("#app").evaluate(app => app.setAttribute("onclick", "throw new Error('test error')"));
   await page.locator("#app h2").first().click(); // an error in the page that nothing catches
-  await expect.poll(() => server.events.map(e => e.name).sort()).toEqual(["app_open", "school_saved", "sign_in"]);
+  await expect.poll(() => server.events.map(e => e.name).sort()).toEqual(["app_open", "school_saved", "sign_in", "tab_view"]);
   await expect.poll(() => server.errors.map(e => e.message)).toEqual(["test error"]);
   expect(server.events.every(e => e.user_id === "a")).toBe(true);
+  expect(new Set(server.events.map(e => e.visit)).size).toBe(1);
   expect(server.events.find(e => e.name === "school_saved").props).toEqual({dbn: expect.stringMatching(/^\d{2}[KMXQR]\d{3}$/)});
   expect(server.errors[0].context).toMatch(/^page · \/ · find$/);
 });

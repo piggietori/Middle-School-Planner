@@ -94,3 +94,19 @@ test("after the deadline the list is read-only and Next up says when offers arri
   await expect(page.locator("#app")).toContainText("Didn't submit?"); // the planner can't know whether they did
   await expect(page.locator("[data-mv]")).toHaveCount(0);
 });
+
+// Usage counts from a signed-out visit (docs/journeys.md "Events we log"): IDs only, no person, one visit ID.
+// They're sent only from the live site, so the test turns them on.
+test("a signed-out visit sends usage counts with no person and no note text", async ({page}) => {
+  const sent = [];
+  await page.addInitScript(() => localStorage.setItem("d20-usage-test", "1"));
+  await page.route(/\/rest\/v1\/events$/, r => { sent.push(...r.request().postDataJSON()); r.fulfill({status: 201, body: ""}); });
+  await page.goto("/");
+  await page.locator('.tab[data-tab="find"]').click();
+  await page.locator("#app [data-open]").first().click();
+  await page.locator("#sheet [data-save]").first().click();
+  await expect.poll(() => sent.map(e => e.name), {timeout: 15000}).toEqual(["app_open", "tab_view", "school_opened", "school_saved"]);
+  expect(sent[0].props).toEqual({tab: "home", signed_in: false});
+  expect(new Set(sent.map(e => e.visit)).size).toBe(1);
+  expect(sent.every(e => !("user_id" in e))).toBe(true);
+});

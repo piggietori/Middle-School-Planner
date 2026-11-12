@@ -16,7 +16,7 @@ more widely. Fill in each step's date as you go.
 | 5. Feedback emails | Resend → API Keys → create one with **Sending access** for the domain only. In the Supabase SQL Editor, run (with your values, never in a file or chat): `select vault.create_secret('<the key>', 'resend_api_key'); select vault.create_secret('<your email>', 'feedback_to'); select vault.create_secret('D20 Planner <feedback@d20mail.torilam.com>', 'feedback_from');` | |
 | 6. The private ops repository | Create `piggietori/planner-ops`, **private**. Add secrets `SUPABASE_DB_URL` and `BACKUP_PASSPHRASE`, and the variable `SITE_URL`. Delete both secrets from the public repo. **Watch → All activity**, so alerts email you | |
 | 7. Invite-only for the pilot | Supabase → Authentication → Sign In / Providers → turn off **Allow new users to sign up**. Invite each family from **Users → Invite user** | |
-| 8. Hear about problems | **healthchecks.io** (free): create a check with period 1 hour and grace 1 hour, and put its ping URL in the `planner-ops` secret `HEALTHCHECK_URL`. Public repo → Settings → **Code security**: turn on secret scanning and push protection. Install **GitHub Mobile** and allow notifications for `planner-ops` | |
+| 8. Hear about problems | **healthchecks.io** (free): create a check with period 1 hour and grace 4 hours (GitHub runs the hourly monitor late, about every 3 hours: [operations.md](operations.md#monitoring)), and put its ping URL in the `planner-ops` secret `HEALTHCHECK_URL`. Public repo → Settings → **Code security**: turn on secret scanning and push protection. Install **GitHub Mobile** and allow notifications for `planner-ops` | |
 | 9. The restore drill | Download the newest backup from the ops repo, decrypt it, check both files open ([backups.md](backups.md#the-restore-drill)) | |
 
 **In the code (merged before the pilot):**
@@ -31,7 +31,7 @@ more widely. Fill in each step's date as you go.
 - Send feedback from the footer. It arrives in your inbox, and the reply address works.
 - In the ops repo, run *Monitor* with "Also post the daily report": the checks pass and the report posts.
 - Run *Monitor* with a wrong `site_url`: an `ALERT: Site up` issue opens and emails you. The next normal run closes it.
-- Run *Monitor* with "Run the real-browser check instead": it passes. healthchecks.io shows the hourly pings.
+- Run *Monitor* with "Run the real-browser check instead": it passes. healthchecks.io shows a ping after each run (about every 3 hours).
 
 ## The pilot (fewer than 5 households, about a week)
 

@@ -8,6 +8,11 @@ feature the middle one (1.1 → 1.2), and a change that needs families or the da
 
 ## [Unreleased]
 
+### Changed
+- **Docs: the monitor's real timing.** GitHub runs the hourly monitor about every 3 hours, sometimes less often, so
+  the healthchecks.io check now waits 4 hours before emailing, and the docs say alerts can be that late (F-55 in
+  [docs/failure-modes.md](docs/failure-modes.md)).
+
 ## [1.3.1] - 2026-11-12
 
 Fixes from a security and robustness review, before sharing with parent groups.

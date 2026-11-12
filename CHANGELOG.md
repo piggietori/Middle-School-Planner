@@ -8,12 +8,15 @@ feature the middle one (1.1 → 1.2), and a change that needs families or the da
 
 ## [Unreleased]
 
+## [1.3.1] - 2026-11-12
+
+Fixes from a security and robustness review, before sharing with parent groups.
+
 ### Security
 - **A link can no longer sign anyone in.** Sign-in has been by typed code since 1.3.0, but the planner still accepted
   a sign-in carried in a link's address. Someone could have shared a link that signed a family in to the sender's
   account, and the plan on that device would have been added to it. Such a link now gets "That sign-in link has
   expired" and nothing is contacted (F-65 in [docs/failure-modes.md](docs/failure-modes.md)).
-
 - **Signing in on a device that has someone else's plan asks first.** On a shared computer, or after another
   person's sign-in lapsed, their schools and notes were added to the account of whoever signed in next. The planner
   now asks "Whose plan is on this device?" and adds it only if you say yes.
@@ -159,7 +162,8 @@ The MVP: one HTML file, no sign-up, choices saved in the browser.
 - **My list:** put saved schools in order, with a "Ready for MySchools" guide showing school codes.
 - **Notes and compare:** your rating, likes and concerns for each school, and a side-by-side compare view.
 
-[Unreleased]: https://github.com/piggietori/Middle-School-Planner/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/piggietori/Middle-School-Planner/compare/v1.3.1...HEAD
+[1.3.1]: https://github.com/piggietori/Middle-School-Planner/releases/tag/v1.3.1
 [1.3.0]: https://github.com/piggietori/Middle-School-Planner/releases/tag/v1.3.0
 [1.2.0]: https://github.com/piggietori/Middle-School-Planner/releases/tag/v1.2.0
 [1.1.1]: https://github.com/piggietori/Middle-School-Planner/releases/tag/v1.1.1

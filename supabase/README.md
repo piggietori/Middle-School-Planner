@@ -43,6 +43,10 @@ Signed-out visitors never talk to it. School data is not here; it lives in `data
    yourself in the SQL Editor; the values never go in a file: `resend_api_key`, `feedback_to` and `feedback_from`
    ([docs/launch.md](../docs/launch.md#before-the-pilot), step 5). Until they're set, feedback is saved but not emailed.
 
+7. **The clock.** GitHub runs scheduled workflows late, so the database starts the monitor, the backup and the source
+   watch itself (`run_workflow()`, pg_cron and pg_net). It needs one more Vault secret, `github_actions_token`
+   ([docs/secrets.md](../docs/secrets.md#the-clocks-github-token)). Until it's set, the clock does nothing.
+
 ## Usage and errors
 
 Signed-in people's devices add rows to `events` (a few kinds, IDs only: see docs/journeys.md) and `client_errors`.

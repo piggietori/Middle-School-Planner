@@ -20,6 +20,7 @@ Above all of these are the **master keys**: the logins that can reset everything
 | Resend SMTP key | Replaceable | Supabase → Authentication → SMTP Settings only | No | Create a new one in Resend and paste it there | Someone could send email as the domain: [rotate the Resend keys](#rotate-a-resend-key) |
 | Resend API key (feedback emails) | Replaceable | Supabase Vault secret `resend_api_key` only. Sending access, for the domain only | No | Create a new one and [update the Vault secret](#rotate-a-resend-key) | Same as the SMTP key |
 | Feedback addresses | Private, not secret | Supabase Vault secrets `feedback_to` (your inbox) and `feedback_from` | No | Set them again in the Vault | Nothing much: `feedback_to` would get spam |
+| The clock's GitHub token | Replaceable | Supabase Vault secret `github_actions_token` only. A fine-grained token: these two repositories, **Actions: Read and write**, nothing else | No | [Make a new one](#the-clocks-github-token) | Someone could start or cancel the workflows (not read their secrets or change code). Revoke it in GitHub and make a new one |
 | Supabase account login | Master key | Password manager, with 2FA | Yes | Recover by email | They could reset everything above |
 | GitHub account | Master key | Password manager, with 2FA | Yes | Recover by email | They could read and change secrets and workflows |
 | Resend account | Master key | Password manager, with 2FA | Yes | Recover by email | They could send email as the domain and read who was emailed |
@@ -95,3 +96,21 @@ To restore into a project, see [supabase/README.md](../supabase/README.md#restor
    If a Resend key might be out, [rotate it](#rotate-a-resend-key).
 4. Supabase → Authentication → Users: delete any account you don't recognize.
 5. If a master key leaked, change that password first, then check that 2FA is still on.
+
+
+## The clock's GitHub token
+
+The database starts the scheduled jobs on time by asking GitHub to run them ([operations.md](operations.md#monitoring),
+F-55). For that it holds one GitHub token, which can run workflows in the two repositories and do nothing else.
+
+1. GitHub → your picture → Settings → Developer settings → Personal access tokens → **Fine-grained tokens** →
+   Generate new token. Name: `planner clock`. Expiration: one year (put the date in your calendar: F-56).
+   Repository access: **Only select repositories** → `Middle-School-Planner` and `planner-ops`.
+   Permissions → Repository → **Actions: Read and write**. Nothing else.
+2. In the Supabase SQL Editor (never in a file or a chat):
+   `select vault.create_secret('<the token>', 'github_actions_token');`
+   To replace it later: `select vault.update_secret((select id from vault.secrets where name = 'github_actions_token'), '<the new token>');`
+3. Check it: `select public.run_workflow('planner-ops', 'monitor.yml', '{"clock": "true"}');` then, a few seconds later,
+   `select created, status_code, left(content, 200) from net._http_response order by created desc limit 1;` shows **204**,
+   and a Monitor run appears in `planner-ops` → Actions. A 401 means the token is wrong or expired; a 422 means
+   `planner-ops` doesn't have the `clock` input yet (merge its pull request first).

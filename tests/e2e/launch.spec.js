@@ -21,7 +21,7 @@ test("with the pilot over, nothing says pilot, and My list says where the applic
   await expect(page.locator("#acctsheet")).not.toContainText("pilot");
   await page.locator("#acctsheet").getByRole("button", {name: "← Back"}).click();
   await page.locator('.tab[data-tab="list"]').click();
-  await expect(page.locator("#app")).toContainText("Your application counts only when you submit it in MySchools.");
+  await expect(page.locator("#app")).toContainText("Your list doesn't count until you submit it in MySchools.");
 });
 
 test("every page links to the privacy notice and to help, and the notice page works under the security policy", async ({page}) => {

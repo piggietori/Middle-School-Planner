@@ -278,3 +278,19 @@ details summary{cursor:pointer;font-weight:700;color:var(--accent);min-height:36
   .acct-label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
   .acct-btn .acct-dot{margin:0}
 }
+/* Required steps that happen in MySchools (6 and 7): they look different from the planner's own steps */
+.pill.req{background:var(--key-soft);color:var(--key)}
+.st-item.ms.todo .st-t{color:var(--ink)}
+.st-item.ms:not(.done):not(.current) .st-dot{border:2.5px solid var(--key);color:var(--key)}
+/* Apply in MySchools */
+.stepper.apply .st-t{color:var(--ink);font-size:1rem;margin:0}
+.ms-codes{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.ms-codes li{display:grid;grid-template-columns:auto 28px minmax(0,1fr);align-items:start;gap:10px;padding:10px;border:1px solid var(--line);border-radius:12px}
+.ms-n{font-family:var(--display);font-weight:800;color:var(--accent);font-size:1.1rem;text-align:center}
+/* Find schools: answers already given fold into one line on phones */
+.prefs-done{width:100%;justify-content:center;margin-top:8px}
+@media (min-width:800px){.prefs-sum,.prefs-done{display:none}}
+@media (max-width:799px){.prefs.folded{display:none}}
+.cmp-move{display:flex;gap:6px;margin-top:6px}
+.cmp-move button{min-width:44px;min-height:40px;border:1.5px solid var(--line);background:var(--surface);border-radius:10px;cursor:pointer;color:var(--ink)}
+.cmp-move button:disabled{opacity:.35;cursor:default}

@@ -17,7 +17,8 @@
           "t": {"type": "string", "description": "Title"},
           "d": {"type": "string", "description": "What to do"},
           "tab": {"enum": ["home", "dates", "find", "list"]},
-          "link": {"$ref": "common.schema.json#/$defs/url"}
+          "link": {"$ref": "common.schema.json#/$defs/url"},
+          "myschools": {"const": true, "description": "A required step that happens in MySchools, not in the planner"}
         },
         "additionalProperties": false
       }

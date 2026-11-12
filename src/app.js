@@ -3,23 +3,29 @@ import {reportError, track} from "./log.js";
 import {STEPS} from "./data.js";
 import {toggleSave, toggleGoing, toggleWent, setNote, stepDone} from "./plan.js";
 import {render, go} from "./render.js";
+import {toast} from "./util.js";
 import {st, persist} from "./state.js";
 import {ui} from "./ui.js";
 import {CAL_RANGE} from "./views/dates.js";
 import {msText, copyText} from "./views/list.js";
 import {renderNotes, addNote, commitDrafts, openNotes, closeSheet} from "./views/notes.js";
 import "./feedback.js";
-import {dismissPilot} from "./notices.js";
+import {dismissPilot, dismissAbout} from "./notices.js";
 import {restoreSession} from "./session.js";
 import {renderSheet} from "./views/sheet.js";
 
 /* ---------------- EVENTS ---------------- */
 document.addEventListener("click",e=>{
-  const t=e.target.closest("[data-pilot-ok],[data-tab],[data-tab-go],[data-open],[data-close],[data-save],[data-going],[data-step],[data-df],[data-w],[data-prog],[data-mv],[data-went],[data-dv],[data-cm],[data-day],[data-ostep],[data-copy],[data-copyall],[data-star],[data-addnote],[data-delnote],[data-notes],[data-lv],[data-compare]");
+  const t=e.target.closest("[data-pilot-ok],[data-about-ok],[data-apply],[data-submitted],[data-prefs],[data-tab],[data-tab-go],[data-open],[data-close],[data-save],[data-going],[data-step],[data-df],[data-w],[data-prog],[data-mv],[data-went],[data-dv],[data-cm],[data-day],[data-ostep],[data-copy],[data-copyall],[data-star],[data-addnote],[data-delnote],[data-notes],[data-lv],[data-compare]");
   if(!t)return;
   const d=t.dataset;
   if(d.close&&e.target!==t&&!e.target.closest("button[data-close]"))return; // clicks inside the sheet
   if(d.pilotOk){dismissPilot();return render()}
+  if(d.aboutOk){dismissAbout();return render()}
+  if(d.apply){commitDrafts();ui.listView="apply";return go("list")}
+  // Step 7 is only what the family tells us: they can't submit without adding programs, so step 6 is done too.
+  if(d.submitted){st.done.s7=!st.done.s7;if(st.done.s7){st.done.s6=true;track("step_done",{step_id:"s7"});toast("Marked as submitted. Offers arrive in the spring.")}persist();return render()}
+  if(d.prefs){ui.prefsOpen=!ui.prefsOpen;return render()}
   if(d.tab)return go(d.tab);
   if(d.tabGo)return go(d.tabGo);
   if(d.open){ui.openDbn=d.open;renderSheet();return}
@@ -41,8 +47,8 @@ document.addEventListener("click",e=>{
   if(d.step){st.done[d.step]=!st.done[d.step];if(st.done[d.step])track("step_done",{step_id:d.step});ui.openStep=null;persist();return render()}
   if(d.ostep){const cur=STEPS.find(s=>!stepDone(s)),openId=ui.openStep??cur?.id;ui.openStep=openId===d.ostep?"":d.ostep;return render()}
   if(d.df){ui.dateFilter=d.df;return render()}
-  if(d.w){const [k,v]=d.w.split(":");st.w[k]=+v;st.done.s1=true;persist();return render()}
-  if(d.prog){const p=d.prog;st.programs=st.programs.includes(p)?st.programs.filter(x=>x!==p):[...st.programs,p];persist();return render()}
+  if(d.w){const [k,v]=d.w.split(":");st.w[k]=+v;ui.prefsOpen=true;st.done.s1=true;persist();return render()}
+  if(d.prog){const p=d.prog;ui.prefsOpen=true;st.programs=st.programs.includes(p)?st.programs.filter(x=>x!==p):[...st.programs,p];persist();return render()}
   if(d.mv){const [i,dir]=d.mv.split(":").map(Number),a=st.saved,j=i+dir;[a[i],a[j]]=[a[j],a[i]];persist();return render()}
 });
 document.addEventListener("change",e=>{
@@ -52,6 +58,7 @@ document.addEventListener("change",e=>{
   else if(id==="subway")st.needSubway=e.target.checked;
   else if(id==="skipc")st.skipCompetitive=e.target.checked;
   else return;
+  ui.prefsOpen=true; // keep Find's answers open while they're being changed
   persist();render();
 });
 document.addEventListener("keydown",e=>{

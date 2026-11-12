@@ -16,11 +16,11 @@ export function vHome(){
   const show=(mine.length?mine:up).slice(0,5);
   const doneN=STEPS.filter(stepDone).length;
   const ask=EVENTS.filter(e=>st.going.includes(e.id)&&!st.attended.includes(e.id)&&daysUntil(e.date)<0);
-  // One setup tip at most: Start here on the very first visit, then Keep your plan safe once something is saved
+  // One setup tip at most: New here on the very first visit, then Keep your plan safe once something is saved
   // Signed out without choosing it: the plan is still here, and the account still has it.
   // A blank start may be a family whose browser lost its data: their plan is waiting in their account.
   const tip=acct.lost&&acct.status==="out"?`<b>Signed out on this device:</b> your plan is still here. <button class="linkbtn" data-acct="open">Sign in again</button> to keep it in sync with your account.`
-    :isEmpty(st)?`<b>Start here:</b> pick your neighborhood on <button class="linkbtn" data-tab-go="find">Find schools</button> so we can show distances.${acct.status==="out"?` Already made a plan? <button class="linkbtn" data-acct="open">Sign in</button> to get it back.`:""}`
+    :isEmpty(st)?`<b>New here?</b> Start with <button class="linkbtn" data-tab-go="find">Find schools</button>. Pick your neighborhood, then tap ☆ Save on schools you like. Your plan will be saved on this device.${acct.status==="out"?` <button class="linkbtn" data-acct="open">Sign in</button> if you want to save or access your plan from another device.`:""}`
     :acct.status==="out"&&st.saved.length?`<b>Keep your plan safe:</b> it's only on this device right now. <button class="linkbtn" data-acct="open">Sign in</button> to save it to your account and use it on your other devices.`:"";
   // Next up (journey J3): what to do now, most urgent first. With nothing urgent, the next step.
   const sent=!!st.done.s7; // the family said they submitted in MySchools

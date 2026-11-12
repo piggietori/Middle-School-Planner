@@ -9,9 +9,17 @@ feature the middle one (1.1 → 1.2), and a change that needs families or the da
 ## [Unreleased]
 
 ### Changed
-- **Docs: the monitor's real timing.** GitHub runs the hourly monitor about every 3 hours, sometimes less often, so
-  the healthchecks.io check now waits 4 hours before emailing, and the docs say alerts can be that late (F-55 in
-  [docs/failure-modes.md](docs/failure-modes.md)).
+- Home on a new device: the first tip says what to do first (Find schools, then Save) and that the plan is kept on this
+  device, and separately that signing in saves it or brings it from another device.
+- Home: the countdown says "days left to apply in MySchools". Steps 6 and 7 are marked **Required · in MySchools**.
+- Home: the Next up box is now **Reminders**, only for things with a date (deadline, visits, notes, offers). It no
+  longer repeats the next step, which the steps already show.
+- After the deadline, My list says "your list as it was then" (the planner can't see MySchools) and who to contact
+  if you didn't submit.
+- **Compare notes** shows your schools in your order, with ◀ ▶ to move them; it stays in step with My order.
+- Empty My list says how schools get there: tap Save on Find schools.
+- My list cards keep "See details" and "Remove"; notes and the calendar are in the school's details.
+- Find schools on a phone: answers you've already given fold into one line, so your matches come first.
 
 ## [1.3.1] - 2026-11-12
 

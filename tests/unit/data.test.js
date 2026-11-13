@@ -89,43 +89,28 @@ test("moving an open house without recording the old time is a warning; with \"w
   assert.deepEqual(warningsOf(d, {base: real}), []);
 });
 
-test("highlights that quote a number different from the data are a warning", () => {
+test("a typed highlight or concern must not repeat what the sheet shows by rule", () => {
+  const banned = ["85% of students feel safe", "Fewer students feel safe than citywide", "Top test scores: 96% math, 93% reading",
+    "Middle school reading: 69% passing", "Only 11% of students say bullying happens often", "93% of teachers would recommend the school",
+    "Very large school (1,526 students); may feel too big for some", "No subway nearby"];
+  for (const text of banned) {
+    const d = copy();
+    d.schools.schools[0].good.push(text);
+    const w = warningsOf(d);
+    assert.equal(w.length, 1, text);
+    has(w, /20K030: ".+" repeats something the sheet already shows by rule/);
+  }
+  // Numbers we don't hold, and words without a number, are ours to write.
   const d = copy();
-  d.schools.schools.find(s => s.dbn === "20K187").math = 95;
-  has(warningsOf(d), /20K187: text says "96% math" but math is 95/);
-  const ms407 = d.schools.schools.find(s => s.dbn === "20K407");
-  Object.assign(ms407, {math: 68, ela: 68});
-  has(warningsOf(d), /20K407: text says "too new for full test results"/);
+  d.schools.schools[0].concerns.push("Stable leadership; 95% attendance", "Overcrowded: some classes reach 32 students",
+    "Reading scores lag behind math", "Students report concerns about bullying and behavior", "Teachers rate the principal below the city average (64% vs 84%)");
+  assert.deepEqual(warningsOf(d), []);
 });
 
-test("survey numbers, citywide averages and school size quoted in text must match the data", () => {
-  const school = (d, dbn) => d.schools.schools.find(s => s.dbn === dbn);
-  let d = copy();
-  Object.assign(school(d, "20K030"), {safe: 70, bully: 75, teach: 60});
-  let w = warningsOf(d);
-  has(w, /20K030: text says "68% of students feel safe" but safe is 70/);
-  has(w, /20K030: text says "78% of students say bullying happens often" but bully is 75/);
-  has(w, /20K030: text says "57% of teachers would recommend" but teach is 60/);
-
-  d = copy();
-  d.schools.city_averages.bully = 61;
-  w = warningsOf(d);
-  has(w, /20K030: text says "citywide 59%" but the citywide bully average is 61/);
-  has(w, /20K192: text says "citywide 59%" but the citywide bully average is 61/);
-  assert.equal(w.length, 2); // "citywide 36%" is about high school credit, which we don't track
-
-  d = copy();
-  school(d, "20K201").size = 1482;
-  has(warningsOf(d), /20K201: text says "1,526 students" but size is 1482/);
-  d = copy();
-  school(d, "20K259").size = 1790; // "about 1,800 students"
-  assert.deepEqual(warningsOf(d), []);
-  school(d, "20K259").size = 1500;
-  has(warningsOf(d), /20K259: text says "about 1,800 students" but size is 1500/);
-
-  d = copy();
-  school(d, "20K180").teach = null;
-  has(warningsOf(d), /20K180: text says "85% of teachers would recommend" but there is no teach number in the data/);
+test("text that says a school is too new for test results is a warning once it has them", () => {
+  const d = copy();
+  Object.assign(d.schools.schools.find(s => s.dbn === "20K407"), {math: 68, ela: 68});
+  has(warningsOf(d), /20K407: text says "too new for full test results"/);
 });
 
 test("open house dates not checked for a month during application season are a warning", () => {
@@ -137,5 +122,5 @@ test("formatJson keeps the data identical and puts one field per line", () => {
   const out = formatJson(real.schools);
   assert.deepEqual(JSON.parse(out), real.schools);
   assert.match(out, /\n {6}"math": null,\n/);
-  assert.match(out, /"concerns": \["Very large school \(1,526 students\); may feel too big for some", "No subway nearby"\]/);
+  assert.match(out, /"concerns": \["No full-size gym", "Screened admission only, very competitive"\]/);
 });

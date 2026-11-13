@@ -76,11 +76,7 @@
       "admit": ["zoned", "screened", "language"],
       "admitText": "Zoned program (priority for families in the zone). Screened Superintendent's Program. Arabic Dual Language program.",
       "good": ["Arabic dual language program", "Low suspension rate (1%)"],
-      "concerns": [
-        "78% of students say bullying happens often (citywide 59%)",
-        "Only 57% of teachers would recommend the school",
-        "68% of students feel safe (citywide 80%)"
-      ],
+      "concerns": [],
       "web": "https://www.psis30marywhiteovington.org/",
       "flyer": "https://drive.google.com/file/d/10liz5qod2dh5Zs9-bLQIPPEfex2tYeEZ/view",
       "provenance": {
@@ -109,10 +105,7 @@
       "tags": ["arts", "honors", "sped"],
       "admit": ["zoned", "screened"],
       "admitText": "Zoned program (priority for families in the zone). Screened Superintendent's Program and Algebra Honors. ASD ACES program for students with autism.",
-      "good": [
-        "Performing & visual arts academy, plus a law & community service academy",
-        "85% of students feel safe"
-      ],
+      "good": ["Performing & visual arts academy, plus a law & community service academy"],
       "concerns": [
         "Only 18% of 8th graders earn high school credit (citywide 36%)",
         "School is working to raise achievement for newly arrived immigrant students"
@@ -175,7 +168,7 @@
       "tags": ["honors", "sped"],
       "admit": ["zoned", "screened"],
       "admitText": "Zoned program (priority for families in the zone). Screened Algebra Honors and Superintendent's Program.",
-      "good": ["Strong middle school math: 81% passing", "85% of teachers would recommend the school"],
+      "good": [],
       "concerns": ["Teachers rate the principal below the city average (64% vs 84%)"],
       "web": "https://seeallacademy.com/",
       "flyer": "https://drive.google.com/file/d/1FsDMUuxWTYuzclP-mOUGVyXYY-H1BcGN/view",
@@ -205,11 +198,7 @@
       "tags": ["honors", "arts", "music", "stem", "sped"],
       "admit": ["screened"],
       "admitText": "Screened only (grades and attendance). Three academies: Arts & Humanities, Business & Law, Scientific Research.",
-      "good": [
-        "Top test scores: 95% math, 92% reading",
-        "Aviation flight simulators and a hydroponics lab",
-        "91% of students feel safe"
-      ],
+      "good": ["Aviation flight simulators and a hydroponics lab"],
       "concerns": ["No full-size gym", "Screened admission only, very competitive"],
       "web": "https://www.is187nyc.com/",
       "flyer": "https://drive.google.com/file/d/1uOBQXU5YhXZo1aWQ4PejCYp1f_94OpGE/view",
@@ -239,11 +228,8 @@
       "tags": ["stem", "honors", "small"],
       "admit": ["zoned", "screened"],
       "admitText": "Zoned program (priority for families in the zone). Screened Algebra Honors program.",
-      "good": ["Math and science magnet school", "Middle school reading: 66% passing"],
-      "concerns": [
-        "73% of students say bullying happens often (citywide 59%)",
-        "Fewer students feel safe than citywide"
-      ],
+      "good": ["Math and science magnet school"],
+      "concerns": [],
       "web": "https://www.ps-is192.org/",
       "flyer": "https://drive.google.com/file/d/1Pn5YenbFd8YZtT79s2BPfsIRhsOq5VPO/view",
       "provenance": {
@@ -272,12 +258,8 @@
       "tags": ["honors", "language", "music", "arts"],
       "admit": ["zoned", "screened", "language"],
       "admitText": "Zoned program (priority for families in the zone). Screened Superintendent's Program and Algebra Honors. Italian Dual Language program.",
-      "good": [
-        "High scores: 85% math, 80% reading",
-        "Marching band, drama, studio art and chorus",
-        "Stable leadership; 95% attendance"
-      ],
-      "concerns": ["Very large school (1,482 students); may feel too big for some", "No subway nearby"],
+      "good": ["Marching band, drama, studio art and chorus", "Stable leadership; 95% attendance"],
+      "concerns": [],
       "web": "https://www.is201k.org/",
       "flyer": "https://drive.google.com/file/d/1b3niIcowPamdEYMUf0PPW6_ju3YEI335/view",
       "provenance": {
@@ -306,11 +288,7 @@
       "tags": ["honors", "language", "stem"],
       "admit": ["zoned", "screened", "language", "open"],
       "admitText": "Zoned program (priority for families in the zone). Screened Algebra Honors and Superintendent's Program. Spanish Dual Language. Open-admission Federal Magnet program.",
-      "good": [
-        "99% of teachers would recommend the school",
-        "Math: 78% passing",
-        "Partnership with Maimonides Medical Center"
-      ],
+      "good": ["Partnership with Maimonides Medical Center"],
       "concerns": ["Reading scores lag behind math", "Students report concerns about bullying and behavior"],
       "web": "https://www.is220.org/",
       "flyer": "https://drive.google.com/file/d/1PNLFhn1PXnOpSzPKmeyABsHEjmFIpHK8/view",
@@ -340,12 +318,8 @@
       "tags": ["honors"],
       "admit": ["zoned", "screened", "open"],
       "admitText": "Zoned program (priority for families in the zone). Screened Algebra Honors and Superintendent's Program. Open-admission Federal Magnet program.",
-      "good": ["AVID college-readiness program", "93% of teachers would recommend the school"],
-      "concerns": [
-        "Limited arts (no dance or theater)",
-        "69% of students say bullying happens often",
-        "Shares its building with another school"
-      ],
+      "good": ["AVID college-readiness program"],
+      "concerns": ["Limited arts (no dance or theater)", "Shares its building with another school"],
       "web": "https://sites.google.com/is223montauk.org/site",
       "flyer": "https://drive.google.com/file/d/1TzYUrV8x6wPZVeGnKynSOZoWBYcjtaON/view",
       "provenance": {
@@ -404,8 +378,8 @@
       "tags": ["honors", "arts", "music"],
       "admit": ["zoned", "screened"],
       "admitText": "Zoned program (priority for families in the zone). Screened Superintendent's Program with an honors Regents track.",
-      "good": ["Strong visual arts, orchestra, band and drama", "85% of students feel safe"],
-      "concerns": ["Half of middle schoolers say there isn't enough class variety", "No subway nearby"],
+      "good": ["Strong visual arts, orchestra, band and drama"],
+      "concerns": ["Half of middle schoolers say there isn't enough class variety"],
       "web": "http://www.229k.org/",
       "flyer": "https://drive.google.com/file/d/1qrMGNjScKpX50dLlo7CCltT72CsyBDdZ/view",
       "provenance": {
@@ -434,16 +408,8 @@
       "tags": ["honors", "language", "stem"],
       "admit": ["zoned", "screened", "language"],
       "admitText": "Zoned program (priority for families in the zone). Screened Superintendent's Program, Algebra Honors, and Mandarin Dual Language.",
-      "good": [
-        "100% of teachers would recommend the school",
-        "Math: 82% passing",
-        "Virtual Enterprise business program and STEM classes"
-      ],
-      "concerns": [
-        "One of the city's largest middle schools (about 1,800 students)",
-        "65% of students say bullying happens often",
-        "No subway nearby"
-      ],
+      "good": ["Virtual Enterprise business program and STEM classes"],
+      "concerns": [],
       "web": "https://www.mckinley259.org/home",
       "flyer": "https://drive.google.com/file/d/15cdojfvjceC7rj1yCsaOVwHIviwTJeSZ/view",
       "provenance": {
@@ -472,9 +438,9 @@
       "tags": ["sped", "stem", "arts", "honors", "small"],
       "admit": ["zoned", "screened"],
       "admitText": "Zoned program (priority for families in the zone). Screened Superintendent's Program and ASD ACES program.",
-      "good": ["ASD Nest program for students with autism", "89% of students feel safe", "Very small school"],
+      "good": ["ASD Nest program for students with autism", "Very small school"],
       "concerns": [
-        "New school: first test results 68% math, 68% reading",
+        "New school: only its first test results so far",
         "New principal; fewer experienced teachers than average"
       ],
       "web": "https://www.ms407star.org/",
@@ -538,7 +504,7 @@
       "tags": ["honors", "small"],
       "admit": ["screened"],
       "admitText": "Screened only (Superintendent's Program). Citywide gifted & talented school; requires very high grades and test scores.",
-      "good": ["Highest scores: 95% math, 93% reading", "Only 11% of students say bullying happens often"],
+      "good": [],
       "concerns": ["Demand far exceeds available seats", "No lockers for middle school; small schoolyard"],
       "web": "https://bsi686.org/",
       "flyer": "https://drive.google.com/file/d/1b6GtupYH9_0rdhnU_mpQUv5OpPc3nfwn/view",
@@ -568,7 +534,7 @@
       "tags": ["arts", "music", "small", "stem"],
       "admit": ["audition"],
       "admitText": "Audition required. Choose a major: dance, drama, music, visual arts or STEAM. Register for an open house on the school website first.",
-      "good": ["Arts majors in music, theater, dance and visual arts", "86% of students feel safe"],
+      "good": ["Arts majors in music, theater, dance and visual arts"],
       "concerns": ["Small school: limited sports", "Audition required"],
       "web": "https://www.ms936artsoff3rd.org/",
       "flyer": "https://drive.google.com/file/d/10urCapcnJF7iffsRfahMBfrevHtHn3gl/view",

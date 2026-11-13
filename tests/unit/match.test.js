@@ -4,6 +4,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {match, ranked, label} from "../../src/match.js";
+import {facts} from "../../src/facts.js";
+import {CITY} from "../../src/data.js";
 import fixture from "./fixtures/data-2026-10-16/schools.json" with {type: "json"};
 
 const SCHOOLS = fixture.schools, BY = Object.fromEntries(SCHOOLS.map(s => [s.dbn, s]));
@@ -33,6 +35,16 @@ test("far schools lose points and explain why", () => {
   const near = match(BY["20K201"], {...base, home:"dyker"}), far = match(BY["20K201"], {...base, home:"kens"});
   assert.ok(far.score < near.score);
   assert.match(far.warn[0], /^Farther than you want/);
+});
+
+test("a card's number bullets are the sheet's highlights, after the family's own reasons, three at most", () => {
+  const s = BY["20K187"], highlights = facts(s, CITY).good;
+  assert.ok(highlights.length >= 3);
+  assert.deepEqual(match(s, base).why, highlights.slice(0, 3));
+  const mine = match(s, {...base, home: "dyker", maxMiles: 3, programs: ["stem"], needSubway: true}).why;
+  assert.match(mine[0], /close to home|mi from home/);
+  assert.deepEqual(mine.slice(1), ["Offers: Science & tech (STEM)", "Near the subway"]);
+  for (const sc of SCHOOLS) for (const w of match(sc, base).why) assert.ok(facts(sc, CITY).good.includes(w), w);
 });
 
 test("match labels", () => {

@@ -20,6 +20,14 @@ feature the middle one (1.1 → 1.2), and a change that needs families or the da
   usage counts are dropped).
 
 ### Changed
+- **Highlights and concerns treat every school's numbers the same way.** A school's sheet now works out its number
+  bullets itself: test results, feel safe, bullying and teachers recommend become a highlight when 5 or more points
+  better than citywide and a concern when 5 or more points worse, always with the citywide figure; schools with
+  1,200 students or more, or no subway, are always flagged. Before, these were written by hand, so the same number
+  was mentioned at one school and left out at another (the lowest feel-safe number in the district had no bullet).
+  The bullets we write now cover only what numbers can't say, and the data checks warn if one repeats a number.
+  The green bullets on Find cards use the same rule and words as the sheet, after the family's own reasons
+  (distance, programs they picked, subway). Scores and rankings are unchanged.
 - **School numbers now come straight from their source, every week.** Survey numbers (feel safe, bullying,
   teachers) and school size are pulled from each school's InsideSchools profile every Monday, the same way test
   results are pulled from NYC Open Data, and arrive as a pull request to review. This filled in ten numbers that

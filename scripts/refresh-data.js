@@ -1,13 +1,13 @@
 // Pull the numbers that have a source we can read and update data/schools.json:
 //   - state test results (math and ela, grades 6 to 8) and their citywide averages, from NYC Open Data;
 //   - NYC School Survey answers (safe, bully, teach), their citywide averages and enrollment (size),
-//     from each school's InsideSchools profile.
+//     from each school's InsideSchools profile, and the program list there (listed).
 // Everything else is hand-curated. A number the source doesn't have is never blanked: we keep ours and say so.
 // Usage: node scripts/refresh-data.js [--summary <file.md>]
 import fs from "node:fs";
 import path from "node:path";
 import {formatJson} from "./lib/json-format.js";
-import {parseProfile, profileUrl} from "./lib/insideschools.js";
+import {parsePrograms, parseProfile, profileUrl} from "./lib/insideschools.js";
 
 const DATASET = "dnpx-dfnc"; // School Quality Reports Data
 const API = `https://data.cityofnewyork.us/resource/${DATASET}.json`;
@@ -78,7 +78,7 @@ async function page(url) {
 }
 const profiles = [], unread = [], gaps = [];
 for (const s of data.schools) {
-  try { profiles.push([s, parseProfile(await page(profileUrl(s.dbn)))]); }
+  try { const html = await page(profileUrl(s.dbn)); profiles.push([s, parseProfile(html), parsePrograms(html)]); }
   catch (e) { unread.push(`${s.short} (${e.message})`); }
   await new Promise(r => setTimeout(r, 300));
 }
@@ -87,6 +87,18 @@ const mark = changes.length;
 for (const [s, p] of profiles) for (const k of [...SURVEY, "size"]) {
   if (p[k] == null) { gaps.push(`${s.short}: ${k}${s[k] == null ? "" : ` (kept ${s[k]})`}`); continue; }
   if (s[k] !== p[k]) { changes.push([s.short, k, s[k], p[k]]); s[k] = p[k]; }
+}
+// The program list that honors, dual language and special-ed tags rest on. Tags are never changed here: the
+// data checks say when a list and a tag no longer agree, for a person to judge. An empty list where we held
+// programs is treated like a missing number: kept, and reported.
+const listChanges = [];
+const show = l => [...l.programs.map(p => `${p.name} (${p.method})`), ...(l.staff_pick_sped ? ["Staff Pick for Special Ed"] : [])];
+for (const [s, , listed] of profiles) {
+  if (!listed.programs.length && s.listed.programs.length) { gaps.push(`${s.short}: program list (kept ours)`); continue; }
+  const was = show(s.listed), now = show(listed);
+  const added = now.filter(x => !was.includes(x)), removed = was.filter(x => !now.includes(x));
+  if (added.length || removed.length) listChanges.push(`| ${s.short} | ${added.join("; ") || "none"} | ${removed.join("; ") || "none"} |`);
+  s.listed = listed; // same order as the page
 }
 // InsideSchools compares each school with schools of its kind, so K-8 and 6-12 schools show another
 // citywide figure. We keep one benchmark: the one most of our schools are compared with.
@@ -118,6 +130,7 @@ const summary = [
   `Survey answers (feel safe, bullying, teachers recommend) and enrollment from each school's **InsideSchools** profile, ${surveyPeriod} NYC School Survey.`,
   "",
   changes.length ? "| School | Number | Was | Now |\n|---|---|---|---|\n" + changes.map(([n, k, a, b]) => `| ${n} | ${label[k]} | ${a ?? "none"} | ${b ?? "none"} |`).join("\n") : "No changes.",
+  listChanges.length ? "\n**Program lists changed on InsideSchools.** Tags were not changed; the data checks on this pull request say which no longer match ([rules](docs/data-sources.md#program-tags)).\n\n| School | Added | Removed |\n|---|---|---|\n" + listChanges.join("\n") : "",
   missing.length ? `\nNo ${period} test results for ${missing.join(", ")}; kept the current numbers.` : "",
   gaps.length ? `\nNot shown on InsideSchools: ${gaps.join("; ")}.` : "",
   unread.length ? `\n**Could not read** the InsideSchools profile for ${unread.join("; ")}. Those schools were not checked.` : "",

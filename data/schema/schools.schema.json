@@ -45,7 +45,7 @@
     "school": {
       "type": "object",
       "required": ["dbn", "name", "short", "addr", "hood", "lat", "lng", "grades", "size", "math", "ela", "safe", "bully", "teach",
-        "subway", "bus", "tags", "admit", "admitText", "good", "concerns", "web", "flyer", "provenance"],
+        "subway", "bus", "tags", "tag_evidence", "listed", "admit", "admitText", "good", "concerns", "web", "flyer", "provenance"],
       "properties": {
         "dbn": {"$ref": "common.schema.json#/$defs/dbn"},
         "name": {"type": "string", "minLength": 3},
@@ -71,6 +71,39 @@
         },
         "bus": {"type": "array", "items": {"type": "string", "pattern": "^B\\d+$"}},
         "tags": {"type": "array", "items": {"type": "string"}, "uniqueItems": true, "description": "Programs the school offers, by the rules in docs/data-sources.md (Program tags). Not \"small\": that comes from size."},
+        "tag_evidence": {
+          "type": "object",
+          "description": "What each tag rests on: one or more quotes per tag. programs: a program name from `listed` (or \"Staff Pick for Special Ed\"). review: words from the school's InsideSchools review. website: words from the school's own site, with the page's url.",
+          "additionalProperties": {
+            "type": "array", "minItems": 1,
+            "items": {
+              "type": "object", "required": ["where", "quote"],
+              "properties": {
+                "where": {"enum": ["programs", "review", "website"]},
+                "quote": {"type": "string", "minLength": 3, "maxLength": 200},
+                "url": {"$ref": "common.schema.json#/$defs/url"}
+              },
+              "if": {"properties": {"where": {"const": "website"}}}, "then": {"required": ["url"]},
+              "additionalProperties": false
+            }
+          }
+        },
+        "listed": {
+          "type": "object", "required": ["programs", "staff_pick_sped"],
+          "description": "The school's InsideSchools program list (Programs & Admissions) and its Staff Pick for Special Ed mark. Kept up to date by the weekly refresh.",
+          "properties": {
+            "programs": {
+              "type": "array",
+              "items": {
+                "type": "object", "required": ["name", "method"],
+                "properties": {"name": {"type": "string", "minLength": 1}, "method": {"type": "string"}},
+                "additionalProperties": false
+              }
+            },
+            "staff_pick_sped": {"type": "boolean"}
+          },
+          "additionalProperties": false
+        },
         "admit": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"enum": ["zoned", "screened", "language", "open", "audition"]}},
         "admitText": {"type": "string"},
         "good": {"type": "array", "items": {"type": "string"}, "description": "Hand-written highlights. Bullets about numbers we hold are generated (src/facts.js), not written here."},

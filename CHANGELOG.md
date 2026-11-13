@@ -9,6 +9,11 @@ feature the middle one (1.1 → 1.2), and a change that needs families or the da
 ## [Unreleased]
 
 ### Added
+- **Every program tag records what it rests on.** Each school's data now holds its InsideSchools program list and,
+  for every tag, the program name or the short quote (from the InsideSchools review or the school's own website)
+  that supports it. The data checks block a tag with no evidence, and warn when an honors, dual language or
+  special-ed tag stops agreeing with the program list, which the weekly refresh now re-reads
+  ([docs/data-sources.md](docs/data-sources.md#program-tags)). Nothing a family sees changes.
 - **A flag for top matches left off the list.** If one of Find's top 3 matches (Good match or better) isn't saved,
   My list and Finalize & apply say so, with Save, See details and Dismiss.
 - **Usage reports for the owner.** Every visit to the live site now sends anonymous usage counts: tabs opened,

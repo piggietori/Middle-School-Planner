@@ -1,8 +1,8 @@
 // Read the numbers we take from an InsideSchools school profile (insideschools.org/school/<DBN>):
-// three NYC School Survey answers with their citywide averages, and enrollment.
+// three NYC School Survey answers with their citywide averages, enrollment, and the program list.
 // A question the page doesn't show comes back as null. A page we can't read at all throws, so a
 // change to their layout is never mistaken for "no data".
-const text = html => html.replace(/<[^>]+>/g, " ").replace(/&amp;/g, "&").replace(/\s+/g, " ").trim();
+const text = html => html.replace(/<[^>]+>/g, " ").replace(/&#39;/g, "'").replace(/&amp;/g, "&").replace(/\s+/g, " ").trim();
 const div = name => `<div class=['"]${name}['"]>([\\s\\S]*?)</div>`;
 const STAT = new RegExp(`${div("stat-title")}\\s*${div("stat-value")}(?:\\s*${div("stat-caption")})?`, "g");
 
@@ -28,4 +28,13 @@ export function parseProfile(html) {
   const enrolled = stats.find(x => /^enrollment$/i.test(x.title))?.value.replace(/,/g, "");
   out.size = /^\d+$/.test(enrolled ?? "") ? +enrolled : null;
   return out;
+}
+
+// The programs under "Programs & Admissions" (each with its admissions method) and whether the page carries
+// the "Staff Pick for Special Ed" mark. Program tags rest on these (docs/data-sources.md, Program tags).
+// A school with no listed programs comes back with an empty list.
+const PROGRAM = new RegExp(`${div("program-title")}\\s*(?:${div("program-underline")})?`, "g");
+export function parsePrograms(html) {
+  const programs = [...html.matchAll(PROGRAM)].map(m => ({name: text(m[1]), method: text(m[2] ?? "").replace(/^Admissions Method:\s*/i, "")}));
+  return {programs, staff_pick_sped: /is-pick-special-ed/.test(html)};
 }

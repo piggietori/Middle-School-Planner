@@ -113,6 +113,34 @@ test("a typed small-school tag is a warning: it is worked out from size", () => 
   has(warningsOf(d), /20K030: the "small" tag is worked out from the school's size/);
 });
 
+test("every tag says what it rests on, and no evidence is left for a tag the school doesn't have", () => {
+  const d = copy(), s = d.schools.schools.find(x => x.dbn === "20K201");
+  delete s.tag_evidence.music;
+  s.tag_evidence.stem = [{where: "review", quote: "a robotics lab"}];
+  const e = errorsOf(d);
+  has(e, /20K201: tag "music" has no tag_evidence/);
+  has(e, /20K201: tag_evidence for "stem", but the school doesn't have that tag/);
+});
+
+test("evidence from the program list must name a program the school lists; website evidence needs its page", () => {
+  const d = copy(), s = d.schools.schools.find(x => x.dbn === "20K201");
+  s.tag_evidence.honors = [{where: "programs", quote: "Gifted Academy"}];
+  has(errorsOf(d), /20K201: "honors" rests on the program "Gifted Academy", which is not in the school's program list/);
+  const w = copy();
+  w.schools.schools.find(x => x.dbn === "20K201").tag_evidence.music = [{where: "website", quote: "Marching band"}];
+  has(errorsOf(w), /must have required property 'url'/);
+});
+
+test("a tag that no longer agrees with the program list is a warning, both ways", () => {
+  const d = copy(), s = d.schools.schools.find(x => x.dbn === "20K201");
+  s.listed.programs = s.listed.programs.filter(p => !/dual language/i.test(p.name)); // the program was dropped from the list
+  s.tag_evidence.language = [{where: "review", quote: "an Italian dual language program"}];
+  has(warningsOf(d), /20K201: tagged "language" but nothing in its program list supports it/);
+  const a = copy(), t = a.schools.schools.find(x => x.dbn === "20K201");
+  t.listed.programs.push({name: "J.H.S. 201 ASD Nest Program", method: "ASD/ACES Program"}); // a new program appeared
+  has(warningsOf(a), /20K201: the program list supports "sped" \(J\.H\.S\. 201 ASD Nest Program\) but the school isn't tagged with it/);
+});
+
 test("text that says a school is too new for test results is a warning once it has them", () => {
   const d = copy();
   Object.assign(d.schools.schools.find(s => s.dbn === "20K407"), {math: 68, ela: 68});

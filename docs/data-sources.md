@@ -122,7 +122,20 @@ score, so every school is tagged by the same rule:
 **Where the evidence comes from, in order:** the program list on the school's InsideSchools profile ("Programs &
 Admissions"), the written review there, then the school's own website. InsideSchools reviews can be several years
 old and some schools have none, so check the school's website when the profile is silent.
-**If nothing confirms a tag, the school doesn't get it.** Say in the pull request what each added or removed tag rests on.
+**If nothing confirms a tag, the school doesn't get it.**
+
+**Each tag records what it rests on**, in the school's `tag_evidence`: one or more short quotes per tag, each
+marked `programs` (a program name from the list), `review` (words from the InsideSchools review) or `website`
+(words from the school's own site, with the page's `url`). Quote the source word for word and keep it short: a
+phrase or one sentence. Adding a tag without evidence, or leaving evidence behind when a tag is removed, fails the
+data checks.
+
+**The program list is kept in the data** (`listed`: each program's name and admissions method, plus the Staff
+Pick for Special Ed mark) and re-read from InsideSchools every Monday by the *Refresh data* workflow. Honors, dual
+language and special-ed follow it by a rule in code (`scripts/lib/tag-rules.js`): a screened program; a dual
+language program; an ASD Nest, Horizon or ACES program, a D75 Inclusion program, or the staff pick. The refresh
+never changes a tag. If a list changes so that a tag no longer agrees with it, the data checks warn on that pull
+request and a person decides. Music, arts and science & tech rest on written text, so no rule in code decides them.
 
 ## Our own data
 
@@ -158,6 +171,7 @@ shown for a person to judge.
 | Duplicate DBN, event, neighborhood or step ID | Error |
 | `events.json` or `steps.json` is for a different `cycle` from `schools.json` | Error |
 | A reference points nowhere: a program tag, a source, an open house's school | Error |
+| A tag with no `tag_evidence`, evidence for a tag the school doesn't have, or evidence naming a program that isn't in the school's program list (`listed`) | Error |
 | An event ends before it starts, or falls outside the admissions cycle | Error |
 | `was` is the same as the current date and time | Error |
 | A retired event ID is still listed | Error |
@@ -165,6 +179,7 @@ shown for a person to judge.
 | A school, event, neighborhood or step was removed compared with `main` (saved plans point at them) | Error |
 | An event's date or time changed without `was` | Warning |
 | A score moved by 15 points or more | Warning |
+| An honors, dual language or special-ed tag that disagrees with the school's program list, either way | Warning |
 | A typed highlight or concern repeats what the sheet shows by rule (test results, feel safe, bullying, teachers recommend, school size, no subway), or says "too new for full test results" when results exist | Warning |
 | An event not checked for 30 days during application season | Warning |
 | A school fact not checked for over 400 days | Warning |

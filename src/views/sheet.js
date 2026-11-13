@@ -1,5 +1,6 @@
 import {CITY, PROG, BY, OH} from "../data.js";
 import {homePt, match} from "../match.js";
+import {facts} from "../facts.js";
 import {isSaved} from "../plan.js";
 import {st} from "../state.js";
 import {ui} from "../ui.js";
@@ -29,6 +30,8 @@ export function renderSheet(){
   noteSession();
   if(!ui.openDbn){box.innerHTML="";return}
   const s=BY[ui.openDbn],m=match(s,st),ev=OH.filter(e=>e.dbn===s.dbn);
+  // What people wrote about the school first, then the bullets its numbers earn (the same rule for every school).
+  const f=facts(s,CITY),list=(items,cls)=>items.length?`<ul class="why${cls}" style="margin-top:8px">${items.map(g=>`<li>${esc(g)}</li>`).join("")}</ul>`:`<p class="muted small" style="margin:8px 0 0">Nothing stands out.</p>`;
   box.innerHTML=`<div class="sheet" data-close="1"><div class="sheet-in" role="dialog" aria-modal="true" aria-label="${esc(s.name)}">
     <div class="sheet-bar"><button class="btn" data-close="1">← Back</button><span style="margin-left:auto"></span><button class="btn${isSaved(s.dbn)?" saved":" primary"}" data-save="${s.dbn}">${isSaved(s.dbn)?"★ Saved":"☆ Save"}</button></div>
     <div class="stack">
@@ -50,9 +53,9 @@ export function renderSheet(){
         ${stat("Teachers who recommend the school",s.teach,CITY.teach)}</div>
         <span class="muted small">Middle school grades. The dark line marks the citywide average.</span></div>
       <div class="grid2" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
-        <div class="card"><h3>Highlights</h3><ul class="why" style="margin-top:8px">${s.good.map(g=>`<li>${esc(g)}</li>`).join("")}</ul>
+        <div class="card"><h3>Highlights</h3>${list([...s.good,...f.good],"")}
           <div class="chips" style="margin-top:12px">${s.tags.map(t=>`<span class="pill">${PROG[t]}</span>`).join("")}</div></div>
-        <div class="card"><h3>Reported concerns</h3><ul class="why caution" style="margin-top:8px">${s.concerns.map(g=>`<li>${esc(g)}</li>`).join("")}</ul></div>
+        <div class="card"><h3>Reported concerns</h3>${list([...s.concerns,...f.concerns]," caution")}</div>
       </div>
       <div class="card"><h3>Open houses</h3>${ev.map(e=>evRow(e)).join("")}</div>
       <div class="row"><a class="btn" href="${s.web}" target="_blank" rel="noopener">School website</a><a class="btn" href="https://insideschools.org/school/${s.dbn}" target="_blank" rel="noopener">Full review on InsideSchools</a>${s.flyer?`<a class="btn" href="${s.flyer}" target="_blank" rel="noopener">Open house flyer</a>`:""}</div>

@@ -88,9 +88,21 @@ an automatic **watch** says when a source changed, so nobody has to remember to 
 - **Everything else, by hand:** once a year, in August, from the checklist. Highlights and concerns are written
   by people, so we read and summarize them. For each school, check the profile, update the fields and the
   `as_of` of `provenance.profile`.
-- **Text must agree with the numbers:** when a highlight or concern quotes a number we hold (test results,
-  survey numbers, a citywide average, school size), the data checks warn if it differs. Numbers we don't hold
-  (attendance, suspensions, class size) are not checked; re-read those in August.
+- **Number bullets are generated, not written.** On a school's sheet, Highlights and Reported concerns show the
+  hand-written bullets first, then bullets worked out from the numbers by `src/facts.js`, with one rule and one
+  wording for every school:
+  - test results (math and reading together), feel safe, bullying and teachers recommend: a highlight when 5 or
+    more points better than citywide, a concern when 5 or more points worse, nothing in between;
+  - 1,200 students or more: "Large school"; no subway stop: "No subway nearby".
+
+  The Find cards show the same highlights, in the same words, after the family's own reasons (distance,
+  programs they picked, subway).
+
+  So **don't write a highlight or concern about those numbers** (or about size or the subway): it would show
+  twice, or give one school a bullet that others with the same number don't get. The data checks warn if you do.
+  Write what numbers can't say: programs, facilities, leadership, what students and teachers report.
+- **Numbers we don't hold** (attendance, suspensions, class size, graduation rate) can be written, and can't be
+  checked; re-read those in August.
 
 ## Our own data
 
@@ -133,7 +145,7 @@ shown for a person to judge.
 | A school, event, neighborhood or step was removed compared with `main` (saved plans point at them) | Error |
 | An event's date or time changed without `was` | Warning |
 | A score moved by 15 points or more | Warning |
-| A school's text quotes a number that doesn't match its data (test results, survey numbers, a citywide average, school size) or that the data doesn't have, or says "too new for full test results" when results exist | Warning |
+| A typed highlight or concern repeats what the sheet shows by rule (test results, feel safe, bullying, teachers recommend, school size, no subway), or says "too new for full test results" when results exist | Warning |
 | An event not checked for 30 days during application season | Warning |
 | A school fact not checked for over 400 days | Warning |
 

@@ -8,9 +8,10 @@ pull request, and the `main` ruleset doesn't allow merging until it passes.
 | Layer | Where | Tests | What it proves |
 |---|---|---|---|
 | Lint | `npm run lint` | — | No unused code, undefined names or common mistakes |
-| Match score | `tests/unit/match.test.js` | 7 | Rankings for four fixed families match known-good results (golden cases), so a change to the score is always deliberate; schools without test results and far schools are scored and explained correctly |
+| Match score | `tests/unit/match.test.js` | 8 | Rankings for four fixed families match known-good results (golden cases), so a change to the score is always deliberate; schools without test results and far schools are scored and explained correctly; a card's number bullets are the same as the school sheet's |
+| Number bullets | `tests/unit/facts.test.js` | 6 | A school's number highlights and concerns follow one rule for every school: 5 points from citywide either way, lower is better for bullying, large schools and no subway are flagged, and a missing number says nothing |
 | Plan sync | `tests/unit/plan-model.test.js` | 9 | Plans turn into database rows and back without loss; only changed rows are saved; merging two plans follows the rules |
-| Data checks | `tests/unit/data.test.js` | 13 | Each kind of data mistake is caught (bad schema, broken references, removed IDs, impossible dates, text that quotes a number different from the data), on a frozen copy of the data so a refresh never breaks the tests. The live data has no errors |
+| Data checks | `tests/unit/data.test.js` | 13 | Each kind of data mistake is caught (bad schema, broken references, removed IDs, impossible dates, typed text that repeats a generated number bullet), on a frozen copy of the data so a refresh never breaks the tests. The live data has no errors |
 | Config | `tests/unit/config.test.js` | 1 | The help address and the Supabase region are filled in, so the privacy notice never shows a placeholder |
 | Source pull | `tests/unit/insideschools.test.js` | 3 | Survey numbers, citywide averages and enrollment are read correctly from an InsideSchools profile; a missing answer is "no data"; a page that can't be read is an error, never "no data" |
 | Source watch | `tests/unit/watch.test.js` | 4 | Page changes are detected; markup and tracking codes aren't mistaken for changes |

@@ -1,4 +1,5 @@
-import {PROG, S, HOMES} from "./data.js";
+import {CITY, PROG, S, HOMES} from "./data.js";
+import {facts} from "./facts.js";
 import {miles} from "./util.js";
 
 /* Match score: pure functions of a school and the family's plan. */
@@ -21,11 +22,10 @@ export function match(s,plan){
   if(h&&dist>plan.maxMiles){score*=.75;warn.push("Farther than you want ("+dist.toFixed(1)+" mi)")}
   if(plan.needSubway&&!s.subway.length){score*=.8;warn.push("No subway nearby, bus only")}
   if(dist!=null&&dist<=plan.maxMiles)why.push(dist<.8?"Very close to home: about "+dist.toFixed(1)+" mi":"About "+dist.toFixed(1)+" mi from home");
-  if(avg.length&&c.scores>=60)why.push("Strong test results: "+(s.math!=null?s.math+"% math, ":"")+s.ela+"% reading passing");
-  if(s.safe>=84)why.push(s.safe+"% of students feel safe");
-  if(s.bully!=null&&s.bully<50)why.push("Low bullying reports ("+s.bully+"%)");
   if(hits.length)why.push("Offers: "+hits.map(p=>PROG[p]).join(", "));
   if(plan.needSubway&&s.subway.length)why.push("Near the subway");
+  // The family's own reasons first, then the school's number highlights: the same ones, in the same words, as its sheet.
+  why.push(...facts(s,CITY).good);
   if(!avg.length)warn.push("Too new for full test results");
   return {s,score:Math.round(score),dist,why:why.slice(0,3),warn};
 }

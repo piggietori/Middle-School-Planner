@@ -56,6 +56,18 @@
       "subway": [{"l": ["R"], "st": "Bay Ridge Av"}],
       "bus": ["B4", "B9", "B37", "B63", "B64", "B70"],
       "tags": ["language", "honors"],
+      "tag_evidence": {
+        "language": [{"where": "programs", "quote": "Arabic Dual Language"}],
+        "honors": [{"where": "programs", "quote": "Superintendent's Program"}]
+      },
+      "listed": {
+        "programs": [
+          {"name": "Arabic Dual Language", "method": "Language Criteria"},
+          {"name": "Superintendent's Program", "method": "Screened"},
+          {"name": "Zoned Program", "method": "Zone Priority"}
+        ],
+        "staff_pick_sped": false
+      },
       "admit": ["zoned", "screened", "language"],
       "admitText": "Zoned program (priority for families in the zone). Screened Superintendent's Program. Arabic Dual Language program.",
       "good": ["Arabic dual language program", "Low suspension rate (1%)"],
@@ -86,6 +98,35 @@
       "subway": [{"l": ["B", "Q"], "st": "Cortelyou Rd"}, {"l": ["F"], "st": "Ditmas Av"}],
       "bus": ["B8", "B35", "B67", "B68", "B69", "B103"],
       "tags": ["arts", "honors", "sped"],
+      "tag_evidence": {
+        "arts": [
+          {
+            "where": "review",
+            "quote": "Arts students choose a concentration from among visual arts, dance, keyboard or band."
+          }
+        ],
+        "honors": [
+          {"where": "programs", "quote": "Algebra Honors Program"},
+          {"where": "programs", "quote": "Superintendent's Program"}
+        ],
+        "sped": [
+          {"where": "programs", "quote": "J.H.S. 062 Ditmas ASD Horizon Program"},
+          {"where": "programs", "quote": "J.H.S. 062 Ditmas D75 Inclusion Program"}
+        ]
+      },
+      "listed": {
+        "programs": [
+          {"name": "Algebra Honors Program", "method": "Screened"},
+          {"name": "J.H.S. 062 Ditmas ASD Horizon Program", "method": "ASD/ACES Program"},
+          {
+            "name": "J.H.S. 062 Ditmas D75 Inclusion Program",
+            "method": "D75 Special Education Inclusive Services"
+          },
+          {"name": "Superintendent's Program", "method": "Screened"},
+          {"name": "Zoned Program", "method": "Zone Priority"}
+        ],
+        "staff_pick_sped": false
+      },
       "admit": ["zoned", "screened"],
       "admitText": "Zoned program (priority for families in the zone). Screened Superintendent's Program and Algebra Honors. ASD ACES program for students with autism.",
       "good": ["Performing & visual arts academy, plus a law & community service academy"],
@@ -118,7 +159,15 @@
       "teach": 77,
       "subway": [{"l": ["R"], "st": "95 St"}],
       "bus": ["B1", "B8", "B16", "B37", "B63", "B70"],
-      "tags": ["honors", "sped"],
+      "tags": ["honors"],
+      "tag_evidence": {"honors": [{"where": "programs", "quote": "Superintendent's Program"}]},
+      "listed": {
+        "programs": [
+          {"name": "Civic Leadership and Responsibility", "method": "Zone Priority"},
+          {"name": "Superintendent's Program", "method": "Screened"}
+        ],
+        "staff_pick_sped": false
+      },
       "admit": ["zoned", "screened"],
       "admitText": "Zoned program (Civic Leadership, priority for families in the zone). Screened Superintendent's Program.",
       "good": ["Gifted & talented classes in each grade", "Warm, welcoming school for students of all abilities"],
@@ -149,6 +198,25 @@
       "subway": [{"l": ["D", "N"], "st": "New Utrecht Av / 62 St"}],
       "bus": ["B8", "B9", "B11", "B16"],
       "tags": ["honors", "sped"],
+      "tag_evidence": {
+        "honors": [
+          {"where": "programs", "quote": "Algebra Honors Program"},
+          {"where": "programs", "quote": "Superintendent's Program"}
+        ],
+        "sped": [{"where": "programs", "quote": "The SEEALL Academy D75 Inclusion Program"}]
+      },
+      "listed": {
+        "programs": [
+          {"name": "Algebra Honors Program", "method": "Screened"},
+          {"name": "SEEALL Academy", "method": "Zone Priority"},
+          {"name": "Superintendent's Program", "method": "Screened"},
+          {
+            "name": "The SEEALL Academy D75 Inclusion Program",
+            "method": "D75 Special Education Inclusive Services"
+          }
+        ],
+        "staff_pick_sped": false
+      },
       "admit": ["zoned", "screened"],
       "admitText": "Zoned program (priority for families in the zone). Screened Algebra Honors and Superintendent's Program.",
       "good": [],
@@ -179,6 +247,29 @@
       "subway": [{"l": ["D"], "st": "62 St"}, {"l": ["N"], "st": "Fort Hamilton Pkwy"}],
       "bus": ["B9", "B16", "B64"],
       "tags": ["honors", "arts", "music", "stem", "sped"],
+      "tag_evidence": {
+        "honors": [
+          {"where": "programs", "quote": "Academy for Arts & Humanities"},
+          {"where": "programs", "quote": "Academy for Business and Law"},
+          {"where": "programs", "quote": "Academy for Scientific Research"}
+        ],
+        "arts": [{"where": "programs", "quote": "Academy for Arts & Humanities"}],
+        "music": [{"where": "review", "quote": "three bands (one for each grade)"}],
+        "stem": [{"where": "programs", "quote": "Academy for Scientific Research"}],
+        "sped": [
+          {"where": "programs", "quote": "The Christa Mcauliffe School ACES 12:1:1 Program"},
+          {"where": "programs", "quote": "Staff Pick for Special Ed"}
+        ]
+      },
+      "listed": {
+        "programs": [
+          {"name": "Academy for Arts & Humanities", "method": "Screened"},
+          {"name": "Academy for Business and Law", "method": "Screened"},
+          {"name": "Academy for Scientific Research", "method": "Screened"},
+          {"name": "The Christa Mcauliffe School ACES 12:1:1 Program", "method": "ASD/ACES Program"}
+        ],
+        "staff_pick_sped": true
+      },
       "admit": ["screened"],
       "admitText": "Screened only (grades and attendance). Three academies: Arts & Humanities, Business & Law, Scientific Research.",
       "good": ["Aviation flight simulators and a hydroponics lab"],
@@ -209,6 +300,28 @@
       "subway": [{"l": ["F"], "st": "18 Av"}],
       "bus": ["B8", "B11"],
       "tags": ["stem", "honors"],
+      "tag_evidence": {
+        "stem": [
+          {
+            "where": "website",
+            "quote": "The Magnet School for Math and Science Inquiry",
+            "url": "https://www.ps-is192.org/"
+          },
+          {
+            "where": "website",
+            "quote": "Various grades come into the STEAM Lab, now on the 5th floor, to focus on many aspects of STEAM education.",
+            "url": "https://www.ps-is192.org/steam_education_at_psis_192"
+          }
+        ],
+        "honors": [{"where": "programs", "quote": "Algebra Honors Program"}]
+      },
+      "listed": {
+        "programs": [
+          {"name": "Algebra Honors Program", "method": "Screened"},
+          {"name": "P.S./I.S. 192", "method": "Zone Priority"}
+        ],
+        "staff_pick_sped": false
+      },
       "admit": ["zoned", "screened"],
       "admitText": "Zoned program (priority for families in the zone). Screened Algebra Honors program.",
       "good": ["Math and science magnet school"],
@@ -239,6 +352,34 @@
       "subway": [],
       "bus": ["B1", "B4", "B16", "B64", "B70"],
       "tags": ["honors", "language", "music", "arts"],
+      "tag_evidence": {
+        "honors": [
+          {"where": "programs", "quote": "Algebra Honors Program"},
+          {"where": "programs", "quote": "Superintendent's Program"}
+        ],
+        "language": [{"where": "programs", "quote": "Italian Dual Language Program"}],
+        "music": [
+          {
+            "where": "review",
+            "quote": "It has a marching band as well as programs in drama, studio art and chorus."
+          }
+        ],
+        "arts": [
+          {
+            "where": "review",
+            "quote": "It has a marching band as well as programs in drama, studio art and chorus."
+          }
+        ]
+      },
+      "listed": {
+        "programs": [
+          {"name": "Algebra Honors Program", "method": "Screened"},
+          {"name": "Italian Dual Language Program", "method": "Language Criteria"},
+          {"name": "Superintendent's Program", "method": "Screened"},
+          {"name": "Zoned Program", "method": "Zone Priority"}
+        ],
+        "staff_pick_sped": false
+      },
       "admit": ["zoned", "screened", "language"],
       "admitText": "Zoned program (priority for families in the zone). Screened Superintendent's Program and Algebra Honors. Italian Dual Language program.",
       "good": ["Marching band, drama, studio art and chorus", "Stable leadership; 95% attendance"],
@@ -269,6 +410,29 @@
       "subway": [{"l": ["D"], "st": "Fort Hamilton Pkwy"}],
       "bus": ["B11", "B16", "B35", "B70"],
       "tags": ["honors", "language", "stem"],
+      "tag_evidence": {
+        "honors": [
+          {"where": "programs", "quote": "Algebra Honors Program"},
+          {"where": "programs", "quote": "Superintendent's Program"}
+        ],
+        "language": [{"where": "programs", "quote": "Spanish Dual Language Program"}],
+        "stem": [
+          {
+            "where": "review",
+            "quote": "for all 7th graders in partnership with Maimonides Medical Center, in which students prepare floor plans and scale models"
+          }
+        ]
+      },
+      "listed": {
+        "programs": [
+          {"name": "Algebra Honors Program", "method": "Screened"},
+          {"name": "Federal Magnet Program", "method": "Open"},
+          {"name": "Spanish Dual Language Program", "method": "Language Criteria"},
+          {"name": "Superintendent's Program", "method": "Screened"},
+          {"name": "Zoned Program", "method": "Zone Priority"}
+        ],
+        "staff_pick_sped": false
+      },
       "admit": ["zoned", "screened", "language", "open"],
       "admitText": "Zoned program (priority for families in the zone). Screened Algebra Honors and Superintendent's Program. Spanish Dual Language. Open-admission Federal Magnet program.",
       "good": ["Partnership with Maimonides Medical Center"],
@@ -299,6 +463,21 @@
       "subway": [{"l": ["F"], "st": "Ditmas Av"}],
       "bus": ["B8", "B11", "B16", "B35", "B67", "B69"],
       "tags": ["honors"],
+      "tag_evidence": {
+        "honors": [
+          {"where": "programs", "quote": "Algebra Honors Program"},
+          {"where": "programs", "quote": "Superintendent's Program"}
+        ]
+      },
+      "listed": {
+        "programs": [
+          {"name": "Algebra Honors Program", "method": "Screened"},
+          {"name": "Federal Magnet Program", "method": "Open"},
+          {"name": "Superintendent's Program", "method": "Screened"},
+          {"name": "Zoned Program", "method": "Zone Priority"}
+        ],
+        "staff_pick_sped": false
+      },
       "admit": ["zoned", "screened", "open"],
       "admitText": "Zoned program (priority for families in the zone). Screened Algebra Honors and Superintendent's Program. Open-admission Federal Magnet program.",
       "good": ["AVID college-readiness program"],
@@ -329,6 +508,34 @@
       "subway": [{"l": ["D", "N"], "st": "New Utrecht Av / 62 St"}],
       "bus": ["B4", "B8", "B9", "B64"],
       "tags": ["honors", "music", "stem", "arts"],
+      "tag_evidence": {
+        "honors": [
+          {"where": "programs", "quote": "Algebra Honors Program"},
+          {"where": "programs", "quote": "Superintendent's Program"}
+        ],
+        "music": [{"where": "review", "quote": "it is large enough to host a band, an orchestra and a chorus"}],
+        "stem": [
+          {
+            "where": "review",
+            "quote": "The school offers an unusual elective in aerospace and flight simulation, as well as graphic arts and computer programming."
+          }
+        ],
+        "arts": [
+          {"where": "review", "quote": "gives English language learners a chance to get involved in theater"},
+          {
+            "where": "review",
+            "quote": "The school offers an unusual elective in aerospace and flight simulation, as well as graphic arts and computer programming."
+          }
+        ]
+      },
+      "listed": {
+        "programs": [
+          {"name": "Algebra Honors Program", "method": "Screened"},
+          {"name": "Superintendent's Program", "method": "Screened"},
+          {"name": "Zoned Program", "method": "Zone Priority"}
+        ],
+        "staff_pick_sped": false
+      },
       "admit": ["zoned", "screened"],
       "admitText": "Zoned program (priority for families in the zone). Screened Algebra Honors and Superintendent's Program.",
       "good": ["Band, orchestra and chorus", "Flight simulators, graphic arts and coding classes"],
@@ -359,6 +566,32 @@
       "subway": [],
       "bus": ["B1", "B8", "B64"],
       "tags": ["honors", "arts", "music"],
+      "tag_evidence": {
+        "honors": [{"where": "programs", "quote": "Superintendent's Program"}],
+        "arts": [
+          {
+            "where": "review",
+            "quote": "The school offers a variety of art programs, such as chorus, orchestra, band, general music and visual arts."
+          },
+          {
+            "where": "review",
+            "quote": "In the middle school, students can choose from enrichment programs such as dramatic arts and jazz music."
+          }
+        ],
+        "music": [
+          {
+            "where": "review",
+            "quote": "The school offers a variety of art programs, such as chorus, orchestra, band, general music and visual arts."
+          }
+        ]
+      },
+      "listed": {
+        "programs": [
+          {"name": "P.S./I.S. 229", "method": "Zone Priority"},
+          {"name": "Superintendent's Program", "method": "Screened"}
+        ],
+        "staff_pick_sped": false
+      },
       "admit": ["zoned", "screened"],
       "admitText": "Zoned program (priority for families in the zone). Screened Superintendent's Program with an honors Regents track.",
       "good": ["Strong visual arts, orchestra, band and drama"],
@@ -389,6 +622,23 @@
       "subway": [],
       "bus": ["B4", "B16", "B63", "B64", "B70"],
       "tags": ["honors", "language", "stem"],
+      "tag_evidence": {
+        "honors": [
+          {"where": "programs", "quote": "Algebra Honors Program"},
+          {"where": "programs", "quote": "Superintendent's Program"}
+        ],
+        "language": [{"where": "programs", "quote": "Mandarin Dual Language Program"}],
+        "stem": [{"where": "review", "quote": "Students in a STEM class tackle real-world problems"}]
+      },
+      "listed": {
+        "programs": [
+          {"name": "Algebra Honors Program", "method": "Screened"},
+          {"name": "Mandarin Dual Language Program", "method": "Language Criteria"},
+          {"name": "Superintendent's Program", "method": "Screened"},
+          {"name": "Zoned Program", "method": "Zone Priority"}
+        ],
+        "staff_pick_sped": false
+      },
       "admit": ["zoned", "screened", "language"],
       "admitText": "Zoned program (priority for families in the zone). Screened Superintendent's Program, Algebra Honors, and Mandarin Dual Language.",
       "good": ["Virtual Enterprise business program and STEM classes"],
@@ -419,6 +669,37 @@
       "subway": [{"l": ["R"], "st": "86 St"}],
       "bus": ["B1", "B8", "B16", "B63", "B70"],
       "tags": ["sped", "stem", "arts", "honors"],
+      "tag_evidence": {
+        "sped": [{"where": "programs", "quote": "M.S. 407 ASD Nest Program"}],
+        "stem": [
+          {
+            "where": "website",
+            "quote": "In this class students will learn basic computer language to instruct different devices to have different outputs.",
+            "url": "https://www.ms407star.org/copy-of-steam"
+          }
+        ],
+        "arts": [
+          {
+            "where": "website",
+            "quote": "Students explore diverse dance styles from different cultures and regions",
+            "url": "https://www.ms407star.org/crew-classes"
+          },
+          {
+            "where": "website",
+            "quote": "Discover the art of ceramics in a hands-on class",
+            "url": "https://www.ms407star.org/crew-classes"
+          }
+        ],
+        "honors": [{"where": "programs", "quote": "Superintendent's Program"}]
+      },
+      "listed": {
+        "programs": [
+          {"name": "M.S. 407 ASD Nest Program", "method": "ASD/ACES Program"},
+          {"name": "Superintendent's Program", "method": "Screened"},
+          {"name": "Zoned Program", "method": "Zone Priority"}
+        ],
+        "staff_pick_sped": false
+      },
       "admit": ["zoned", "screened"],
       "admitText": "Zoned program (priority for families in the zone). Screened Superintendent's Program and ASD ACES program.",
       "good": ["ASD Nest program for students with autism", "Very small school"],
@@ -452,6 +733,8 @@
       "subway": [{"l": ["F"], "st": "Ditmas Av"}],
       "bus": ["B8", "B11", "B16", "B35", "B67", "B69"],
       "tags": ["sped"],
+      "tag_evidence": {"sped": [{"where": "programs", "quote": "Staff Pick for Special Ed"}]},
+      "listed": {"programs": [], "staff_pick_sped": true},
       "admit": ["open"],
       "admitText": "Open admission: any student may apply. School for girls, transgender and non-binary students, grades 6–12.",
       "good": [
@@ -485,6 +768,8 @@
       "subway": [{"l": ["N"], "st": "Kings Hwy"}],
       "bus": ["B1", "B4", "B6", "B82"],
       "tags": ["honors"],
+      "tag_evidence": {"honors": [{"where": "programs", "quote": "Superintendent's Program"}]},
+      "listed": {"programs": [{"name": "Superintendent's Program", "method": "Screened"}], "staff_pick_sped": false},
       "admit": ["screened"],
       "admitText": "Screened only (Superintendent's Program). Citywide gifted & talented school; requires very high grades and test scores.",
       "good": [],
@@ -515,6 +800,24 @@
       "subway": [{"l": ["N", "R"], "st": "59 St"}],
       "bus": ["B9", "B11", "B37", "B63"],
       "tags": ["arts", "music", "stem"],
+      "tag_evidence": {
+        "arts": [
+          {
+            "where": "review",
+            "quote": "Theater (acting, singing, dancing); and visual arts (ranging from pottery and digital arts to drawing and painting)"
+          }
+        ],
+        "music": [
+          {
+            "where": "review",
+            "quote": "Music (instrumental: concert & jazz bands, strings, woodwind, percussion) or chorus"
+          }
+        ],
+        "stem": [
+          {"where": "review", "quote": "Various clubs listed on the website include a newspaper club, STEAM"}
+        ]
+      },
+      "listed": {"programs": [{"name": "M.S. 936", "method": "Audition"}], "staff_pick_sped": false},
       "admit": ["audition"],
       "admitText": "Audition required. Choose a major: dance, drama, music, visual arts or STEAM. Register for an open house on the school website first.",
       "good": ["Arts majors in music, theater, dance and visual arts"],

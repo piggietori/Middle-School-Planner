@@ -4,7 +4,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
-import {parseProfile, profileUrl} from "../../scripts/lib/insideschools.js";
+import {parsePrograms, parseProfile, profileUrl} from "../../scripts/lib/insideschools.js";
 
 const html = fs.readFileSync(path.resolve(import.meta.dirname, "fixtures/insideschools-profile.html"), "utf8");
 
@@ -24,4 +24,16 @@ test("an answer the page doesn't show is null; the others are still read", () =>
 test("a page without the survey section is an error, not \"no data\"", () => {
   assert.throws(() => parseProfile("<html><body>Just a moment...</body></html>"), /no NYC School Survey section/);
   assert.throws(() => parseProfile(html.replaceAll("stat-title", "metric-name")), /no NYC School Survey section/);
+});
+
+test("the program list and the special-ed staff pick are read; a page with neither gives an empty list", () => {
+  assert.deepEqual(parsePrograms(html), {
+    programs: [
+      {name: "Mandarin Dual Language Program", method: "Language Criteria"},
+      {name: "Superintendent's Program", method: "Screened"},
+      {name: "Academy for Arts & Humanities", method: ""},
+    ],
+    staff_pick_sped: true,
+  });
+  assert.deepEqual(parsePrograms("<h2 class='school-heading'>Programs & Admissions</h2>"), {programs: [], staff_pick_sped: false});
 });

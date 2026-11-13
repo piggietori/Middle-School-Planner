@@ -2,6 +2,7 @@
 import Ajv from "ajv/dist/2020.js";
 import fs from "node:fs";
 import path from "node:path";
+import {LIST_TAGS, STAFF_PICK, listEvidence, listTags} from "./tag-rules.js";
 
 export const FILES = ["schools", "events", "neighborhoods", "steps", "notice"];
 const schemaDir = path.resolve(import.meta.dirname, "../../data/schema");
@@ -55,6 +56,17 @@ export function checkData(data, {base = null, today = new Date().toISOString().s
   for (const s of schools) {
     for (const t of s.tags) if (!sf.programs[t]) errors.push(`schools.json ${s.dbn}: tag "${t}" is not in programs`);
     if (s.tags.includes("small")) warnings.push(`schools.json ${s.dbn}: the "small" tag is worked out from the school's size. Remove it from tags`);
+    // Every tag says what it rests on, and nothing is left over from a tag that was removed.
+    for (const t of s.tags) if (t !== "small" && !s.tag_evidence[t]) errors.push(`schools.json ${s.dbn}: tag "${t}" has no tag_evidence. Add what it rests on, or remove the tag`);
+    for (const t of Object.keys(s.tag_evidence)) if (!s.tags.includes(t)) errors.push(`schools.json ${s.dbn}: tag_evidence for "${t}", but the school doesn't have that tag`);
+    const names = [...s.listed.programs.map(p => p.name), ...(s.listed.staff_pick_sped ? [STAFF_PICK] : [])];
+    for (const [t, list] of Object.entries(s.tag_evidence)) for (const e of list) if (e.where === "programs" && !names.includes(e.quote)) errors.push(`schools.json ${s.dbn}: "${t}" rests on the program "${e.quote}", which is not in the school's program list (listed)`);
+    // Honors, dual language and special-ed follow the program list by rule (scripts/lib/tag-rules.js).
+    const byRule = listTags(s.listed);
+    for (const t of LIST_TAGS) {
+      if (byRule.includes(t) && !s.tags.includes(t)) warnings.push(`schools.json ${s.dbn}: the program list supports "${t}" (${listEvidence(s.listed)[t].join(", ")}) but the school isn't tagged with it`);
+      if (!byRule.includes(t) && s.tags.includes(t)) warnings.push(`schools.json ${s.dbn}: tagged "${t}" but nothing in its program list supports it. Check the rule in docs/data-sources.md`);
+    }
     for (const [k, p] of Object.entries(s.provenance)) if (!sf.sources[p.source]) errors.push(`schools.json ${s.dbn}: ${k} source "${p.source}" is not in sources`);
   }
   for (const e of events) {

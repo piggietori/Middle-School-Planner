@@ -75,7 +75,7 @@ an automatic **watch** says when a source changed, so nobody has to remember to 
 - **What we take:**
   - Survey numbers (`provenance.survey`): percent of students who feel safe (`safe`), who say bullying
     happens often (`bully`), and teachers who would recommend the school (`teach`), for each school and the city.
-  - School facts (`provenance.profile`): name, address, grades, size, programs (`tags`), admissions method
+  - School facts (`provenance.profile`): name, address, grades, programs (`tags`, by the rules in [Program tags](#program-tags)), admissions method
     and its description, highlights (`good`), concerns, website, nearby subway and bus.
 - **Numbers, pulled automatically:** every Monday the *Refresh data* workflow reads each school's profile page
   (`insideschools.org/school/<DBN>`, read by `scripts/lib/insideschools.js`) and takes the three survey
@@ -103,6 +103,26 @@ an automatic **watch** says when a source changed, so nobody has to remember to 
   Write what numbers can't say: programs, facilities, leadership, what students and teachers report.
 - **Numbers we don't hold** (attendance, suspensions, class size, graduation rate) can be written, and can't be
   checked; re-read those in August.
+
+## Program tags
+
+Each school's `tags` decide the program chips on its sheet, the "Offers: …" bullet on Find, and part of its match
+score, so every school is tagged by the same rule:
+
+| Tag | A school gets it when… |
+|---|---|
+| Honors / gifted (`honors`) | its InsideSchools program list has a screened academic program (Superintendent's Program, Algebra Honors, a screened academy, gifted) |
+| Dual language (`language`) | its program list has a dual language program |
+| Special-ed support (`sped`) | its program list has a specialized program (ASD Nest, Horizon or ACES; D75 Inclusion), or InsideSchools marks it "Staff Pick for Special Ed". Team-teaching and self-contained classes alone don't count: every school has them |
+| Music & band (`music`) | a band, orchestra, chorus or music major is named |
+| Arts (`arts`) | an arts academy or major is named, or at least two of visual art, theater and dance |
+| Science & tech (`stem`) | a science or tech academy, lab, or class beyond the core is named (coding, robotics, flight simulation). A Federal Magnet program alone doesn't count: it is a diversity lottery |
+| Small school (`small`) | under 650 students. Worked out from `size` (`src/facts.js`); never typed in `tags` |
+
+**Where the evidence comes from, in order:** the program list on the school's InsideSchools profile ("Programs &
+Admissions"), the written review there, then the school's own website. InsideSchools reviews can be several years
+old and some schools have none, so check the school's website when the profile is silent.
+**If nothing confirms a tag, the school doesn't get it.** Say in the pull request what each added or removed tag rests on.
 
 ## Our own data
 

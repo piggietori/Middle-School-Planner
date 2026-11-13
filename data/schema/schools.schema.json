@@ -70,7 +70,7 @@
           }
         },
         "bus": {"type": "array", "items": {"type": "string", "pattern": "^B\\d+$"}},
-        "tags": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "tags": {"type": "array", "items": {"type": "string"}, "uniqueItems": true, "description": "Programs the school offers, by the rules in docs/data-sources.md (Program tags). Not \"small\": that comes from size."},
         "admit": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"enum": ["zoned", "screened", "language", "open", "audition"]}},
         "admitText": {"type": "string"},
         "good": {"type": "array", "items": {"type": "string"}, "description": "Hand-written highlights. Bullets about numbers we hold are generated (src/facts.js), not written here."},

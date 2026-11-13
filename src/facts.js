@@ -4,6 +4,11 @@
    what numbers can't; they should not quote these numbers. */
 export const MARGIN=5;   // points better or worse than citywide before a number is worth a bullet
 export const LARGE=1150; // students; at or above this a school is called large
+export const SMALL=650;  // students; under this a school counts as a small school
+
+// The programs a school offers: its tags (assigned by the rules in docs/data-sources.md), plus "small",
+// which is worked out from its size and never typed.
+export const programsOf=s=>[...new Set([...s.tags,...(s.size<SMALL?["small"]:[])])];
 
 const mean=a=>a.reduce((x,y)=>x+y,0)/a.length;
 export function facts(s,city){

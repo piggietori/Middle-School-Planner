@@ -1,5 +1,5 @@
 import {CITY, PROG, S, HOMES} from "./data.js";
-import {facts} from "./facts.js";
+import {facts, programsOf} from "./facts.js";
 import {miles} from "./util.js";
 
 /* Match score: pure functions of a school and the family's plan. */
@@ -17,7 +17,7 @@ export function match(s,plan){
   let tw=0,sum=0;
   for(const k in plan.w){if(c[k]!=null&&plan.w[k]>0){tw+=plan.w[k];sum+=plan.w[k]*c[k]}}
   let hits=[];
-  if(plan.programs.length){hits=plan.programs.filter(p=>s.tags.includes(p)||(p==="small"&&s.size<650));tw+=2;sum+=2*(hits.length/plan.programs.length*100)}
+  if(plan.programs.length){const has=programsOf(s);hits=plan.programs.filter(p=>has.includes(p));tw+=2;sum+=2*(hits.length/plan.programs.length*100)}
   let score=tw?sum/tw:50;
   if(h&&dist>plan.maxMiles){score*=.75;warn.push("Farther than you want ("+dist.toFixed(1)+" mi)")}
   if(plan.needSubway&&!s.subway.length){score*=.8;warn.push("No subway nearby, bus only")}

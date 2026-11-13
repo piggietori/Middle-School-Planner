@@ -16,6 +16,7 @@ Start with architecture, then read whichever doc answers your question. Each fac
 | [governance.md](governance.md) | Who runs the planner, who steps in when the owner can't, and what they can do |
 | [failure-modes.md](failure-modes.md) | Everything that can go wrong, how we'd know, what we do, and how much risk is left (scored) |
 | [testing.md](testing.md) | The test and eval layers, what each proves, and how to run them |
+| [evals.md](evals.md) | How we check that what families see about a school is right and decided the same way for every school: the free checks, the tag classifier, and its eval, end to end |
 | [journeys.md](journeys.md) | What families do in the planner, step by step |
 | [CHANGELOG.md](../CHANGELOG.md) | What changed in each version, and how to release one |
 

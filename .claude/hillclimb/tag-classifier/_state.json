@@ -7,11 +7,28 @@
     "tests/evals/tag-cases.json"
   ],
   "metrics": [
-    {"id": "correct", "kind": "binary", "label": "All 3 right"},
-    {"id": "agree", "kind": "float", "label": "Answers right"},
-    {"id": "quotes_ok", "kind": "binary", "label": "Quotes found"}
+    {
+      "id": "correct",
+      "kind": "binary",
+      "label": "All 3 right"
+    },
+    {
+      "id": "agree",
+      "kind": "float",
+      "label": "Answers right"
+    },
+    {
+      "id": "quotes_ok",
+      "kind": "binary",
+      "label": "Quotes found"
+    }
   ],
   "perf_fields": [
-    {"id": "latency_s", "label": "Latency", "unit": "s"}
-  ]
+    {
+      "id": "latency_s",
+      "label": "Latency",
+      "unit": "s"
+    }
+  ],
+  "harness_sha": "2cdc1277291ae9dce8ad07f3c5cb9092c908de9404a46c8b69659753fa16ec0a"
 }

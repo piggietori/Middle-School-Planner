@@ -93,7 +93,7 @@ an automatic **watch** says when a source changed, so nobody has to remember to 
   wording for every school:
   - test results (math and reading together), feel safe, bullying and teachers recommend: a highlight when 5 or
     more points better than citywide, a concern when 5 or more points worse, nothing in between;
-  - 1,200 students or more: "Large school"; no subway stop: "No subway nearby".
+  - 1,150 students or more: "Large school"; no subway stop: "No subway nearby".
 
   The Find cards show the same highlights, in the same words, after the family's own reasons (distance,
   programs they picked, subway).

@@ -20,6 +20,12 @@ feature the middle one (1.1 → 1.2), and a change that needs families or the da
   usage counts are dropped).
 
 ### Changed
+- **Program tags follow one written rule per program.** The chips on a school's sheet and the programs that count
+  toward its match now rest on the same evidence for every school: its InsideSchools program list and review, then
+  the school's own website ([docs/data-sources.md](docs/data-sources.md#program-tags)). Applying the rules: JHS 259
+  gains Arts and Music & band, JHS 62 gains Music & band, and PS/IS 104 loses Special-ed support (it has the
+  classes every school has, not a specialized program). Small school is now worked out from the school's size, so
+  JHS 223 (549 students) shows the chip its match already counted.
 - **Highlights and concerns treat every school's numbers the same way.** A school's sheet now works out its number
   bullets itself: test results, feel safe, bullying and teachers recommend become a highlight when 5 or more points
   better than citywide and a concern when 5 or more points worse, always with the citywide figure; schools with

@@ -107,6 +107,12 @@ test("a typed highlight or concern must not repeat what the sheet shows by rule"
   assert.deepEqual(warningsOf(d), []);
 });
 
+test("a typed small-school tag is a warning: it is worked out from size", () => {
+  const d = copy();
+  d.schools.schools[0].tags.push("small");
+  has(warningsOf(d), /20K030: the "small" tag is worked out from the school's size/);
+});
+
 test("text that says a school is too new for test results is a warning once it has them", () => {
   const d = copy();
   Object.assign(d.schools.schools.find(s => s.dbn === "20K407"), {math: 68, ela: 68});

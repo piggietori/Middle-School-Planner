@@ -1,7 +1,7 @@
 // Number bullets on the school sheet: the same rule and wording for every school.
 import test from "node:test";
 import assert from "node:assert/strict";
-import {facts, MARGIN, LARGE} from "../../src/facts.js";
+import {facts, programsOf, MARGIN, LARGE, SMALL} from "../../src/facts.js";
 
 const CITY = {math: 56, ela: 57, safe: 80, bully: 59, teach: 85};
 // A school exactly at the citywide averages, mid-sized, with a subway: nothing to say about it.
@@ -43,4 +43,11 @@ test("large schools and schools with no subway are always flagged", () => {
   assert.equal(LARGE, 1150);
   assert.deepEqual(facts(school({size: 1149}), CITY).concerns, []);
   assert.deepEqual(facts(school({size: 1482, subway: []}), CITY).concerns, ["Large school: 1,482 students", "No subway nearby"]);
+});
+
+test("a school's programs are its tags, plus small school when it has under 650 students", () => {
+  assert.equal(SMALL, 650);
+  assert.deepEqual(programsOf({tags: ["honors"], size: 649}), ["honors", "small"]);
+  assert.deepEqual(programsOf({tags: ["honors"], size: 650}), ["honors"]);
+  assert.deepEqual(programsOf({tags: ["honors", "small"], size: 500}), ["honors", "small"]); // never twice
 });

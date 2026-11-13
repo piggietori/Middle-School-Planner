@@ -1,6 +1,6 @@
 import {CITY, PROG, BY, OH} from "../data.js";
 import {homePt, match} from "../match.js";
-import {facts} from "../facts.js";
+import {facts, programsOf} from "../facts.js";
 import {isSaved} from "../plan.js";
 import {st} from "../state.js";
 import {ui} from "../ui.js";
@@ -54,7 +54,7 @@ export function renderSheet(){
         <span class="muted small">Middle school grades. The dark line marks the citywide average.</span></div>
       <div class="grid2" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
         <div class="card"><h3>Highlights</h3>${list([...s.good,...f.good],"")}
-          <div class="chips" style="margin-top:12px">${s.tags.map(t=>`<span class="pill">${PROG[t]}</span>`).join("")}</div></div>
+          <div class="chips" style="margin-top:12px">${programsOf(s).map(t=>`<span class="pill">${PROG[t]}</span>`).join("")}</div></div>
         <div class="card"><h3>Reported concerns</h3>${list([...s.concerns,...f.concerns]," caution")}</div>
       </div>
       <div class="card"><h3>Open houses</h3>${ev.map(e=>evRow(e)).join("")}</div>

@@ -54,6 +54,7 @@ export function checkData(data, {base = null, today = new Date().toISOString().s
   const cycle = +sf.cycle, from = `${cycle - 1}-09-01`, to = `${cycle}-06-30`;
   for (const s of schools) {
     for (const t of s.tags) if (!sf.programs[t]) errors.push(`schools.json ${s.dbn}: tag "${t}" is not in programs`);
+    if (s.tags.includes("small")) warnings.push(`schools.json ${s.dbn}: the "small" tag is worked out from the school's size. Remove it from tags`);
     for (const [k, p] of Object.entries(s.provenance)) if (!sf.sources[p.source]) errors.push(`schools.json ${s.dbn}: ${k} source "${p.source}" is not in sources`);
   }
   for (const e of events) {

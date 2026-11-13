@@ -7,3 +7,11 @@ playwright-report/
 *.code-workspace
 screenshots/
 /*.png
+
+# Saved source text and eval output (scripts/fetch-tag-sources.js, scripts/eval-tags.mjs)
+.cache/
+.claude/hillclimb/**/traces/
+.claude/hillclimb/**/report.html
+.claude/hillclimb/**/trajectory/
+.claude/hillclimb/**/progress.txt
+.claude/hillclimb/*-selftest/

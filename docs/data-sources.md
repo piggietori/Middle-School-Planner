@@ -136,6 +136,9 @@ language and special-ed follow it by a rule in code (`scripts/lib/tag-rules.js`)
 language program; an ASD Nest, Horizon or ACES program, a D75 Inclusion program, or the staff pick. The refresh
 never changes a tag. If a list changes so that a tag no longer agrees with it, the data checks warn on that pull
 request and a person decides. Music, arts and science & tech rest on written text, so no rule in code decides them.
+A classifier can propose them, and an eval measures how well it agrees with our decisions; both run by hand
+([testing.md](testing.md#tag-classifier-eval)). `npm run fetch:tag-sources` re-fetches the pages and lists any
+stored quote that is no longer found word for word.
 
 ## Our own data
 

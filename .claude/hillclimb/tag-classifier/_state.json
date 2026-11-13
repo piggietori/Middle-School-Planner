@@ -1,0 +1,17 @@
+{
+  "harness_paths": [
+    "scripts/lib/tag-classifier.js",
+    "scripts/lib/tag-eval.js",
+    "scripts/lib/tag-rules.js",
+    "scripts/lib/tag-sources.js",
+    "tests/evals/tag-cases.json"
+  ],
+  "metrics": [
+    {"id": "correct", "kind": "binary", "label": "All 3 right"},
+    {"id": "agree", "kind": "float", "label": "Answers right"},
+    {"id": "quotes_ok", "kind": "binary", "label": "Quotes found"}
+  ],
+  "perf_fields": [
+    {"id": "latency_s", "label": "Latency", "unit": "s"}
+  ]
+}

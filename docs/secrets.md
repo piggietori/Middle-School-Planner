@@ -40,6 +40,9 @@ Above all of these are the **master keys**: the logins that can reset everything
 ## Where secrets live
 
 - **The public repository holds no secrets.** Its workflows (CI, deploy, watch, refresh, release) don't need any.
+- **Your own shell** holds the Anthropic API key (`ANTHROPIC_API_KEY`) when you run the tag classifier or its
+  eval ([testing.md](testing.md#tag-classifier-eval)). It is never written to a file here and never added to
+  GitHub Actions; those scripts run by hand only.
 - **The private `planner-ops` repository** holds the two that touch families' data: `SUPABASE_DB_URL` and
   `BACKUP_PASSPHRASE`. Its *Backup* and *Monitor* workflows use them. Only you can see it, its runs and its backup files.
 - **Supabase** holds the email keys: the SMTP key in its settings, and the Resend API key and feedback addresses in

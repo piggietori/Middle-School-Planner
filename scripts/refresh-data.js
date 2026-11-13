@@ -1,9 +1,13 @@
-// Pull the latest state test results for our schools from NYC Open Data and update data/schools.json.
-// Only math and ela (grades 6 to 8) and the citywide averages are touched; everything else is hand-curated.
+// Pull the numbers that have a source we can read and update data/schools.json:
+//   - state test results (math and ela, grades 6 to 8) and their citywide averages, from NYC Open Data;
+//   - NYC School Survey answers (safe, bully, teach), their citywide averages and enrollment (size),
+//     from each school's InsideSchools profile.
+// Everything else is hand-curated. A number the source doesn't have is never blanked: we keep ours and say so.
 // Usage: node scripts/refresh-data.js [--summary <file.md>]
 import fs from "node:fs";
 import path from "node:path";
 import {formatJson} from "./lib/json-format.js";
+import {parseProfile, profileUrl} from "./lib/insideschools.js";
 
 const DATASET = "dnpx-dfnc"; // School Quality Reports Data
 const API = `https://data.cityofnewyork.us/resource/${DATASET}.json`;
@@ -65,19 +69,62 @@ const c = data.city_averages;
 for (const k of ["math", "ela"]) if (city["city:" + k] != null && c[k] !== city["city:" + k]) { changes.push(["Citywide average", k, c[k], city["city:" + k]]); c[k] = city["city:" + k]; }
 c.provenance.scores = prov;
 
+// Survey answers and enrollment, one profile page per school.
+const SURVEY = ["safe", "bully", "teach"];
+async function page(url) {
+  const res = await fetch(url, {headers: {"user-agent": "school data refresh"}, signal: AbortSignal.timeout(30000)});
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+  return res.text();
+}
+const profiles = [], unread = [], gaps = [];
+for (const s of data.schools) {
+  try { profiles.push([s, parseProfile(await page(profileUrl(s.dbn)))]); }
+  catch (e) { unread.push(`${s.short} (${e.message})`); }
+  await new Promise(r => setTimeout(r, 300));
+}
+if (!profiles.length) throw new Error(`Could not read any InsideSchools profile: ${unread[0]}`);
+const mark = changes.length;
+for (const [s, p] of profiles) for (const k of [...SURVEY, "size"]) {
+  if (p[k] == null) { gaps.push(`${s.short}: ${k}${s[k] == null ? "" : ` (kept ${s[k]})`}`); continue; }
+  if (s[k] !== p[k]) { changes.push([s.short, k, s[k], p[k]]); s[k] = p[k]; }
+}
+// InsideSchools compares each school with schools of its kind, so K-8 and 6-12 schools show another
+// citywide figure. We keep one benchmark: the one most of our schools are compared with.
+const otherCity = new Set();
+for (const k of SURVEY) {
+  const seen = profiles.map(([, p]) => p.city[k]).filter(v => v != null);
+  if (!seen.length) continue;
+  const count = v => seen.filter(x => x === v).length;
+  const top = [...new Set(seen)].sort((a, b) => count(b) - count(a))[0];
+  for (const [s, p] of profiles) if (p.city[k] != null && p.city[k] !== top) otherCity.add(s.short);
+  if (c[k] !== top) { changes.push(["Citywide average", k, c[k], top]); c[k] = top; }
+}
+// "Last checked" moves only when something did, so a week with no news opens no pull request.
+const surveyPeriod = profiles[0][1].period;
+if (changes.length > mark || profiles.some(([s, p]) => s.provenance.survey.period !== p.period)) {
+  const today = new Date().toISOString().slice(0, 10);
+  for (const [s, p] of profiles) s.provenance.survey = {source: "insideschools", as_of: today, period: p.period};
+  c.provenance.survey = {source: "insideschools", as_of: today, period: surveyPeriod};
+}
+
 const before = fs.readFileSync(file, "utf8"), after = formatJson(data);
 if (after !== before) fs.writeFileSync(file, after);
 
-const label = {math: "Math", ela: "Reading"};
+const label = {math: "Math", ela: "Reading", safe: "Feel safe", bully: "Bullying", teach: "Teachers recommend", size: "Students"};
 const summary = [
   `Test results from **NYC School Quality Reports** ([${DATASET}](https://data.cityofnewyork.us/d/${DATASET})), ${period} school year, published ${published}.`,
   "Percent of students in grades 6 to 8 at level 3 or 4 on the state tests, weighted by students tested in each grade.",
   "",
-  changes.length ? "| School | Subject | Was | Now |\n|---|---|---|---|\n" + changes.map(([n, k, a, b]) => `| ${n} | ${label[k]} | ${a ?? "none"} | ${b ?? "none"} |`).join("\n") : "No score changes.",
-  missing.length ? `\nNo ${period} results for ${missing.join(", ")}; kept the current numbers.` : "",
+  `Survey answers (feel safe, bullying, teachers recommend) and enrollment from each school's **InsideSchools** profile, ${surveyPeriod} NYC School Survey.`,
   "",
-  "Survey numbers (feels safe, bullying, teachers), open houses, highlights and concerns are hand-curated and were not changed.",
+  changes.length ? "| School | Number | Was | Now |\n|---|---|---|---|\n" + changes.map(([n, k, a, b]) => `| ${n} | ${label[k]} | ${a ?? "none"} | ${b ?? "none"} |`).join("\n") : "No changes.",
+  missing.length ? `\nNo ${period} test results for ${missing.join(", ")}; kept the current numbers.` : "",
+  gaps.length ? `\nNot shown on InsideSchools: ${gaps.join("; ")}.` : "",
+  unread.length ? `\n**Could not read** the InsideSchools profile for ${unread.join("; ")}. Those schools were not checked.` : "",
+  otherCity.size ? `\nInsideSchools compares ${[...otherCity].join(", ")} with a different citywide figure (schools with other grades). We show one citywide average for every school.` : "",
+  "",
+  "Open houses, programs, highlights and concerns are hand-curated and were not changed. If a highlight or concern quotes a number that changed, the data checks say which.",
 ].join("\n");
 if (summaryFile) fs.writeFileSync(summaryFile, summary + "\n");
-console.log(after === before ? "data/schools.json is already up to date." : `Updated data/schools.json: ${changes.length} score changes.`);
+console.log(after === before ? "data/schools.json is already up to date." : `Updated data/schools.json: ${changes.length} changes.`);
 console.log(summary);

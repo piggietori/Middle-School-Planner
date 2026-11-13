@@ -18,6 +18,16 @@ function schemas() {
 const days = (a, b) => Math.round((Date.parse(b) - Date.parse(a)) / 864e5);
 const dupes = list => list.filter((x, i) => list.indexOf(x) !== i);
 
+// How highlights and concerns quote a number that is also a field. Each must agree with the field.
+const SURVEY = ["safe", "bully", "teach"];
+const QUOTES = [
+  ["math", /(\d+)% math|math: (\d+)% passing/i],
+  ["ela", /(\d+)% reading|reading: (\d+)% passing/i],
+  ["safe", /(\d+)% of students feel safe/i],
+  ["bully", /(\d+)% of students say bullying happens often/i],
+  ["teach", /(\d+)% of teachers would recommend/i],
+];
+
 /**
  * @param data  {schools, events, neighborhoods, steps}: parsed data files
  * @param opts  base: the same files on the target branch (or null), today: "YYYY-MM-DD"
@@ -75,10 +85,23 @@ export function checkData(data, {base = null, today = new Date().toISOString().s
 
   // Freshness: open houses change often in application season; school facts about once a year.
   // Hand-written highlights and concerns that quote a number must agree with the number.
+  // Numbers with no field of their own (attendance, suspensions, class size) can't be checked here.
   for (const s of schools) for (const text of [...s.good, ...s.concerns]) {
-    for (const [k, word] of [["math", "math"], ["ela", "reading"]]) {
-      const m = text.match(new RegExp(`(\\d+)% ${word}|${word}: (\\d+)% passing`, "i"));
-      if (m && s[k] != null && +(m[1] ?? m[2]) !== s[k]) warnings.push(`schools.json ${s.dbn}: text says "${m[0]}" but ${k} is ${s[k]}. Update the text`);
+    const quoted = [];
+    for (const [k, re] of QUOTES) {
+      const m = text.match(re);
+      if (!m) continue;
+      quoted.push(k);
+      const n = +(m[1] ?? m[2]);
+      if (s[k] == null) { if (SURVEY.includes(k)) warnings.push(`schools.json ${s.dbn}: text says "${m[0]}" but there is no ${k} number in the data. Add the number or update the text`); }
+      else if (n !== s[k]) warnings.push(`schools.json ${s.dbn}: text says "${m[0]}" but ${k} is ${s[k]}. Update the text`);
+    }
+    const city = text.match(/citywide (\d+)%/i);
+    if (city && quoted.length === 1 && +city[1] !== sf.city_averages[quoted[0]]) warnings.push(`schools.json ${s.dbn}: text says "${city[0]}" but the citywide ${quoted[0]} average is ${sf.city_averages[quoted[0]]}. Update the text`);
+    const size = text.match(/(about )?(\d[\d,]{2,}) students/i);
+    if (size) {
+      const n = +size[2].replace(/,/g, "");
+      if (size[1] ? Math.abs(n - s.size) > s.size * .05 : n !== s.size) warnings.push(`schools.json ${s.dbn}: text says "${size[0]}" but size is ${s.size}. Update the text`);
     }
     if (/too new for full test results/i.test(text) && s.math != null && s.ela != null) warnings.push(`schools.json ${s.dbn}: text says "too new for full test results" but there are now test results. Update the text`);
   }

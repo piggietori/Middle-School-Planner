@@ -20,6 +20,13 @@ feature the middle one (1.1 → 1.2), and a change that needs families or the da
   usage counts are dropped).
 
 ### Changed
+- **School numbers now come straight from their source, every week.** Survey numbers (feel safe, bullying,
+  teachers) and school size are pulled from each school's InsideSchools profile every Monday, the same way test
+  results are pulled from NYC Open Data, and arrive as a pull request to review. This filled in ten numbers that
+  showed "No data" (bullying at nine schools, teachers at one) and brought every school's size up to date.
+- **Highlights and concerns can't quote a different number from the one shown above them.** The data checks now
+  cover survey numbers, citywide averages and school size as well as test results. Three bullets quoting an old
+  citywide average, and one an old school size, are fixed.
 - **The account menu no longer offers "Download my data".** A data file meant nothing to families. Signed in, it
   offers sign out and delete; a copy of their data is on request at help@torilam.com (the privacy page says so).
 - **The first-visit note says what the planner is for:** built by a D20 parent to explore schools, coordinate open

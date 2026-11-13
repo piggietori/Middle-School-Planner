@@ -7,6 +7,7 @@ Running the planner day to day: what happens when, how to tell it's healthy, and
 | When | What happens | What you do |
 |---|---|---|
 | Every day October–December, Mondays otherwise | *Watch sources* checks the D20 pages, the city's admissions page and the test results dataset | If an issue opens, update the data it names ([data-sources.md](data-sources.md)) |
+| Every Monday | *Refresh data* compares survey numbers and school size with InsideSchools, and test results with NYC Open Data | If it opens a pull request, read the table, fix any text the data checks flag, and merge |
 | Spring (around April) | The city publishes last year's test results; the watch opens an issue | Actions → *Refresh data* → Run workflow, then review and merge its pull request |
 | April 7 | Offers come out; Next up says so | Nothing |
 | August 15 | *New admissions cycle* opens the yearly checklist | Work through it: new key dates, flyer, school facts, survey, steps, `cycle`, restore drill, 2FA check |

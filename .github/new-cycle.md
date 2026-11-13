@@ -12,7 +12,8 @@ See README → Updating data.
 
 **Schools** ([InsideSchools](https://insideschools.org) and the NYC School Survey on [InfoHub](https://infohub.nyced.org))
 - [ ] For each school: size, programs, admissions method, highlights and concerns. Update `provenance.profile`.
-- [ ] Survey numbers (feels safe, bullying, teachers) per school and in `city_averages`. Update `provenance.survey`.
+- [ ] Survey numbers (feels safe, bullying, teachers) and school size are pulled every Monday by *Refresh data*. Check it has run (Actions → Refresh data) and that no pull request from it is waiting.
+- [ ] Re-read every highlight and concern that quotes a number we don't hold (attendance, suspensions, class size): the data checks can't.
 - [ ] Any new District 20 middle schools (and their neighborhoods' distances).
 
 **Test results**

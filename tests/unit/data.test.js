@@ -98,6 +98,36 @@ test("highlights that quote a number different from the data are a warning", () 
   has(warningsOf(d), /20K407: text says "too new for full test results"/);
 });
 
+test("survey numbers, citywide averages and school size quoted in text must match the data", () => {
+  const school = (d, dbn) => d.schools.schools.find(s => s.dbn === dbn);
+  let d = copy();
+  Object.assign(school(d, "20K030"), {safe: 70, bully: 75, teach: 60});
+  let w = warningsOf(d);
+  has(w, /20K030: text says "68% of students feel safe" but safe is 70/);
+  has(w, /20K030: text says "78% of students say bullying happens often" but bully is 75/);
+  has(w, /20K030: text says "57% of teachers would recommend" but teach is 60/);
+
+  d = copy();
+  d.schools.city_averages.bully = 61;
+  w = warningsOf(d);
+  has(w, /20K030: text says "citywide 59%" but the citywide bully average is 61/);
+  has(w, /20K192: text says "citywide 59%" but the citywide bully average is 61/);
+  assert.equal(w.length, 2); // "citywide 36%" is about high school credit, which we don't track
+
+  d = copy();
+  school(d, "20K201").size = 1482;
+  has(warningsOf(d), /20K201: text says "1,526 students" but size is 1482/);
+  d = copy();
+  school(d, "20K259").size = 1790; // "about 1,800 students"
+  assert.deepEqual(warningsOf(d), []);
+  school(d, "20K259").size = 1500;
+  has(warningsOf(d), /20K259: text says "about 1,800 students" but size is 1500/);
+
+  d = copy();
+  school(d, "20K180").teach = null;
+  has(warningsOf(d), /20K180: text says "85% of teachers would recommend" but there is no teach number in the data/);
+});
+
 test("open house dates not checked for a month during application season are a warning", () => {
   has(warningsOf(real, {today: "2026-11-30"}), /last checked 2026-10-16 \(45 days ago\) during application season/);
   assert.deepEqual(warningsOf(real, {today: "2027-01-20"}), []); // after the deadline

@@ -1,10 +1,12 @@
-# Pulls the latest test results from NYC Open Data and opens a pull request for a person to review.
-# Nothing reaches the live site until that pull request is merged.
-# Run by hand (Actions → Refresh data → Run workflow): NYC publishes results once a year, and the
-# Watch sources workflow opens an issue when it does.
+# Pulls the numbers that have a source we can read (test results from NYC Open Data; survey answers and
+# enrollment from each school's InsideSchools profile) and opens a pull request for a person to review.
+# Nothing reaches the live site until that pull request is merged. No pull request opens if nothing changed.
+# Runs every Monday, and by hand (Actions → Refresh data → Run workflow).
 # One-time setup: Settings → Actions → General → "Allow GitHub Actions to create and approve pull requests".
 name: Refresh data
 on:
+  schedule:
+    - cron: "40 11 * * 1" # Mondays, after Watch sources
   workflow_dispatch:
 
 permissions: {contents: write, pull-requests: write}
@@ -18,7 +20,7 @@ jobs:
       - uses: actions/setup-node@v7
         with: {node-version: 24, cache: npm}
       - run: npm ci
-      - name: Pull from NYC Open Data
+      - name: Pull from NYC Open Data and InsideSchools
         run: node scripts/refresh-data.js --summary "$RUNNER_TEMP/summary.md"
       - name: Data checks
         run: |
@@ -31,9 +33,9 @@ jobs:
       - run: npm test
       - uses: peter-evans/create-pull-request@v7
         with:
-          branch: data/refresh-test-results
-          commit-message: "Refresh test results from NYC School Quality Reports"
-          title: "Data refresh: test results from NYC Open Data"
+          branch: data/refresh
+          commit-message: "Refresh school numbers from NYC Open Data and InsideSchools"
+          title: "Data refresh: school numbers from their sources"
           body-path: ${{ runner.temp }}/summary.md
           add-paths: data/schools.json
           delete-branch: true

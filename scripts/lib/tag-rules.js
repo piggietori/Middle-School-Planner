@@ -15,3 +15,13 @@ export function listEvidence(listed) {
   };
 }
 export const listTags = listed => LIST_TAGS.filter(t => listEvidence(listed)[t].length);
+
+// The three tags that rest on written text (a review, a school's website). No rule in code decides them:
+// a person does, or the classifier in scripts/lib/tag-classifier.js proposes. These are the rules in words,
+// word for word as in docs/data-sources.md (a unit test keeps the two the same).
+export const PROSE_TAGS = ["music", "arts", "stem"];
+export const PROSE_RULES = {
+  music: "a band, orchestra, chorus or music major is named",
+  arts: "an arts academy or major is named, or at least two of visual art, theater and dance",
+  stem: "a science or tech academy, lab, or class beyond the core is named (coding, robotics, flight simulation). A Federal Magnet program alone doesn't count: it is a diversity lottery",
+};

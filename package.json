@@ -8,17 +8,23 @@
     "lint": "eslint .",
     "check:data": "node scripts/validate-data.js",
     "refresh:data": "node scripts/refresh-data.js",
+    "fetch:tag-sources": "node scripts/fetch-tag-sources.js",
+    "classify:tags": "node scripts/classify-tags.js",
+    "eval:tags": "node scripts/eval-tags.mjs --flow .claude/hillclimb/tag-classifier --model claude-opus-5-5",
+    "eval:tags:summary": "node scripts/eval-tags-summary.js",
     "test": "node --test \"tests/unit/*.test.js\" \"tests/db/*.test.js\"",
     "test:e2e": "playwright test"
   },
   "devDependencies": {
+    "@anthropic-ai/sdk": "^1.8.0",
     "@axe-core/playwright": "^4.14.0",
     "@electric-sql/pglite": "0.5.15",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.65.0",
     "ajv": "^8.20.0",
     "eslint": "^10.14.0",
-    "globals": "^17.14.0"
+    "globals": "^17.14.0",
+    "zod": "^4.6.7"
   },
   "overrides": {
     "minimatch": "^11.0.1"

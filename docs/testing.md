@@ -15,6 +15,7 @@ pull request, and the `main` ruleset doesn't allow merging until it passes.
 | Config | `tests/unit/config.test.js` | 1 | The help address and the Supabase region are filled in, so the privacy notice never shows a placeholder |
 | Source pull | `tests/unit/insideschools.test.js` | 4 | Survey numbers, citywide averages, enrollment and the program list are read correctly from an InsideSchools profile; a missing answer is "no data"; a page that can't be read is an error, never "no data" |
 | Tag rules | `tests/unit/tag-rules.test.js` | 4 | Honors, dual language and special-ed follow a school's program list by one rule: a screened program, a dual language program, a specialized program or the staff pick; nothing else earns them |
+| Tag classifier eval (grading) | `tests/unit/tag-eval.test.js` | 8 | The eval's own scoring is right, with no model and no network: our answers score full marks and all-"no" doesn't, a quote must be in the source word for word, wrong yeses and wrong nos are counted apart, and the rules the classifier is given are the docs' rules word for word |
 | Source watch | `tests/unit/watch.test.js` | 4 | Page changes are detected; markup and tracking codes aren't mistaken for changes |
 | Database security | `tests/db/rls.test.js` | 16 | Every migration runs in real Postgres (PGlite). Different people try to read and change each other's data, sign up for other households, and delete accounts; the database refuses what it should. Old events and errors are pruned, and only the database owner can prune. Anyone can send feedback, but nobody can read or change it, or mark it emailed |
 | Data files | `npm run check:data` | — | The real `data/*.json` passes every check; compared with `main`, no ID was removed |
@@ -42,6 +43,43 @@ compared against the pull request's base branch).
 The data checks double as evals for the source data: they run on every pull request that touches `data/`, and the
 *Refresh data* workflow runs them on its own changes and puts the results in its pull request.
 [data-sources.md](data-sources.md#what-the-data-checks-catch) lists what they catch.
+
+## Tag classifier eval
+
+Music & band, arts and science & tech rest on written text (a review, a school's website), so a person judges
+them. The classifier (`scripts/lib/tag-classifier.js`) makes that judgment repeatable: it reads a school's saved
+source text and the written rules, and answers yes or no per tag with the words it rests on. It only proposes;
+it never changes `data/schools.json`. The eval measures whether it can be trusted to.
+
+- **Golden answers:** `tests/evals/tag-cases.json`, 48 decisions (16 schools × 3 tags). They are our own
+  decisions, with a note on each judgment call.
+- **Grading, all by code:** each answer against ours, reported per tag as precision, recall and specificity;
+  every quote behind a "yes" must be in the school's source text word for word; and each school is run several
+  times, so an answer that changes between runs is listed.
+- **It runs on your machine, by hand.** Never in GitHub Actions: it needs an Anthropic API key, and the
+  repository holds none ([secrets.md](secrets.md)). Each run costs one model call per school per run.
+
+```
+npm run fetch:tag-sources                 # save each school's source text to .cache/ (free; also re-checks every stored quote)
+$env:ANTHROPIC_API_KEY = "..."            # your own key, in your shell only (PowerShell; bash: export ANTHROPIC_API_KEY=...)
+npm run eval:tags -- --reps 3 --approve-harness   # first run, and after any change to the runner, rules, prompt or cases
+npm run eval:tags -- --reps 3             # later runs; picks up where a stopped run left off
+npm run eval:tags:summary                 # the per-tag table, answers that differ from ours, answers that flipped
+npm run classify:tags                     # outside the eval: the classifier's answers next to today's tags
+```
+
+`--approve-harness` records that you have looked at the runner and what it runs; without it a changed runner
+refuses to start. Results land in `.claude/hillclimb/tag-classifier/baseline/` (`results.jsonl`, one transcript
+per run in `traces/`, failed calls in `errors.jsonl`: a failed call is never scored as a wrong answer).
+To start over, delete that `baseline` folder.
+
+**When to run it:** when a tag rule, the classifier's prompt or the model changes, and each August with the
+yearly tag review. Not weekly: the sources change about once a year.
+
+**What it can and can't tell you:** 16 schools is a small set, so one answer is about 2 points and small
+differences mean nothing. The golden answers are our decisions, so the eval measures agreement with us, not
+truth. InsideSchools reviews date from 2017 to 2021. When the classifier and a tag disagree, read both quotes
+and decide; a tag changes only with its evidence ([data-sources.md](data-sources.md#program-tags)).
 
 ## Not tested yet
 

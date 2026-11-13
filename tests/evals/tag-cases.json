@@ -1,0 +1,109 @@
+{
+  "about": "Golden answers for the tag classifier eval (scripts/eval-tags.mjs): does each school earn music, arts and science & tech by the rules in docs/data-sources.md? The answers are the owner's decisions, signed off 2026-11-13. source_sha is the saved source text they were checked against (scripts/fetch-tag-sources.js); a different one means the pages changed since.",
+  "answers_from": "owner decisions",
+  "cases": [
+    {
+      "id": "20K030",
+      "school": "PS/IS 30",
+      "expected": {"music": false, "arts": false, "stem": false},
+      "source_sha": "7e6e03a3e9f1"
+    },
+    {
+      "id": "20K062",
+      "school": "JHS 62",
+      "expected": {"music": true, "arts": true, "stem": false},
+      "notes": {"stem": "Judgment call: coding for all and Saturday robotics, judged not enough."},
+      "source_sha": "3666d82cd27d"
+    },
+    {
+      "id": "20K104",
+      "school": "PS/IS 104",
+      "expected": {"music": false, "arts": false, "stem": false},
+      "source_sha": "18083db9c93a"
+    },
+    {
+      "id": "20K180",
+      "school": "SEEALL K180",
+      "expected": {"music": false, "arts": false, "stem": false},
+      "source_sha": "8ade0a071ca3"
+    },
+    {
+      "id": "20K187",
+      "school": "IS 187",
+      "expected": {"music": true, "arts": true, "stem": true},
+      "source_sha": "77b759ea2f5a"
+    },
+    {
+      "id": "20K192",
+      "school": "PS/IS 192",
+      "expected": {"music": false, "arts": false, "stem": true},
+      "source_sha": "6678d6a54b07"
+    },
+    {
+      "id": "20K201",
+      "school": "JHS 201",
+      "expected": {"music": true, "arts": true, "stem": false},
+      "source_sha": "456c1b92f002"
+    },
+    {
+      "id": "20K220",
+      "school": "JHS 220",
+      "expected": {"music": false, "arts": false, "stem": true},
+      "notes": {
+        "stem": "Judgment call: rests on a 7th-grade architecture program with Maimonides Medical Center. Its Federal Magnet program alone would not count."
+      },
+      "source_sha": "f4e80513c762"
+    },
+    {
+      "id": "20K223",
+      "school": "JHS 223",
+      "expected": {"music": false, "arts": false, "stem": false},
+      "notes": {"stem": "Federal Magnet program alone doesn't count."},
+      "source_sha": "c2f4ed896838"
+    },
+    {
+      "id": "20K227",
+      "school": "JHS 227",
+      "expected": {"music": true, "arts": true, "stem": true},
+      "source_sha": "5158ab494b1b"
+    },
+    {
+      "id": "20K229",
+      "school": "PS/IS 229",
+      "expected": {"music": true, "arts": true, "stem": false},
+      "source_sha": "b2da9419e03c"
+    },
+    {
+      "id": "20K259",
+      "school": "JHS 259",
+      "expected": {"music": true, "arts": true, "stem": true},
+      "source_sha": "002e79800ff0"
+    },
+    {
+      "id": "20K407",
+      "school": "MS 407",
+      "expected": {"music": false, "arts": true, "stem": true},
+      "source_sha": "ad1907adcfd8"
+    },
+    {
+      "id": "20K609",
+      "school": "UA Leadership",
+      "expected": {"music": false, "arts": false, "stem": false},
+      "source_sha": "438cb538284a"
+    },
+    {
+      "id": "20K686",
+      "school": "BSI",
+      "expected": {"music": false, "arts": false, "stem": false},
+      "notes": {"arts": "Judgment call: \"arts-rich\" in a review of the whole K–8 school, judged not enough."},
+      "source_sha": "49279a5fe846"
+    },
+    {
+      "id": "20K936",
+      "school": "MS 936",
+      "expected": {"music": true, "arts": true, "stem": true},
+      "notes": {"stem": "Judgment call: rests on a STEAM club named in the review."},
+      "source_sha": "4d9da47a545f"
+    }
+  ]
+}

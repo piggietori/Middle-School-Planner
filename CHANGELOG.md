@@ -9,6 +9,11 @@ feature the middle one (1.1 → 1.2), and a change that needs families or the da
 ## [Unreleased]
 
 ### Added
+- **A classifier and an eval for the tags that rest on written text.** For music & band, arts and science & tech,
+  a script can now propose yes or no per school from its InsideSchools review and website, with the words each
+  answer rests on, and an eval scores it against our 48 decisions. Both run by hand with your own Anthropic API
+  key, never in GitHub Actions, and neither changes a tag ([docs/testing.md](docs/testing.md#tag-classifier-eval)).
+  `npm run fetch:tag-sources` (free) re-checks that every stored quote is still on its page.
 - **Every program tag records what it rests on.** Each school's data now holds its InsideSchools program list and,
   for every tag, the program name or the short quote (from the InsideSchools review or the school's own website)
   that supports it. The data checks block a tag with no evidence, and warn when an honors, dual language or

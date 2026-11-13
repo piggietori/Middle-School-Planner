@@ -38,3 +38,10 @@ export function parsePrograms(html) {
   const programs = [...html.matchAll(PROGRAM)].map(m => ({name: text(m[1]), method: text(m[2] ?? "").replace(/^Admissions Method:\s*/i, "")}));
   return {programs, staff_pick_sped: /is-pick-special-ed/.test(html)};
 }
+
+// The "Our Insights" section: InsideSchools' own takeaways and written review, as HTML. Empty when the page
+// has none. Schools without a visit carry a short standard text here instead of a review.
+export function reviewHtml(html) {
+  const m = html.match(/<h2 class=['"]school-heading['"]>Our Insights<\/h2>([\s\S]*?)<h2 class=['"]school-heading['"]>/);
+  return m ? m[1] : "";
+}

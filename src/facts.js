@@ -3,7 +3,7 @@
    at one school earns it at all of them. Hand-written highlights and concerns (data/schools.json) cover
    what numbers can't; they should not quote these numbers. */
 export const MARGIN=5;   // points better or worse than citywide before a number is worth a bullet
-export const LARGE=1200; // students; at or above this a school is called large
+export const LARGE=1150; // students; at or above this a school is called large
 
 const mean=a=>a.reduce((x,y)=>x+y,0)/a.length;
 export function facts(s,city){

@@ -40,7 +40,7 @@ test("a missing number earns no bullet; one test subject alone is compared with 
 });
 
 test("large schools and schools with no subway are always flagged", () => {
-  assert.equal(LARGE, 1200);
-  assert.deepEqual(facts(school({size: 1199}), CITY).concerns, []);
+  assert.equal(LARGE, 1150);
+  assert.deepEqual(facts(school({size: 1149}), CITY).concerns, []);
   assert.deepEqual(facts(school({size: 1482, subway: []}), CITY).concerns, ["Large school: 1,482 students", "No subway nearby"]);
 });

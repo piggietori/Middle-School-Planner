@@ -10,10 +10,10 @@ For the journeys this supports, see [journeys.md](journeys.md). For the outside 
  ┌─────────────── SOURCE DATA (public) ──────────────────────────────────────┐
  │ NYC Open Data        D20 open house flyer     schools.nyc.gov/MS          │
  │ (test results)       (D20 website)            (key dates)                 │
- │ InsideSchools + NYC School Survey (facts, highlights, survey numbers)     │
+ │ InsideSchools + NYC School Survey (survey numbers, size; facts by hand)   │
  └───────┬───────────────────────┬───────────────────────────────────────────┘
          │ Refresh data          │ a person edits by hand
-         │ (run by hand)         │ (prompted by the weekly watch or the August checklist)
+         │ (Mondays)             │ (prompted by the weekly watch or the August checklist)
          ▼                       ▼
  ┌─────────────── GITHUB REPOSITORY ─────────────────────────────────────────┐
  │ data/*.json  (every record says source and as_of)                         │
@@ -137,7 +137,7 @@ file that talks to Supabase is `src/sync/backend.js`, and signed-out visitors ne
   - In the private `planner-ops` repository: *Backup* (daily Oct–Dec, Sundays and Wednesdays otherwise) and
     *Monitor* (hourly, plus the daily report). Private, because they handle families' data.
   - *New admissions cycle*: August 15.
-  - *Refresh data*: run by hand.
+  - *Refresh data*: Mondays, and by hand.
 
   See [operations.md](operations.md).
 - **Database changes** are SQL files in `supabase/migrations/`. Each is tested in CI against a real Postgres

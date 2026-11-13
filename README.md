@@ -69,7 +69,7 @@ Every source changes about once a year, so each one is pulled once a year by a p
 
 - **Watched** (`"watch"` on the source in `data/schools.json`): every Monday the *Watch sources* workflow checks those pages, and the dataset's last-updated date, and opens an issue for each source that changed, saying what to do. After updating our data, run `node scripts/watch-sources.js --accept <source>` and commit `data/watch.json` in the same pull request.
 - **August checklist**: on August 15 the *New admissions cycle* workflow opens an issue with everything to update for next year ([.github/new-cycle.md](.github/new-cycle.md)).
-- The *Refresh data* workflow pulls test results and opens a pull request with a table of what changed. Fix any warnings it lists (usually highlight text that quotes an old number), then merge.
+- The *Refresh data* workflow runs every Monday. It pulls test results (NYC Open Data) and survey numbers and school size (InsideSchools), and opens a pull request with a table of what changed, only when something did. Fix any warnings it lists (usually highlight text that quotes an old number), then merge.
 - Update `as_of` on everything you check by hand.
 - **Never delete or rename an ID** (school DBN, event `id`, neighborhood `id`, step `id`): saved plans point at them. If an open house moves, change its date or time, keep its `id`, and add `"was": {"date": ..., "start": ...}` so families see it moved. If one is cancelled, remove it and add its ID to `retired_ids`.
 

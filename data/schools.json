@@ -7,7 +7,7 @@
       "name": "InsideSchools school profiles (NYC School Survey and state test results)",
       "url": "https://insideschools.org",
       "cadence": "yearly",
-      "update": "Each August, from the new-cycle checklist: school facts, highlights and concerns, and survey numbers."
+      "update": "Survey numbers and school size: the Refresh data workflow pulls them every Monday and opens a pull request. Each August, from the new-cycle checklist: school facts, highlights and concerns."
     },
     "nyc-sqr": {
       "name": "NYC School Quality Reports (NYC Open Data dnpx-dfnc)",
@@ -51,7 +51,7 @@
     "teach": 85,
     "provenance": {
       "scores": {"source": "nyc-sqr", "as_of": "2026-04-09", "period": "2024-25"},
-      "survey": {"source": "insideschools", "as_of": "2026-10-16"}
+      "survey": {"source": "insideschools", "as_of": "2026-11-13", "period": "2024-25"}
     }
   },
   "schools": [
@@ -64,7 +64,7 @@
       "lat": 40.634,
       "lng": -74.0236,
       "grades": "K–8",
-      "size": 849,
+      "size": 805,
       "math": 49,
       "ela": 51,
       "safe": 68,
@@ -77,15 +77,15 @@
       "admitText": "Zoned program (priority for families in the zone). Screened Superintendent's Program. Arabic Dual Language program.",
       "good": ["Arabic dual language program", "Low suspension rate (1%)"],
       "concerns": [
-        "78% of students say bullying happens often (citywide 57%)",
+        "78% of students say bullying happens often (citywide 59%)",
         "Only 57% of teachers would recommend the school",
-        "68% of students feel safe (citywide 81%)"
+        "68% of students feel safe (citywide 80%)"
       ],
       "web": "https://www.psis30marywhiteovington.org/",
       "flyer": "https://drive.google.com/file/d/10liz5qod2dh5Zs9-bLQIPPEfex2tYeEZ/view",
       "provenance": {
         "scores": {"source": "nyc-sqr", "as_of": "2026-04-09", "period": "2024-25"},
-        "survey": {"source": "insideschools", "as_of": "2026-10-16"},
+        "survey": {"source": "insideschools", "as_of": "2026-11-13", "period": "2024-25"},
         "profile": {"source": "insideschools", "as_of": "2026-10-16"}
       }
     },
@@ -98,12 +98,12 @@
       "lat": 40.6396,
       "lng": -73.9745,
       "grades": "6–8",
-      "size": 872,
+      "size": 811,
       "math": 51,
       "ela": 52,
       "safe": 85,
-      "bully": null,
-      "teach": null,
+      "bully": 60,
+      "teach": 73,
       "subway": [{"l": ["B", "Q"], "st": "Cortelyou Rd"}, {"l": ["F"], "st": "Ditmas Av"}],
       "bus": ["B8", "B35", "B67", "B68", "B69", "B103"],
       "tags": ["arts", "honors", "sped"],
@@ -121,7 +121,7 @@
       "flyer": "https://drive.google.com/file/d/1DTLFToJnsiwF3uUQrL44nRRVJGrfHYKl/view",
       "provenance": {
         "scores": {"source": "nyc-sqr", "as_of": "2026-04-09", "period": "2024-25"},
-        "survey": {"source": "insideschools", "as_of": "2026-10-16"},
+        "survey": {"source": "insideschools", "as_of": "2026-11-13", "period": "2024-25"},
         "profile": {"source": "insideschools", "as_of": "2026-10-16"}
       }
     },
@@ -134,11 +134,11 @@
       "lat": 40.6168,
       "lng": -74.0302,
       "grades": "K–8",
-      "size": 1023,
+      "size": 924,
       "math": 56,
       "ela": 63,
       "safe": 82,
-      "bully": null,
+      "bully": 68,
       "teach": 77,
       "subway": [{"l": ["R"], "st": "95 St"}],
       "bus": ["B1", "B8", "B16", "B37", "B63", "B70"],
@@ -151,7 +151,7 @@
       "flyer": "https://drive.google.com/file/d/1n-kY44TP3qJoBBfE-Sr8T_HqoThN4dIP/view",
       "provenance": {
         "scores": {"source": "nyc-sqr", "as_of": "2026-04-09", "period": "2024-25"},
-        "survey": {"source": "insideschools", "as_of": "2026-10-16"},
+        "survey": {"source": "insideschools", "as_of": "2026-11-13", "period": "2024-25"},
         "profile": {"source": "insideschools", "as_of": "2026-10-16"}
       }
     },
@@ -164,11 +164,11 @@
       "lat": 40.63,
       "lng": -73.993,
       "grades": "Pre-K–8",
-      "size": 853,
+      "size": 829,
       "math": 81,
       "ela": 69,
       "safe": 82,
-      "bully": null,
+      "bully": 59,
       "teach": 85,
       "subway": [{"l": ["D", "N"], "st": "New Utrecht Av / 62 St"}],
       "bus": ["B8", "B9", "B11", "B16"],
@@ -181,7 +181,7 @@
       "flyer": "https://drive.google.com/file/d/1FsDMUuxWTYuzclP-mOUGVyXYY-H1BcGN/view",
       "provenance": {
         "scores": {"source": "nyc-sqr", "as_of": "2026-04-09", "period": "2024-25"},
-        "survey": {"source": "insideschools", "as_of": "2026-10-16"},
+        "survey": {"source": "insideschools", "as_of": "2026-11-13", "period": "2024-25"},
         "profile": {"source": "insideschools", "as_of": "2026-10-16"}
       }
     },
@@ -194,11 +194,11 @@
       "lat": 40.6255,
       "lng": -74.003,
       "grades": "6–8",
-      "size": 954,
+      "size": 939,
       "math": 95,
       "ela": 92,
       "safe": 91,
-      "bully": null,
+      "bully": 36,
       "teach": 97,
       "subway": [{"l": ["D"], "st": "62 St"}, {"l": ["N"], "st": "Fort Hamilton Pkwy"}],
       "bus": ["B9", "B16", "B64"],
@@ -215,7 +215,7 @@
       "flyer": "https://drive.google.com/file/d/1uOBQXU5YhXZo1aWQ4PejCYp1f_94OpGE/view",
       "provenance": {
         "scores": {"source": "nyc-sqr", "as_of": "2026-04-09", "period": "2024-25"},
-        "survey": {"source": "insideschools", "as_of": "2026-10-16"},
+        "survey": {"source": "insideschools", "as_of": "2026-11-13", "period": "2024-25"},
         "profile": {"source": "insideschools", "as_of": "2026-10-16"}
       }
     },
@@ -228,7 +228,7 @@
       "lat": 40.6339,
       "lng": -73.981,
       "grades": "Pre-K–8",
-      "size": 597,
+      "size": 596,
       "math": 65,
       "ela": 66,
       "safe": 73,
@@ -241,14 +241,14 @@
       "admitText": "Zoned program (priority for families in the zone). Screened Algebra Honors program.",
       "good": ["Math and science magnet school", "Middle school reading: 66% passing"],
       "concerns": [
-        "73% of students say bullying happens often (citywide 57%)",
+        "73% of students say bullying happens often (citywide 59%)",
         "Fewer students feel safe than citywide"
       ],
       "web": "https://www.ps-is192.org/",
       "flyer": "https://drive.google.com/file/d/1Pn5YenbFd8YZtT79s2BPfsIRhsOq5VPO/view",
       "provenance": {
         "scores": {"source": "nyc-sqr", "as_of": "2026-04-09", "period": "2024-25"},
-        "survey": {"source": "insideschools", "as_of": "2026-10-16"},
+        "survey": {"source": "insideschools", "as_of": "2026-11-13", "period": "2024-25"},
         "profile": {"source": "insideschools", "as_of": "2026-10-16"}
       }
     },
@@ -261,11 +261,11 @@
       "lat": 40.6175,
       "lng": -74.0124,
       "grades": "6–8",
-      "size": 1526,
+      "size": 1482,
       "math": 85,
       "ela": 80,
       "safe": 81,
-      "bully": null,
+      "bully": 56,
       "teach": 97,
       "subway": [],
       "bus": ["B1", "B4", "B16", "B64", "B70"],
@@ -277,12 +277,12 @@
         "Marching band, drama, studio art and chorus",
         "Stable leadership; 95% attendance"
       ],
-      "concerns": ["Very large school (1,526 students); may feel too big for some", "No subway nearby"],
+      "concerns": ["Very large school (1,482 students); may feel too big for some", "No subway nearby"],
       "web": "https://www.is201k.org/",
       "flyer": "https://drive.google.com/file/d/1b3niIcowPamdEYMUf0PPW6_ju3YEI335/view",
       "provenance": {
         "scores": {"source": "nyc-sqr", "as_of": "2026-04-09", "period": "2024-25"},
-        "survey": {"source": "insideschools", "as_of": "2026-10-16"},
+        "survey": {"source": "insideschools", "as_of": "2026-11-13", "period": "2024-25"},
         "profile": {"source": "insideschools", "as_of": "2026-10-16"}
       }
     },
@@ -295,7 +295,7 @@
       "lat": 40.642,
       "lng": -73.9973,
       "grades": "6–8",
-      "size": 1263,
+      "size": 1188,
       "math": 78,
       "ela": 56,
       "safe": 71,
@@ -316,7 +316,7 @@
       "flyer": "https://drive.google.com/file/d/1PNLFhn1PXnOpSzPKmeyABsHEjmFIpHK8/view",
       "provenance": {
         "scores": {"source": "nyc-sqr", "as_of": "2026-04-09", "period": "2024-25"},
-        "survey": {"source": "insideschools", "as_of": "2026-10-16"},
+        "survey": {"source": "insideschools", "as_of": "2026-11-13", "period": "2024-25"},
         "profile": {"source": "insideschools", "as_of": "2026-10-16"}
       }
     },
@@ -329,7 +329,7 @@
       "lat": 40.638,
       "lng": -73.9853,
       "grades": "6–8",
-      "size": 623,
+      "size": 549,
       "math": 61,
       "ela": 52,
       "safe": 64,
@@ -350,7 +350,7 @@
       "flyer": "https://drive.google.com/file/d/1TzYUrV8x6wPZVeGnKynSOZoWBYcjtaON/view",
       "provenance": {
         "scores": {"source": "nyc-sqr", "as_of": "2026-04-09", "period": "2024-25"},
-        "survey": {"source": "insideschools", "as_of": "2026-10-16"},
+        "survey": {"source": "insideschools", "as_of": "2026-11-13", "period": "2024-25"},
         "profile": {"source": "insideschools", "as_of": "2026-10-16"}
       }
     },
@@ -363,11 +363,11 @@
       "lat": 40.6236,
       "lng": -73.999,
       "grades": "6–8",
-      "size": 1325,
+      "size": 1223,
       "math": 59,
       "ela": 55,
       "safe": 73,
-      "bully": null,
+      "bully": 61,
       "teach": 94,
       "subway": [{"l": ["D", "N"], "st": "New Utrecht Av / 62 St"}],
       "bus": ["B4", "B8", "B9", "B64"],
@@ -380,7 +380,7 @@
       "flyer": "https://drive.google.com/file/d/14kuJfJL1V2Gk-f3xYROBiP2Gh_bd-kzr/view",
       "provenance": {
         "scores": {"source": "nyc-sqr", "as_of": "2026-04-09", "period": "2024-25"},
-        "survey": {"source": "insideschools", "as_of": "2026-10-16"},
+        "survey": {"source": "insideschools", "as_of": "2026-11-13", "period": "2024-25"},
         "profile": {"source": "insideschools", "as_of": "2026-10-16"}
       }
     },
@@ -393,11 +393,11 @@
       "lat": 40.6085,
       "lng": -74.0107,
       "grades": "Pre-K–8",
-      "size": 1118,
+      "size": 1093,
       "math": 68,
       "ela": 74,
       "safe": 85,
-      "bully": null,
+      "bully": 58,
       "teach": 92,
       "subway": [],
       "bus": ["B1", "B8", "B64"],
@@ -410,7 +410,7 @@
       "flyer": "https://drive.google.com/file/d/1qrMGNjScKpX50dLlo7CCltT72CsyBDdZ/view",
       "provenance": {
         "scores": {"source": "nyc-sqr", "as_of": "2026-04-09", "period": "2024-25"},
-        "survey": {"source": "insideschools", "as_of": "2026-10-16"},
+        "survey": {"source": "insideschools", "as_of": "2026-11-13", "period": "2024-25"},
         "profile": {"source": "insideschools", "as_of": "2026-10-16"}
       }
     },
@@ -423,7 +423,7 @@
       "lat": 40.6292,
       "lng": -74.0134,
       "grades": "6–8",
-      "size": 1798,
+      "size": 1802,
       "math": 82,
       "ela": 72,
       "safe": 73,
@@ -448,7 +448,7 @@
       "flyer": "https://drive.google.com/file/d/15cdojfvjceC7rj1yCsaOVwHIviwTJeSZ/view",
       "provenance": {
         "scores": {"source": "nyc-sqr", "as_of": "2026-04-09", "period": "2024-25"},
-        "survey": {"source": "insideschools", "as_of": "2026-10-16"},
+        "survey": {"source": "insideschools", "as_of": "2026-11-13", "period": "2024-25"},
         "profile": {"source": "insideschools", "as_of": "2026-10-16"}
       }
     },
@@ -461,11 +461,11 @@
       "lat": 40.6216,
       "lng": -74.0233,
       "grades": "6–7 (growing)",
-      "size": 116,
+      "size": 274,
       "math": 68,
       "ela": 68,
       "safe": 89,
-      "bully": null,
+      "bully": 62,
       "teach": 100,
       "subway": [{"l": ["R"], "st": "86 St"}],
       "bus": ["B1", "B8", "B16", "B63", "B70"],
@@ -481,7 +481,7 @@
       "flyer": "https://drive.google.com/file/d/1i6GXHxFw_HVw_PoaSHa17J0c4Ob-bm-Q/view",
       "provenance": {
         "scores": {"source": "nyc-sqr", "as_of": "2026-04-09", "period": "2024-25"},
-        "survey": {"source": "insideschools", "as_of": "2026-10-16"},
+        "survey": {"source": "insideschools", "as_of": "2026-11-13", "period": "2024-25"},
         "profile": {"source": "insideschools", "as_of": "2026-10-16"}
       }
     },
@@ -494,7 +494,7 @@
       "lat": 40.638,
       "lng": -73.9853,
       "grades": "6–12",
-      "size": 497,
+      "size": 483,
       "math": 52,
       "ela": 64,
       "safe": 72,
@@ -514,7 +514,7 @@
       "flyer": null,
       "provenance": {
         "scores": {"source": "nyc-sqr", "as_of": "2026-04-09", "period": "2024-25"},
-        "survey": {"source": "insideschools", "as_of": "2026-10-16"},
+        "survey": {"source": "insideschools", "as_of": "2026-11-13", "period": "2024-25"},
         "profile": {"source": "insideschools", "as_of": "2026-10-16"}
       }
     },
@@ -527,7 +527,7 @@
       "lat": 40.61,
       "lng": -73.977,
       "grades": "K–8",
-      "size": 501,
+      "size": 516,
       "math": 95,
       "ela": 93,
       "safe": 89,
@@ -544,7 +544,7 @@
       "flyer": "https://drive.google.com/file/d/1b6GtupYH9_0rdhnU_mpQUv5OpPc3nfwn/view",
       "provenance": {
         "scores": {"source": "nyc-sqr", "as_of": "2026-04-09", "period": "2024-25"},
-        "survey": {"source": "insideschools", "as_of": "2026-10-16"},
+        "survey": {"source": "insideschools", "as_of": "2026-11-13", "period": "2024-25"},
         "profile": {"source": "insideschools", "as_of": "2026-10-16"}
       }
     },
@@ -557,11 +557,11 @@
       "lat": 40.642,
       "lng": -74.02,
       "grades": "6–8",
-      "size": 442,
+      "size": 451,
       "math": 58,
       "ela": 62,
       "safe": 86,
-      "bully": null,
+      "bully": 57,
       "teach": 92,
       "subway": [{"l": ["N", "R"], "st": "59 St"}],
       "bus": ["B9", "B11", "B37", "B63"],
@@ -575,7 +575,7 @@
       "signup": "https://docs.google.com/forms/d/e/1FAIpQLSfbBccPKW_TYKyN9aUfAh-7dk5GJmHcD0bxQbagpAmi93IqwQ/viewform",
       "provenance": {
         "scores": {"source": "nyc-sqr", "as_of": "2026-04-09", "period": "2024-25"},
-        "survey": {"source": "insideschools", "as_of": "2026-10-16"},
+        "survey": {"source": "insideschools", "as_of": "2026-11-13", "period": "2024-25"},
         "profile": {"source": "insideschools", "as_of": "2026-10-16"}
       }
     }

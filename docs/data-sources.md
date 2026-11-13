@@ -13,7 +13,8 @@ an automatic **watch** says when a source changed, so nobody has to remember to 
 | [NYC School Quality Reports](#nyc-school-quality-reports) | Test results (math, reading) | `data/schools.json` | Once a year, when the city publishes (spring) | Weekly watch |
 | [District 20 open house flyer](#district-20-open-house-flyer) | Open house dates and times | `data/events.json` | Once a year (Sep–Oct), plus fixes through December | Weekly watch |
 | [NYC middle school admissions](#nyc-middle-school-admissions) | Key dates: applications open, deadline, offers | `data/events.json` | Once a year | Weekly watch |
-| [InsideSchools and the NYC School Survey](#insideschools-and-the-nyc-school-survey) | School facts, highlights and concerns, survey numbers | `data/schools.json` | Once a year (August) | August checklist |
+| [InsideSchools and the NYC School Survey](#insideschools-and-the-nyc-school-survey) | Survey numbers and school size | `data/schools.json` | Pulled every Monday | *Refresh data* opens a pull request |
+| Same | School facts, highlights and concerns | `data/schools.json` | Once a year (August) | August checklist |
 | [Our own data](#our-own-data) | Neighborhoods, the step-by-step checklist, the announcement banner | `data/neighborhoods.json`, `data/steps.json`, `data/notice.json` | When we decide; steps reviewed each August | August checklist |
 
 **How the reminders work**
@@ -76,10 +77,20 @@ an automatic **watch** says when a source changed, so nobody has to remember to 
     happens often (`bully`), and teachers who would recommend the school (`teach`), for each school and the city.
   - School facts (`provenance.profile`): name, address, grades, size, programs (`tags`), admissions method
     and its description, highlights (`good`), concerns, website, nearby subway and bus.
-- **Cadence:** once a year, in August, from the checklist. There is no automatic pull or watch: InsideSchools
-  has no data feed, and its highlights and concerns are written by people, so we read and summarize them.
-- **How to refresh:** for each school, check the profile and the latest survey, update the fields and the
-  `as_of` of `provenance.survey` and `provenance.profile`.
+- **Numbers, pulled automatically:** every Monday the *Refresh data* workflow reads each school's profile page
+  (`insideschools.org/school/<DBN>`, read by `scripts/lib/insideschools.js`) and takes the three survey
+  numbers, their citywide averages and enrollment (`size`). If anything differs from our data it opens a pull
+  request with a table of every change. A number the page doesn't show is never blanked: ours is kept and the
+  pull request says so. If a page can't be read (InsideSchools changed its layout), the pull request or the
+  failed run says which, and nothing is guessed.
+- **One citywide average:** InsideSchools compares K–8 and 6–12 schools with a slightly different citywide
+  figure. We show one for every school: the one most of our schools are compared with (the 6–8 figure).
+- **Everything else, by hand:** once a year, in August, from the checklist. Highlights and concerns are written
+  by people, so we read and summarize them. For each school, check the profile, update the fields and the
+  `as_of` of `provenance.profile`.
+- **Text must agree with the numbers:** when a highlight or concern quotes a number we hold (test results,
+  survey numbers, a citywide average, school size), the data checks warn if it differs. Numbers we don't hold
+  (attendance, suspensions, class size) are not checked; re-read those in August.
 
 ## Our own data
 
@@ -94,8 +105,8 @@ an automatic **watch** says when a source changed, so nobody has to remember to 
 
 1. **Something says it's due:** a *Watch sources* issue (a page or dataset changed), the August checklist
    (*New admissions cycle*), or a family reporting a wrong date.
-2. **A person makes the change:** edits `data/*.json` by hand, or runs Actions → *Refresh data* for the test results,
-   which opens a pull request itself.
+2. **The change is made:** a person edits `data/*.json` by hand; or *Refresh data* (every Monday, or run by
+   hand) pulls test results, survey numbers and school size and opens a pull request itself.
 3. **The data checks run** (`npm run check:data`, and again in CI), comparing with `main` so removed IDs are caught.
 4. **Someone reviews the pull request.** The diff shows exactly which dates and numbers changed.
 5. **Merging to `main` deploys it** to GitHub Pages within a minute or two.
@@ -122,7 +133,7 @@ shown for a person to judge.
 | A school, event, neighborhood or step was removed compared with `main` (saved plans point at them) | Error |
 | An event's date or time changed without `was` | Warning |
 | A score moved by 15 points or more | Warning |
-| A school's text quotes a number that no longer matches its data, or says "too new for full test results" when results exist | Warning |
+| A school's text quotes a number that doesn't match its data (test results, survey numbers, a citywide average, school size) or that the data doesn't have, or says "too new for full test results" when results exist | Warning |
 | An event not checked for 30 days during application season | Warning |
 | A school fact not checked for over 400 days | Warning |
 

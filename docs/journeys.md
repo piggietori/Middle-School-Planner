@@ -131,7 +131,7 @@ The owner's reports on them: [operations.md](operations.md#usage-reports).
 
 **Goal:** families see correct dates and facts without losing their plan.
 
-1. A source changes → the weekly *Watch sources* issue (or the August checklist) says what to update → a person edits `data/*.json`, or runs *Refresh data* for test results → pull request with a readable diff → approved → deployed.
+1. A source changes → the weekly *Watch sources* issue (or the August checklist) says what to update → a person edits `data/*.json`, or *Refresh data* pulls test results, survey numbers and school size → pull request with a readable diff → approved → deployed.
 2. On next open, the app compares the data `as_of` with what this plan last saw.
 3. If something on *my* plan changed (open house moved, cancelled, time changed) → notice on Home and a "Changed" pill on that date.
 4. Footer shows "School data updated Nov 9, 2026".

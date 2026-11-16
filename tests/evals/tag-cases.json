@@ -11,8 +11,8 @@
     {
       "id": "20K062",
       "school": "JHS 62",
-      "expected": {"music": true, "arts": true, "stem": false},
-      "notes": {"stem": "Judgment call: coding for all and Saturday robotics, judged not enough."},
+      "expected": {"music": true, "arts": true, "stem": true},
+      "notes": {"stem": "Changed to yes 2026-11-16: a computer programming class is named, which the rule counts."},
       "source_sha": "3666d82cd27d"
     },
     {
@@ -37,20 +37,28 @@
       "id": "20K192",
       "school": "PS/IS 192",
       "expected": {"music": false, "arts": false, "stem": true},
+      "notes": {
+        "music": "Band is listed under before/after school programming: a club doesn't count.",
+        "arts": "Judgment call: Drama Club is a club and Ballroom Dancing a residency; Soapbox Theater and Canvas Art Painting are enrichment items with no grades given, in a K–8 school. Judged not enough."
+      },
       "source_sha": "6678d6a54b07"
     },
     {
       "id": "20K201",
       "school": "JHS 201",
-      "expected": {"music": true, "arts": true, "stem": false},
+      "expected": {"music": true, "arts": true, "stem": true},
+      "notes": {
+        "stem": "Changed to yes 2026-11-16: the website lists S.T.E.A.M. as a minor subject, a class beyond the core. Thin: a menu label only."
+      },
       "source_sha": "456c1b92f002"
     },
     {
       "id": "20K220",
       "school": "JHS 220",
-      "expected": {"music": false, "arts": false, "stem": true},
+      "expected": {"music": false, "arts": false, "stem": false},
       "notes": {
-        "stem": "Judgment call: rests on a 7th-grade architecture program with Maimonides Medical Center. Its Federal Magnet program alone would not count."
+        "arts": "Judgment call: art for all students is the required class, and the review says drama and dance are still being built. A yearly musical is not a program.",
+        "stem": "Changed to no 2026-11-16: the 7th-grade architecture program is not a science or tech academy, lab or class. Its Federal Magnet program alone doesn't count."
       },
       "source_sha": "f4e80513c762"
     },
@@ -94,15 +102,21 @@
     {
       "id": "20K686",
       "school": "BSI",
-      "expected": {"music": false, "arts": false, "stem": false},
-      "notes": {"arts": "Judgment call: \"arts-rich\" in a review of the whole K–8 school, judged not enough."},
+      "expected": {"music": false, "arts": true, "stem": false},
+      "notes": {
+        "music": "\"Mini Band Share\" in a newsletter is a one-off event, not a program.",
+        "arts": "Changed to yes 2026-11-16: 7th and 8th graders choose an arts concentration.",
+        "stem": "An ordinary science lab doesn't count, and the STEM lab was not yet built when the review was written."
+      },
       "source_sha": "49279a5fe846"
     },
     {
       "id": "20K936",
       "school": "MS 936",
       "expected": {"music": true, "arts": true, "stem": true},
-      "notes": {"stem": "Judgment call: rests on a STEAM club named in the review."},
+      "notes": {
+        "stem": "STEAM is one of the majors students audition for (school website). The STEAM club in the review would not count by itself."
+      },
       "source_sha": "4d9da47a545f"
     }
   ]

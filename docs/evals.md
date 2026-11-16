@@ -84,7 +84,7 @@ It proposes. It cannot write to the data.
 A model's answer is only useful if we know how often it matches a careful person. The eval measures that.
 
 **The golden answers.** `tests/evals/tag-cases.json` holds our own decision for each of 16 schools × 3 tags: 48
-answers, 22 yes and 26 no, with a note on each judgment call (for example, a Federal Magnet program alone does
+answers, 24 yes and 24 no, with a note on each judgment call (for example, a Federal Magnet program alone does
 not earn science & tech).
 
 **One run.** For each school the runner (`scripts/eval-tags.mjs`) calls the classifier, then grades the answer

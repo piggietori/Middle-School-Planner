@@ -4,7 +4,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
-import {PROSE_RULES, PROSE_TAGS} from "../../scripts/lib/tag-rules.js";
+import {PROSE_NOT_ENOUGH, PROSE_RULES, PROSE_TAGS} from "../../scripts/lib/tag-rules.js";
 import {pageText, quoteFound, sourceText} from "../../scripts/lib/tag-sources.js";
 import {gradeSchool, summarize} from "../../scripts/lib/tag-eval.js";
 import {Answer, SYSTEM, classify, userMessage} from "../../scripts/lib/tag-classifier.js";
@@ -22,6 +22,8 @@ test("the rules the classifier is given are the rules in the docs, word for word
     assert.ok(docs.includes(`| ${PROSE_RULES[t]} |`), `docs/data-sources.md no longer has the ${t} rule as written in tag-rules.js`);
     assert.ok(SYSTEM.includes(PROSE_RULES[t]));
   }
+  assert.ok(docs.replace(/\n/g, " ").includes(PROSE_NOT_ENOUGH), "docs/data-sources.md no longer says what never earns a tag as written in tag-rules.js");
+  assert.ok(SYSTEM.includes(PROSE_NOT_ENOUGH));
 });
 
 test("our own answers score full marks; answering no to everything does not", () => {

@@ -124,6 +124,10 @@ Admissions"), the written review there, then the school's own website. InsideSch
 old and some schools have none, so check the school's website when the profile is silent.
 **If nothing confirms a tag, the school doesn't get it.**
 
+**What never earns music, arts or science & tech.** These three are about programs and classes a student can take
+as part of school. A before- or after-school club, a one-off event or yearly show, the art, music or science class
+every student must take, an ordinary science lab, and anything not yet in place don't count.
+
 **Each tag records what it rests on**, in the school's `tag_evidence`: one or more short quotes per tag, each
 marked `programs` (a program name from the list), `review` (words from the InsideSchools review) or `website`
 (words from the school's own site, with the page's `url`). Quote the source word for word and keep it short: a

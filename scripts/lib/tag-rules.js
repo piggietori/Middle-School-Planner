@@ -25,3 +25,5 @@ export const PROSE_RULES = {
   arts: "an arts academy or major is named, or at least two of visual art, theater and dance",
   stem: "a science or tech academy, lab, or class beyond the core is named (coding, robotics, flight simulation). A Federal Magnet program alone doesn't count: it is a diversity lottery",
 };
+// What never earns any of the three, in the same words as docs/data-sources.md.
+export const PROSE_NOT_ENOUGH = "A before- or after-school club, a one-off event or yearly show, the art, music or science class every student must take, an ordinary science lab, and anything not yet in place don't count";

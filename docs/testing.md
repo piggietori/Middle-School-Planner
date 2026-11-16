@@ -46,6 +46,8 @@ The data checks double as evals for the source data: they run on every pull requ
 
 ## Tag classifier eval
 
+The whole picture, from stored evidence to what to do with a result: [evals.md](evals.md). This section is how to run it.
+
 Music & band, arts and science & tech rest on written text (a review, a school's website), so a person judges
 them. The classifier (`scripts/lib/tag-classifier.js`) makes that judgment repeatable: it reads a school's saved
 source text and the written rules, and answers yes or no per tag with the words it rests on. It only proposes;

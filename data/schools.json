@@ -114,8 +114,9 @@
       "teach": 73,
       "subway": [{"l": ["B", "Q"], "st": "Cortelyou Rd"}, {"l": ["F"], "st": "Ditmas Av"}],
       "bus": ["B8", "B35", "B67", "B68", "B69", "B103"],
-      "tags": ["arts", "honors", "sped", "music"],
+      "tags": ["arts", "honors", "sped", "music", "stem"],
       "tag_evidence": {
+        "stem": [{"where": "review", "quote": "All students may study computer programming."}],
         "arts": [
           {
             "where": "review",
@@ -322,7 +323,7 @@
       "teach": 85,
       "subway": [{"l": ["F"], "st": "18 Av"}],
       "bus": ["B8", "B11"],
-      "tags": ["stem", "honors"],
+      "tags": ["stem", "honors", "arts"],
       "tag_evidence": {
         "stem": [
           {
@@ -335,6 +336,10 @@
             "quote": "Various grades come into the STEAM Lab, now on the 5th floor, to focus on many aspects of STEAM education.",
             "url": "https://www.ps-is192.org/steam_education_at_psis_192"
           }
+        ],
+        "arts": [
+          {"where": "website", "quote": "Soapbox Theater", "url": "https://www.ps-is192.org/"},
+          {"where": "website", "quote": "Canvas Art Painting", "url": "https://www.ps-is192.org/"}
         ],
         "honors": [{"where": "programs", "quote": "Algebra Honors Program"}]
       },
@@ -374,8 +379,15 @@
       "teach": 97,
       "subway": [],
       "bus": ["B1", "B4", "B16", "B64", "B70"],
-      "tags": ["honors", "language", "music", "arts"],
+      "tags": ["honors", "language", "music", "arts", "stem"],
       "tag_evidence": {
+        "stem": [
+          {
+            "where": "website",
+            "quote": "Minor Subjects Art Band Drama Foreign Language Physical Education/Health S.T.E.A.M. Vocal",
+            "url": "https://www.is201k.org/"
+          }
+        ],
         "honors": [
           {"where": "programs", "quote": "Algebra Honors Program"},
           {"where": "programs", "quote": "Superintendent's Program"}
@@ -432,19 +444,13 @@
       "teach": 99,
       "subway": [{"l": ["D"], "st": "Fort Hamilton Pkwy"}],
       "bus": ["B11", "B16", "B35", "B70"],
-      "tags": ["honors", "language", "stem"],
+      "tags": ["honors", "language"],
       "tag_evidence": {
         "honors": [
           {"where": "programs", "quote": "Algebra Honors Program"},
           {"where": "programs", "quote": "Superintendent's Program"}
         ],
-        "language": [{"where": "programs", "quote": "Spanish Dual Language Program"}],
-        "stem": [
-          {
-            "where": "review",
-            "quote": "for all 7th graders in partnership with Maimonides Medical Center, in which students prepare floor plans and scale models"
-          }
-        ]
+        "language": [{"where": "programs", "quote": "Spanish Dual Language Program"}]
       },
       "listed": {
         "programs": [
@@ -803,8 +809,11 @@
       "teach": 89,
       "subway": [{"l": ["N"], "st": "Kings Hwy"}],
       "bus": ["B1", "B4", "B6", "B82"],
-      "tags": ["honors"],
-      "tag_evidence": {"honors": [{"where": "programs", "quote": "Superintendent's Program"}]},
+      "tags": ["honors", "arts"],
+      "tag_evidence": {
+        "honors": [{"where": "programs", "quote": "Superintendent's Program"}],
+        "arts": [{"where": "review", "quote": "They decide what arts to concentrate on in 7th and 8th grade."}]
+      },
       "listed": {"programs": [{"name": "Superintendent's Program", "method": "Screened"}], "staff_pick_sped": false},
       "admit": ["screened"],
       "admitText": "Screened only (Superintendent's Program). Citywide gifted & talented school; requires very high grades and test scores.",
@@ -850,7 +859,7 @@
           }
         ],
         "stem": [
-          {"where": "review", "quote": "Various clubs listed on the website include a newspaper club, STEAM"}
+          {"where": "website", "quote": "STEAM AUDITION", "url": "https://www.ms936artsoff3rd.org/"}
         ]
       },
       "listed": {"programs": [{"name": "M.S. 936", "method": "Audition"}], "staff_pick_sped": false},

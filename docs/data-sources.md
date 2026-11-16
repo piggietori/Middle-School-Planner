@@ -128,6 +128,10 @@ old and some schools have none, so check the school's website when the profile i
 as part of school. A before- or after-school club, a one-off event or yearly show, the art, music or science class
 every student must take, an ordinary science lab, and anything not yet in place don't count.
 
+**Schools that also have elementary grades.** The tags are about grades 6 to 8. Something the text places only
+in the elementary grades doesn't count; an offering with no grades given does. A residency or enrichment class
+in the school day counts like any other class.
+
 **Each tag records what it rests on**, in the school's `tag_evidence`: one or more short quotes per tag, each
 marked `programs` (a program name from the list), `review` (words from the InsideSchools review) or `website`
 (words from the school's own site, with the page's `url`). Quote the source word for word and keep it short: a

@@ -115,7 +115,7 @@
       "school": "MS 936",
       "expected": {"music": true, "arts": true, "stem": true},
       "notes": {
-        "stem": "STEAM is one of the majors students audition for (school website). The STEAM club in the review would not count by itself."
+        "stem": "Rests on the school's STEAM Department page: coding, web design and robotics, and STEAM is one of the majors students audition for. The STEAM club in the review would not count by itself."
       },
       "source_sha": "4d9da47a545f"
     }

@@ -323,7 +323,7 @@
       "teach": 85,
       "subway": [{"l": ["F"], "st": "18 Av"}],
       "bus": ["B8", "B11"],
-      "tags": ["stem", "honors"],
+      "tags": ["stem", "honors", "arts"],
       "tag_evidence": {
         "stem": [
           {
@@ -336,6 +336,10 @@
             "quote": "Various grades come into the STEAM Lab, now on the 5th floor, to focus on many aspects of STEAM education.",
             "url": "https://www.ps-is192.org/steam_education_at_psis_192"
           }
+        ],
+        "arts": [
+          {"where": "website", "quote": "Soapbox Theater", "url": "https://www.ps-is192.org/"},
+          {"where": "website", "quote": "Canvas Art Painting", "url": "https://www.ps-is192.org/"}
         ],
         "honors": [{"where": "programs", "quote": "Algebra Honors Program"}]
       },

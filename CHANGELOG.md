@@ -9,10 +9,11 @@ feature the middle one (1.1 → 1.2), and a change that needs families or the da
 ## [Unreleased]
 
 ### Changed
-- **Five program tags, after the first run of the tag eval.** BSI gains Arts (7th and 8th graders choose an arts
-  concentration). JHS 62 and JHS 201 gain Science & tech (a computer programming class; a S.T.E.A.M. minor
-  subject). JHS 220 loses Science & tech: its architecture program is not a science or tech class. MS 936 keeps
-  Science & tech, now resting on its STEAM major instead of a club.
+- **Six program tags, after the first runs of the tag eval.** BSI gains Arts (7th and 8th graders choose an arts
+  concentration). PS/IS 192 gains Arts (theater and painting among its enrichment offerings). JHS 62 and JHS 201
+  gain Science & tech (a computer programming class; a S.T.E.A.M. minor subject). JHS 220 loses Science & tech:
+  its architecture program is not a science or tech class. MS 936 keeps Science & tech, now resting on its STEAM
+  major instead of a club.
 - **The tag rules now say what never counts** for music, arts and science & tech: a before- or after-school club,
   a one-off event or yearly show, the class every student must take, an ordinary science lab, and anything not
   yet in place ([docs/data-sources.md](docs/data-sources.md#program-tags)).

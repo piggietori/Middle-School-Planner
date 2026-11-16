@@ -36,10 +36,10 @@
     {
       "id": "20K192",
       "school": "PS/IS 192",
-      "expected": {"music": false, "arts": false, "stem": true},
+      "expected": {"music": false, "arts": true, "stem": true},
       "notes": {
         "music": "Band is listed under before/after school programming: a club doesn't count.",
-        "arts": "Judgment call: Drama Club is a club and Ballroom Dancing a residency; Soapbox Theater and Canvas Art Painting are enrichment items with no grades given, in a K–8 school. Judged not enough."
+        "arts": "Changed to yes 2026-11-16: theater and visual art are named under enrichment, apart from the after-school list. Judgment call: no grades are given, in a K–8 school; counted, as its STEAM Lab is. Drama Club is a club and doesn't count."
       },
       "source_sha": "6678d6a54b07"
     },

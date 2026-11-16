@@ -61,19 +61,40 @@ it never changes `data/schools.json`. The eval measures whether it can be truste
 - **It runs on your machine, by hand.** Never in GitHub Actions: it needs an Anthropic API key, and the
   repository holds none ([secrets.md](secrets.md)). Each run costs one model call per school per run.
 
+**The easy way: two files in the project folder, no terminal.**
+
+- **`Run tag eval.cmd`**: double-click it. It refreshes each school's pages and re-checks every stored quote
+  (free), tells you how many paid calls the run will make and asks before spending anything, runs the eval, and
+  opens the results page in your browser. The first time, it asks for your Anthropic API key and saves it
+  encrypted on this computer ([secrets.md](secrets.md)). If the rules, prompt, golden answers or runner changed
+  since you last approved them, it lists what changed and asks you to approve before it runs. A run that stops
+  part-way (closed window, out of credits) is picked up where it stopped the next time.
+- **`View tag eval results.cmd`**: double-click to reopen the latest results page. Free; no key.
+
+**The results page** shows the per-tag table; a card for each answer that needs your decision, with the model's
+quotes and reason beside our answer, note and stored evidence; what changed since the run before, both the
+model's answers and ours; and every school's answers, with quotes and reasons to expand. It is rebuilt from
+saved files each time and scored against today's golden answers, so after you change an answer, reopen it to
+see the new score. It lives at `.claude/hillclimb/tag-classifier/<run>/report.html` and is not committed.
+
+**The same by command**, if you prefer the terminal (in PowerShell use `npm.cmd`):
+
 ```
 npm run fetch:tag-sources                 # save each school's source text to .cache/ (free; also re-checks every stored quote)
 $env:ANTHROPIC_API_KEY = "..."            # your own key, in your shell only (PowerShell; bash: export ANTHROPIC_API_KEY=...)
 npm run eval:tags -- --reps 3 --approve-harness   # first run, and after any change to the runner, rules, prompt or cases
 npm run eval:tags -- --reps 3             # later runs; picks up where a stopped run left off
 npm run eval:tags:summary                 # the per-tag table, answers that differ from ours, answers that flipped
+npm run eval:tags:report                  # write the results page for the latest run and print where it is
 npm run classify:tags                     # outside the eval: the classifier's answers next to today's tags
 ```
 
 `--approve-harness` records that you have looked at the runner and what it runs; without it a changed runner
-refuses to start. Results land in `.claude/hillclimb/tag-classifier/baseline/` (`results.jsonl`, one transcript
-per run in `traces/`, failed calls in `errors.jsonl`: a failed call is never scored as a wrong answer).
-To start over, delete that `baseline` folder.
+refuses to start. Each run has its own folder in `.claude/hillclimb/tag-classifier/`: `baseline` for the
+first, then `v1`, `v2` and so on (`--variant v2`; the double-click file picks the next one). A folder holds
+`results.jsonl`, one transcript per call in `traces/`, and failed calls in `errors.jsonl`: a failed call is
+never scored as a wrong answer. `results.jsonl` can be committed to keep a run on record; transcripts and the
+results page stay on your computer.
 
 **When to run it:** when a tag rule, the classifier's prompt or the model changes, and each August with the
 yearly tag review. Not weekly: the sources change about once a year.

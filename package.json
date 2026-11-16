@@ -12,6 +12,7 @@
     "classify:tags": "node scripts/classify-tags.js",
     "eval:tags": "node scripts/eval-tags.mjs --flow .claude/hillclimb/tag-classifier --model claude-opus-5-5",
     "eval:tags:summary": "node scripts/eval-tags-summary.js",
+    "eval:tags:report": "node scripts/eval-tags-report.js",
     "test": "node --test \"tests/unit/*.test.js\" \"tests/db/*.test.js\"",
     "test:e2e": "playwright test"
   },

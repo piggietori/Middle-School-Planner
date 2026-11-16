@@ -19,6 +19,11 @@ feature the middle one (1.1 → 1.2), and a change that needs families or the da
   yet in place ([docs/data-sources.md](docs/data-sources.md#program-tags)).
 
 ### Added
+- **The tag eval runs by double-click and shows its results in the browser.** `Run tag eval.cmd` asks before
+  spending anything, keeps your API key encrypted on your computer, and opens a results page: the per-tag table,
+  a card for each answer that needs your decision with the model's quote beside ours, and what changed since the
+  run before. `View tag eval results.cmd` reopens the latest page for free
+  ([docs/testing.md](docs/testing.md#tag-classifier-eval)).
 - **A classifier and an eval for the tags that rest on written text.** For music & band, arts and science & tech,
   a script can now propose yes or no per school from its InsideSchools review and website, with the words each
   answer rests on, and an eval scores it against our 48 decisions. Both run by hand with your own Anthropic API

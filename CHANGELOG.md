@@ -8,7 +8,16 @@ feature the middle one (1.1 → 1.2), and a change that needs families or the da
 
 ## [Unreleased]
 
+### Added
+- **The tag eval can compare models.** `Run tag eval.cmd` now asks whether Claude Opus 5.5 or Muse Ember (Meta)
+  should answer. Each model has its own runs, key and approval. `Compare tag eval models.cmd` opens a page that
+  shows the two side by side: scores per tag, mistakes, answers that changed between runs, time, tokens and
+  estimated cost, and every answer where they differ.
+
 ### Changed
+- **Science & tech: a STEAM, STEM or tech minor subject counts.** A class like that, listed among a school's
+  minor subjects or electives, earns the tag even when a menu label is all that names it. A class named only
+  Science doesn't: that is the science class every student takes. No school's tags change.
 - **Six program tags, after the first runs of the tag eval.** BSI gains Arts (7th and 8th graders choose an arts
   concentration). PS/IS 192 gains Arts (theater and painting among its enrichment offerings). JHS 62 and JHS 201
   gain Science & tech (a computer programming class; a S.T.E.A.M. minor subject). JHS 220 loses Science & tech:
@@ -19,6 +28,11 @@ feature the middle one (1.1 → 1.2), and a change that needs families or the da
   yet in place ([docs/data-sources.md](docs/data-sources.md#program-tags)).
 
 ### Added
+- **The tag eval runs by double-click and shows its results in the browser.** `Run tag eval.cmd` asks before
+  spending anything, keeps your API key encrypted on your computer, and opens a results page: the per-tag table,
+  a card for each answer that needs your decision with the model's quote beside ours, and what changed since the
+  run before. `View tag eval results.cmd` reopens the latest page for free
+  ([docs/testing.md](docs/testing.md#tag-classifier-eval)).
 - **A classifier and an eval for the tags that rest on written text.** For music & band, arts and science & tech,
   a script can now propose yes or no per school from its InsideSchools review and website, with the words each
   answer rests on, and an eval scores it against our 48 decisions. Both run by hand with your own Anthropic API

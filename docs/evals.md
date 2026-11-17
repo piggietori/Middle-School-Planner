@@ -115,7 +115,8 @@ and pass.
 
 ## Step 5: what happens with the result
 
-The summary lists three kinds of disagreement, and each means something different:
+The results page lists three kinds of disagreement, each as a card with the model's quote beside our answer,
+and each means something different:
 
 | The summary says | Likely meaning | What to do |
 |---|---|---|
@@ -133,6 +134,10 @@ A tag changes only through a normal pull request, with its evidence, decided by 
 | Data checks, including the program-list rule | Every pull request | GitHub Actions |
 | Quote re-check | Each August, and whenever you edit tags | You |
 | Classifier eval | Each August, and when a tag rule, the prompt or the model changes | You, with your own API key |
+
+To run the last two, double-click **`Run tag eval.cmd`** in the project folder: it does the quote re-check,
+asks before spending anything, runs the eval and opens the results page. **`View tag eval results.cmd`** reopens
+the latest page for free ([testing.md](testing.md#tag-classifier-eval)).
 
 The classifier never runs in GitHub Actions. It needs an Anthropic API key, and the public repository holds no
 secrets ([secrets.md](secrets.md)).

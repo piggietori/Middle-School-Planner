@@ -858,7 +858,13 @@
             "quote": "Music (instrumental: concert & jazz bands, strings, woodwind, percussion) or chorus"
           }
         ],
-        "stem": [{"where": "website", "quote": "STEAM AUDITION", "url": "https://www.ms936artsoff3rd.org/"}]
+        "stem": [
+          {
+            "where": "website",
+            "quote": "equipped with latest technology in coding, web design, robotics, and the digital arts",
+            "url": "https://www.ms936artsoff3rd.org/copy-of-steam"
+          }
+        ]
       },
       "listed": {"programs": [{"name": "M.S. 936", "method": "Audition"}], "staff_pick_sped": false},
       "admit": ["audition"],

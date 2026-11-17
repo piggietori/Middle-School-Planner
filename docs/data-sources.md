@@ -116,7 +116,7 @@ score, so every school is tagged by the same rule:
 | Special-ed support (`sped`) | its program list has a specialized program (ASD Nest, Horizon or ACES; D75 Inclusion), or InsideSchools marks it "Staff Pick for Special Ed". Team-teaching and self-contained classes alone don't count: every school has them |
 | Music & band (`music`) | a band, orchestra, chorus or music major is named |
 | Arts (`arts`) | an arts academy or major is named, or at least two of visual art, theater and dance |
-| Science & tech (`stem`) | a science or tech academy, lab, or class beyond the core is named (coding, robotics, flight simulation). A Federal Magnet program alone doesn't count: it is a diversity lottery |
+| Science & tech (`stem`) | a science or tech academy, lab, or class beyond the core is named (coding, robotics, flight simulation). A STEAM, STEM or tech class the school lists among its minor subjects or electives counts, even as a menu label; one named only Science doesn't. A Federal Magnet program alone doesn't count: it is a diversity lottery |
 | Small school (`small`) | under 650 students. Worked out from `size` (`src/facts.js`); never typed in `tags` |
 
 **Where the evidence comes from, in order:** the program list on the school's InsideSchools profile ("Programs &
@@ -127,6 +127,10 @@ old and some schools have none, so check the school's website when the profile i
 **What never earns music, arts or science & tech.** These three are about programs and classes a student can take
 as part of school. A before- or after-school club, a one-off event or yearly show, the art, music or science class
 every student must take, an ordinary science lab, and anything not yet in place don't count.
+
+**Schools that also have elementary grades.** The tags are about grades 6 to 8. Something the text places only
+in the elementary grades doesn't count; an offering with no grades given does. A residency or enrichment class
+in the school day counts like any other class.
 
 **Each tag records what it rests on**, in the school's `tag_evidence`: one or more short quotes per tag, each
 marked `programs` (a program name from the list), `review` (words from the InsideSchools review) or `website`

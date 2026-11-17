@@ -1,6 +1,7 @@
 {
   "harness_paths": [
     "scripts/lib/tag-classifier.js",
+    "scripts/lib/tag-models.js",
     "scripts/lib/tag-eval.js",
     "scripts/lib/tag-rules.js",
     "scripts/lib/tag-sources.js",
@@ -30,5 +31,5 @@
       "unit": "s"
     }
   ],
-  "harness_sha": "1e2fbba3d9d22c11f661721098544a1ac85bc00b235e1e611e0f937799088715"
+  "harness_sha": "4366ad64de90845163092149d274a867ea0c1d732a9e485e20f69235f206f16a"
 }

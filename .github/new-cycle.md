@@ -26,5 +26,8 @@ See README → Updating data.
 - [ ] Restore drill: open the latest backup with the passphrase ([docs/secrets.md](../docs/secrets.md#restore-drill-once-then-every-august)).
 - [ ] 2FA is still on for the Supabase and GitHub accounts, and the `main` ruleset is still active (Settings → Rules).
 
+**Agents**
+- [ ] Decide whether to build the source-change drafter this season ([docs/agents.md](../docs/agents.md)). If one is running: check the prices in `scripts/lib/tag-prices.js` and run its eval again.
+
 **Finish**
 - [ ] `node scripts/watch-sources.js --accept` and commit `data/watch.json`, so the weekly watch starts from what you just checked.

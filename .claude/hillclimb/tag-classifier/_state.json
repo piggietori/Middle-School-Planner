@@ -1,6 +1,7 @@
 {
   "harness_paths": [
     "scripts/lib/tag-classifier.js",
+    "scripts/lib/tag-models.js",
     "scripts/lib/tag-eval.js",
     "scripts/lib/tag-rules.js",
     "scripts/lib/tag-sources.js",

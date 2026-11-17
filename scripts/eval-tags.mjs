@@ -145,7 +145,7 @@ const REF_EXTS = ['', '.html', '.txt', '.json'];
 //                                     Only allowed in a flow directory ending in -selftest.
 const CASES = fileURLToPath(new URL('../tests/evals/tag-cases.json', import.meta.url));
 const STUB = process.env.TAG_EVAL_STUB;
-let client;
+let client; // one model per run (--model), so one client
 
 /** Return the list of input cases. Each must have a stable `id`. */
 async function loadCases() {
@@ -178,8 +178,14 @@ async function runCase(input, ctx) {
     return { answer, model: ctx.model ?? MODEL, usage: { input_tokens: 0, output_tokens: 0 }, stop_reason: 'end_turn',
              transcript: [{ role: 'user', content: input.source }, { role: 'assistant', content: JSON.stringify(answer, null, 2) }] };
   }
-  if (!client) client = new (await import('@anthropic-ai/sdk')).default(); // reads ANTHROPIC_API_KEY from your shell
-  const run = await classify(client, input.source, { model: ctx.model ?? MODEL });
+  // One client for the run's model, reaching that model's provider with that provider's key only
+  // (scripts/lib/tag-models.js): ANTHROPIC_API_KEY for Claude, MODEL_API_KEY for Meta's models.
+  const model = ctx.model ?? MODEL;
+  if (!client) {
+    const { clientOptions } = await import('./lib/tag-models.js');
+    client = new (await import('@anthropic-ai/sdk')).default(clientOptions(model));
+  }
+  const run = await classify(client, input.source, { model });
   // A refusal or a cut-off answer is not a wrong answer: it goes to errors.jsonl, with what it cost.
   if (!run.answer) { const e = new Error(`no answer (${run.stop_reason})`); e.failure_class = run.stop_reason === 'refusal' ? 'refusal' : 'error'; throw e; }
   return run;

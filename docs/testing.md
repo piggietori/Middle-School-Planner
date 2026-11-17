@@ -70,6 +70,23 @@ it never changes `data/schools.json`. The eval measures whether it can be truste
   since you last approved them, it lists what changed and asks you to approve before it runs. A run that stops
   part-way (closed window, out of credits) is picked up where it stopped the next time.
 - **`View tag eval results.cmd`**: double-click to reopen the latest results page. Free; no key.
+- **`Compare tag eval models.cmd`**: double-click to open the page that puts the models side by side. Free; no
+  key. It needs a run from each model first.
+
+**Two models.** The eval can ask Claude Opus 5.5 (Anthropic) or Muse Ember (Meta, `muse-ember-1.0`).
+`Run tag eval.cmd` asks which one first. Both get the same prompt, rules, source text and grading. Meta's
+Model API accepts Anthropic's request format at `https://api.meta.ai`, so the same classifier code serves both
+([dev.meta.ai/docs/protocols/messages](https://dev.meta.ai/docs/protocols/messages)). Each model keeps its own
+runs (`.claude/hillclimb/tag-classifier/` for Claude, `.claude/hillclimb/tag-classifier-muse-ember/` for Muse
+Ember), its own run names and its own approval of the eval's files, and its own key ([secrets.md](secrets.md)).
+A model's first run asks for approval, because nothing has been approved for its folder yet. After each run,
+when both models have results, the comparison page opens too. It shows the per-tag scores, mistakes, answers
+that changed between runs, time and tokens for each model, and every school and tag where the two answered
+differently. It also estimates each run's cost, from the tokens each call reported and the list prices in
+`scripts/lib/tag-prices.js`, with the date they were checked. Re-check them when a provider changes its prices.
+Failed calls aren't counted. It lives at `.claude/hillclimb/compare.html` and is not committed. The models are listed in
+`scripts/lib/tag-models.js` and, for the double-click file, `scripts/run-tag-eval.ps1`. A test checks that the
+two lists agree.
 
 **The results page** shows the per-tag table; a card for each answer that needs your decision, with the model's
 quotes and reason beside our answer, note and stored evidence; what changed since the run before, both the
@@ -86,6 +103,10 @@ npm run eval:tags -- --reps 3 --approve-harness   # first run, and after any cha
 npm run eval:tags -- --reps 3             # later runs; picks up where a stopped run left off
 npm run eval:tags:summary                 # the per-tag table, answers that differ from ours, answers that flipped
 npm run eval:tags:report                  # write the results page for the latest run and print where it is
+$env:MODEL_API_KEY = "..."                # Muse Ember instead: your Meta Model API key, then
+npm run eval:tags -- --flow .claude/hillclimb/tag-classifier-muse-ember --model muse-ember-1.0 --reps 3
+npm run eval:tags:report -- --flow .claude/hillclimb/tag-classifier-muse-ember
+npm run eval:tags:compare                 # the page comparing each model's latest run
 npm run classify:tags                     # outside the eval: the classifier's answers next to today's tags
 ```
 

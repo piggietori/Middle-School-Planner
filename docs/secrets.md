@@ -46,6 +46,10 @@ Above all of these are the **master keys**: the logins that can reset everything
   `%LOCALAPPDATA%\d20-planner\anthropic-key.txt`. That is outside the project folder, so it is not in git and
   not synced by OneDrive. To replace it, delete that file and run again; to remove it, delete the file and
   delete the key in the Anthropic Console. Running by command instead, set `ANTHROPIC_API_KEY` in your shell.
+- **Your own computer** also holds the Meta Model API key, for comparing the eval with Muse Ember. It is kept the
+  same way, at `%LOCALAPPDATA%\d20-planner\meta-key.txt`. Running by command, set `MODEL_API_KEY`. Each run
+  sends only its own provider's key: the Anthropic key never goes to Meta, and the Meta key never goes to
+  Anthropic (a test checks this).
   The key is never written to a file in this repository and never added to GitHub Actions; those scripts run by
   hand only.
 - **The private `planner-ops` repository** holds the two that touch families' data: `SUPABASE_DB_URL` and

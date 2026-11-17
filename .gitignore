@@ -12,6 +12,7 @@ screenshots/
 .cache/
 .claude/hillclimb/**/traces/
 .claude/hillclimb/**/report.html
+.claude/hillclimb/compare.html
 .claude/hillclimb/**/trajectory/
 .claude/hillclimb/**/progress.txt
 .claude/hillclimb/**/errors.jsonl

@@ -1,0 +1,35 @@
+{
+  "harness_paths": [
+    "scripts/lib/tag-classifier.js",
+    "scripts/lib/tag-models.js",
+    "scripts/lib/tag-eval.js",
+    "scripts/lib/tag-rules.js",
+    "scripts/lib/tag-sources.js",
+    "tests/evals/tag-cases.json"
+  ],
+  "metrics": [
+    {
+      "id": "correct",
+      "kind": "binary",
+      "label": "All 3 right"
+    },
+    {
+      "id": "agree",
+      "kind": "float",
+      "label": "Answers right"
+    },
+    {
+      "id": "quotes_ok",
+      "kind": "binary",
+      "label": "Quotes found"
+    }
+  ],
+  "perf_fields": [
+    {
+      "id": "latency_s",
+      "label": "Latency",
+      "unit": "s"
+    }
+  ],
+  "harness_sha": "56e39767c90d1d20ba50bacf0700ead48ed0cbc1d21d57c15d226e70c8d74eb5"
+}

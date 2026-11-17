@@ -8,6 +8,12 @@ feature the middle one (1.1 → 1.2), and a change that needs families or the da
 
 ## [Unreleased]
 
+### Added
+- **The tag eval can compare models.** `Run tag eval.cmd` now asks whether Claude Opus 5.5 or Muse Ember (Meta)
+  should answer. Each model has its own runs, key and approval. `Compare tag eval models.cmd` opens a page that
+  shows the two side by side: scores per tag, mistakes, answers that changed between runs, time, tokens and
+  estimated cost, and every answer where they differ.
+
 ### Changed
 - **Six program tags, after the first runs of the tag eval.** BSI gains Arts (7th and 8th graders choose an arts
   concentration). PS/IS 192 gains Arts (theater and painting among its enrichment offerings). JHS 62 and JHS 201

@@ -15,6 +15,9 @@ feature the middle one (1.1 → 1.2), and a change that needs families or the da
   estimated cost, and every answer where they differ.
 
 ### Changed
+- **Science & tech: a STEAM, STEM or tech minor subject counts.** A class like that, listed among a school's
+  minor subjects or electives, earns the tag even when a menu label is all that names it. A class named only
+  Science doesn't: that is the science class every student takes. No school's tags change.
 - **Six program tags, after the first runs of the tag eval.** BSI gains Arts (7th and 8th graders choose an arts
   concentration). PS/IS 192 gains Arts (theater and painting among its enrichment offerings). JHS 62 and JHS 201
   gain Science & tech (a computer programming class; a S.T.E.A.M. minor subject). JHS 220 loses Science & tech:

@@ -48,7 +48,7 @@
       "school": "JHS 201",
       "expected": {"music": true, "arts": true, "stem": true},
       "notes": {
-        "stem": "Changed to yes 2026-11-16: the website lists S.T.E.A.M. as a minor subject, a class beyond the core. Thin: a menu label only."
+        "stem": "Changed to yes 2026-11-16: the website lists S.T.E.A.M. as a minor subject, a class beyond the core. 2026-11-17: the rule now says a STEAM class listed among a school's minor subjects counts, even as a menu label."
       },
       "source_sha": "456c1b92f002"
     },

@@ -116,7 +116,7 @@ score, so every school is tagged by the same rule:
 | Special-ed support (`sped`) | its program list has a specialized program (ASD Nest, Horizon or ACES; D75 Inclusion), or InsideSchools marks it "Staff Pick for Special Ed". Team-teaching and self-contained classes alone don't count: every school has them |
 | Music & band (`music`) | a band, orchestra, chorus or music major is named |
 | Arts (`arts`) | an arts academy or major is named, or at least two of visual art, theater and dance |
-| Science & tech (`stem`) | a science or tech academy, lab, or class beyond the core is named (coding, robotics, flight simulation). A Federal Magnet program alone doesn't count: it is a diversity lottery |
+| Science & tech (`stem`) | a science or tech academy, lab, or class beyond the core is named (coding, robotics, flight simulation). A STEAM, STEM or tech class the school lists among its minor subjects or electives counts, even as a menu label; one named only Science doesn't. A Federal Magnet program alone doesn't count: it is a diversity lottery |
 | Small school (`small`) | under 650 students. Worked out from `size` (`src/facts.js`); never typed in `tags` |
 
 **Where the evidence comes from, in order:** the program list on the school's InsideSchools profile ("Programs &

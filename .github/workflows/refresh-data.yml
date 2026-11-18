@@ -31,7 +31,7 @@ jobs:
           exit $status
       # Pull requests opened with the built-in token don't start other workflows, so run the checks here.
       - run: npm test
-      - uses: peter-evans/create-pull-request@v7
+      - uses: peter-evans/create-pull-request@v8
         with:
           branch: data/refresh
           commit-message: "Refresh school numbers from NYC Open Data and InsideSchools"
